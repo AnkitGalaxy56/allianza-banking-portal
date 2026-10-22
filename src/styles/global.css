@@ -1,0 +1,36 @@
+/*
+ * Default brand variables so the very first paint has colours.
+ * They are overwritten at runtime by src/theme/applyBrand.ts for the active bank.
+ *
+ * Stable class names you can target in a bank's customCss:
+ *   .app-sidebar  .app-nav-item  .app-page-title  .app-card  .app-stat-card
+ *   .login-panel  .login-card
+ */
+:root {
+  --brand-primary: #2d4dd0;
+  --brand-primary-dark: #0e1f5c;
+  --brand-primary-tint: #e1e7fb;
+  --brand-secondary: #0e1f5c;
+  --brand-auth-panel: #0e1f5c;
+  --brand-background: #f3f5fa;
+  --brand-surface: #ffffff;
+  --brand-text: #0f1b2d;
+  --brand-text-muted: #5b6b7f;
+  --brand-border: #d0d7e5;
+  --brand-radius: 12px;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+}
