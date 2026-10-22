@@ -3,15 +3,6 @@
 Web control panel for the **Allianza mobile-banking platform**. One React app serves three kinds of
 people, each with their own menu and dashboard, and every bank gets its **own name, logo and colour theme**.
 
-| Login type | Who | Sees |
-|---|---|---|
-| **Allianza** (`SUPER_ADMIN`) | Allianza staff - platform owner | Banks, application users, requests across all banks |
-| **Bank Admin** (`BANK_ADMIN`) | Admin of one bank | Branches, customers, requests, leads, notifications, banners ... for that bank |
-| **Bank User** (`BANK_USER`) | Bank employee | A smaller menu: customers, service requests, lead enquiries |
-
-> The project document shows only two login types (Admin / User). This template has **three** as requested:
-> Allianza, Bank Admin and Bank User - chosen with a switch on the login page.
-
 ## What is built
 
 - Login page with the 3-way login switch, JWT handling, "Remember this device", show/hide password
@@ -94,19 +85,3 @@ src/
 ├─ utils/                     authStorage, jwt, bank (bank resolution), format, delay
 └─ styles/global.css          Default brand CSS variables
 ```
-
-## Documentation
-
-| File | Read it to ... |
-|---|---|
-| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Understand how everything works, and how to add a new page |
-| [docs/THEMING.md](docs/THEMING.md) | Add a bank, change colours/logo, write custom CSS |
-| [docs/API_CONTRACT.md](docs/API_CONTRACT.md) | Give your backend team the endpoints the UI expects |
-| [docs/ROADMAP.md](docs/ROADMAP.md) | Know what to build next (screens, security, tests) |
-
-## Connecting the real API
-
-1. In `.env.development` set `VITE_USE_MOCK_API=false` and `VITE_API_BASE_URL=<your API>`.
-2. Make the backend match [docs/API_CONTRACT.md](docs/API_CONTRACT.md) - or change the paths in
-   `src/services/api/endpoints.ts` and the types in `src/types/` to match your backend.
-3. Delete nothing: the mock folder is never included in production builds.
