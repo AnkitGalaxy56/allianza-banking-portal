@@ -3,15 +3,6 @@
 Web control panel for the **Allianza mobile-banking platform**. One React app serves three kinds of
 people, each with their own menu and dashboard, and every bank gets its **own name, logo and colour theme**.
 
-| Login type | Who | Sees |
-|---|---|---|
-| **Allianza** (`SUPER_ADMIN`) | Allianza staff - platform owner | Banks, application users, requests across all banks |
-| **Bank Admin** (`BANK_ADMIN`) | Admin of one bank | Branches, customers, requests, leads, notifications, banners ... for that bank |
-| **Bank User** (`BANK_USER`) | Bank employee | A smaller menu: customers, service requests, lead enquiries |
-
-> The project document shows only two login types (Admin / User). This template has **three** as requested:
-> Allianza, Bank Admin and Bank User - chosen with a switch on the login page.
-
 ## What is built
 
 - Login page with the 3-way login switch, JWT handling, "Remember this device", show/hide password
