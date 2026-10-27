@@ -379,14 +379,14 @@ export default function LoginPage() {
 
 
 
-          {/* <DevCredentialsHint
+          <DevCredentialsHint
             role={role}
             bankCode={bankCode}
             onUse={(c) => {
               setValue('loginId', c.loginId, { shouldValidate: true });
               setValue('password', c.password, { shouldValidate: true });
             }}
-          /> */}
+          />
 
 
 
