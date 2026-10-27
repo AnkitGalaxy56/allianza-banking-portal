@@ -1,87 +1,126 @@
 # Allianza Banking Portal
 
-Web control panel for the **Allianza mobile-banking platform**. One React app serves three kinds of
-people, each with their own menu and dashboard, and every bank gets its **own name, logo and colour theme**.
+A web-based control panel for the Allianza mobile banking platform. The application supports three user roles, role-based access control, and bank-specific branding.
 
-## What is built
+## User Roles
 
-- Login page with the 3-way login switch, JWT handling, "Remember this device", show/hide password
-- Role-based dashboards (Allianza dashboard from slide 14; Bank dashboard from the *Bank Admin - Dashboard* image)
-- **Branches** page (list, search, filter, paging, add/edit form, view) from the *Bank Admin - Branches* image
-- Per-bank theming: colours, logo, name, font and optional custom CSS
-- Protected routes + role guards; every other menu item shows a "Coming soon" placeholder
-- Axios instance with automatic token attach + refresh, Redux store, mock API for development
+| Role | Description |
+|---|---|
+| **Allianza (`SUPER_ADMIN`)** | Manages banks, application users, and platform-wide requests. |
+| **Bank Admin (`BANK_ADMIN`)** | Manages branches, customers, service requests, leads, notifications, and banners for their bank. |
+| **Bank User (`BANK_USER`)** | Accesses permitted features, including customers, service requests, and lead enquiries. |
 
-## Quick start
+Each bank can have its own name, logo, colours, font, and custom CSS.
 
-Requirements: **Node.js 18.18+ (20 LTS recommended)** and npm.
+## Features
+
+- Login with three role options.
+- JWT authentication and token handling.
+- Remember this device and show/hide password options.
+- Role-based dashboards and protected routes.
+- Branch management with listing, search, filtering, pagination, add, edit, and view functionality.
+- Bank-specific themes and branding.
+- Axios API integration with automatic token attachment and refresh handling.
+- Redux Toolkit for application state management.
+- Mock API support for development.
+- Placeholder pages for features that are not yet implemented.
+
+## Tech Stack
+
+- React 18
+- TypeScript
+- Vite
+- Material UI (MUI v5)
+- Redux Toolkit and React-Redux
+- React Router v6
+- Axios
+- React Hook Form and Zod
+- JWT Decode
+
+## Requirements
+
+- Node.js 18.18 or later
+- npm
+
+## Getting Started
+
+Install dependencies:
 
 ```bash
 npm install
-npm run dev          # opens http://localhost:5173
 ```
 
-No backend is needed: `.env.development` sets `VITE_USE_MOCK_API=true`, which switches on temporary logins and fake data.
+Start the development server:
 
-### Temporary development logins (mock mode only)
+```bash
+npm run dev
+```
 
-| Login type | Login ID | Password | Bank |
+The application runs at `http://localhost:5173`.
+
+## Development Login
+
+When mock mode is enabled, use the following credentials:
+
+| Role | Login ID | Password | Bank |
 |---|---|---|---|
-| Allianza | `allianza.admin` | `Admin@123` | - |
-| Bank Admin | `bank.admin` | `Admin@123` | Sample Urban Co-op Bank (teal) |
-| Bank User | `bank.user` | `User@123` | Sample Urban Co-op Bank |
-| Bank Admin | `sahakari.admin` | `Admin@123` | Demo Sahakari Bank (navy) |
-| Bank Admin | `nagar.admin` | `Admin@123` | Nagar Co-op Bank (maroon) |
+| Allianza | `allianza.admin` | `Admin@123` | Platform |
+| Bank Admin | `bank.admin` | `Admin@123` | Sample Urban Co-op Bank |
+| Bank Admin | `sahakari.admin` | `Admin@123` | Demo Sahakari Bank |
+| Bank Admin | `nagar.admin` | `Admin@123` | Nagar Co-op Bank |
 
-The login page lists these too (with a **Use** button) while mock mode is on.
+These credentials are for local development only. Do not use them in production.
 
-**See bank-wise themes:** pick the bank with a URL parameter, choose *Bank Admin*, sign in:
+## Bank Theme Preview
 
-- `http://localhost:5173/login?bank=sample-urban`
-- `http://localhost:5173/login?bank=demo-sahakari`
-- `http://localhost:5173/login?bank=nagar-co-op`
+To preview different bank themes, use these URLs while the development server is running:
 
-In production the bank comes from the sub-domain (e.g. `sample-urban.portal.yourdomain.com`).
+- Sample Urban Co-op Bank: `http://localhost:5173/login?bank=sample-urban`
+- Demo Sahakari Bank: `http://localhost:5173/login?bank=demo-sahakari`
+- Nagar Co-op Bank: `http://localhost:5173/login?bank=nagar-co-op`
 
-### Scripts
+## Available Scripts
 
-| Command | What it does |
+| Command | Description |
 |---|---|
-| `npm run dev` | Dev server with hot reload |
-| `npm run build` | Type-check + production build into `dist/` |
-| `npm run preview` | Serve the production build locally |
-| `npm run typecheck` | TypeScript check only |
-| `npm run lint` | ESLint |
-| `npm run format` | Prettier |
+| `npm run dev` | Start the development server |
+| `npm run build` | Type-check and create a production build |
+| `npm run preview` | Preview the production build |
+| `npm run typecheck` | Run TypeScript checks |
+| `npm run lint` | Run ESLint |
+| `npm run format` | Format the code using Prettier |
 
-## Tech stack
+## Project Structure
 
-React 18 + TypeScript (strict) - Vite - MUI v5 - Redux Toolkit + React-Redux - React Router v6 - Axios -
-react-hook-form + zod (forms/validation) - jwt-decode.
-
-## Folder structure
-
-```
+```text
 src/
-├─ main.tsx, App.tsx          App start-up, theme loading gate
-├─ config/                    env.ts (env vars), roles.ts (role constants)
-├─ types/                     Shared TypeScript types (auth, theme, branch, dashboard ...)
-├─ redux/                     ALL Redux code
-│  ├─ store.ts, hooks.ts
-│  └─ slices/                 authSlice.ts, themeSlice.ts
-├─ routes/                    ALL routing code
-│  ├─ AppRoutes.tsx           Route table
-│  ├─ navigation.ts           Menu + route access per role (single source of truth)
-│  ├─ paths.ts, ProtectedRoute.tsx, PublicOnlyRoute.tsx, RoleGuard.tsx
-├─ services/                  ALL API calling code
-│  ├─ api/                    axiosInstance.ts, endpoints.ts, apiError.ts
-│  ├─ auth.service.ts, theme.service.ts, dashboard.service.ts, branch.service.ts
-│  └─ mock/                   Fake API + dev logins (development only)
-├─ theme/                     Bank theming (MUI theme builder, CSS variables, custom CSS)
-├─ layouts/                   DashboardLayout.tsx, Sidebar.tsx
-├─ pages/                     auth/, dashboard/, branches/, errors/
-├─ components/                common/ (StatCard, StatusChip ...), form/, auth/
-├─ hooks/                     useAsyncData, useDebouncedValue
-├─ utils/                     authStorage, jwt, bank (bank resolution), format, delay
-└─ styles/global.css          Default brand CSS variables
+├── config/       Environment configuration and role constants
+├── types/        Shared TypeScript types
+├── redux/        Redux store, hooks, and slices
+├── routes/       Routes, navigation, and access control
+├── services/     API services and mock API
+├── theme/        Bank-specific theming
+├── layouts/      Dashboard layout and sidebar
+├── pages/        Login, dashboards, branches, and error pages
+├── components/   Reusable UI components
+├── hooks/        Custom React hooks
+├── utils/        Shared utility functions
+└── styles/       Global styles
 ```
+
+## Documentation
+
+| Document | Description |
+|---|---|
+| `docs/ARCHITECTURE.md` | Application architecture and adding new pages |
+| `docs/THEMING.md` | Bank branding and theme configuration |
+| `docs/API_CONTRACT.md` | Expected backend API contract |
+| `docs/ROADMAP.md` | Planned features and future improvements |
+
+## Connecting the Real API
+
+1. Configure `VITE_USE_MOCK_API=false` in your local environment file.
+2. Set `VITE_API_BASE_URL` to your backend API URL.
+3. Ensure the backend endpoints and response formats match `docs/API_CONTRACT.md`, or update the API endpoints and TypeScript types accordingly.
+
+**Security:** Never commit environment files containing credentials, tokens, or other secrets.
