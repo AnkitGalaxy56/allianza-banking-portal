@@ -55,25 +55,6 @@ export default function BranchForm({ editing, focusSignal, onSaved, onCancel }: 
     <Paper variant="outlined" className="app-card" sx={{ p: 2.5, borderRadius: 3 }}>
 
 
-      {/* <Stack
-        direction="row"
-        alignItems="center"
-        justifyContent="space-between"
-        sx={{ mb: 2 }}
-      >
-        <Typography variant="subtitle1" fontWeight={700}>
-          {editing ? 'Edit branch' : 'Add branch'}
-        </Typography>
-
-        <IconButton
-          aria-label="Close form"
-          onClick={onCancel}
-          size="small"
-          disabled={busy}
-        >
-          <CloseOutlinedIcon />
-        </IconButton>
-      </Stack> */}
       <Stack direction="row" alignItems="center" justifyContent="space-between" mb={2.5}>
         <Typography variant="h6" fontWeight={800}>  {editing ? 'Edit branch' : 'Add branch'}</Typography>
         <Button aria-label="Close form" color="inherit" size="small" onClick={onCancel} sx={{ minWidth: 36 }}>
@@ -84,20 +65,6 @@ export default function BranchForm({ editing, focusSignal, onSaved, onCancel }: 
 
 
 
-
-
-
-
-      {/* <Typography variant="subtitle1" sx={{ mb: 2 }}>
-        {editing ? 'Edit branch' : 'Add branch'}
-      </Typography>
-      <IconButton
-        aria-label="Close form"
-        onClick={onCancel}
-        size="small"
-      >
-        <CloseOutlinedIcon />
-      </IconButton> */}
 
       {submitError && (
         <Alert severity="error" sx={{ mb: 2 }}>
