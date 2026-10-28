@@ -24,12 +24,16 @@ const DashboardPage = lazy(() => import('@/pages/dashboard/DashboardPage'));
 const BranchesPage = lazy(() => import('@/pages/branches/BranchesPage'));
 const UserManagement = lazy(() => import('@/pages/users-management/index'));
 const CustomersPage = lazy(() => import('@/pages/customers/CustomersPage'));
+const UploadImagesPage = lazy(() => import('@/pages/upload-images/UploadImagesPage'));
+const BankPage = lazy(() => import('@/pages/bank/BankPage'));
 
 const BUILT_PAGES: Record<string, ReactElement> = {
+  [PATHS.banks]: <BankPage />,
   [PATHS.dashboard]: <DashboardPage />,
   [PATHS.branches]: <BranchesPage />,
   [PATHS.userManagement]: <UserManagement />,
   [PATHS.customers]: <CustomersPage />,
+  [PATHS.uploadImages]: <UploadImagesPage />,
   [PATHS.serviceRequests]: <ServiceRequestsPage />,
   [PATHS.leadEnquiries]: <LeadEnquiriesPage />,
   [PATHS.reports]: <ReportsPage />,
