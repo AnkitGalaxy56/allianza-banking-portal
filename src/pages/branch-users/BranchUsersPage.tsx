@@ -326,6 +326,7 @@ export default function BranchUsersPage() {
       /> */}
       <PageHeader
         title="User Management"
+        subtitle="Manage bank employees, system roles and access permissions"
         actions={
           <>
             <Button

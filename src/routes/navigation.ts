@@ -32,11 +32,11 @@ export const NAV_ITEMS: NavItem[] = [
 
   // Allianza admin
   { label: 'Bank Management', path: PATHS.banks, icon: AccountBalanceOutlinedIcon, roles: [SUPER_ADMIN] },
-  { label: 'User Management', path: PATHS.users, icon: ManageAccountsOutlinedIcon, roles: [SUPER_ADMIN] },
+  // { label: 'User Management', path: PATHS.users, icon: ManageAccountsOutlinedIcon, roles: [SUPER_ADMIN] },
 
   // Bank admin
   { label: 'Branches', path: PATHS.branches, icon: AccountBalanceOutlinedIcon, roles: [BANK_ADMIN] },
-  { label: 'Branch Users', path: PATHS.branchUsers, icon: ShieldOutlinedIcon, roles: [BANK_ADMIN] },
+  { label: 'User Management', path: PATHS.branchUsers, icon: ShieldOutlinedIcon, roles: [BANK_ADMIN,SUPER_ADMIN] },
 
   // Bank admin + bank employee
   { label: 'Customers', path: PATHS.customers, icon: PeopleAltOutlinedIcon, roles: [BANK_ADMIN, BANK_USER] },
