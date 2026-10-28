@@ -9,6 +9,8 @@ const STATUS_CONFIG: Record<string, { label: string; tone: Tone }> = {
   rejected: { label: 'Rejected', tone: 'error' },
   active: { label: 'Active', tone: 'success' },
   inactive: { label: 'Inactive', tone: 'warning' },
+  invited: { label: 'Invited', tone: 'info' },
+  locked: { label: 'Locked', tone: 'error' },
 };
 
 export default function StatusChip({ status }: { status: string }) {
