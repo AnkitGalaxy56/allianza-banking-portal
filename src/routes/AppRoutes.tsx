@@ -5,7 +5,7 @@ import DashboardLayout from '@/layouts/DashboardLayout';
 import ComingSoonPage from '@/pages/errors/ComingSoonPage';
 import NotFoundPage from '@/pages/errors/NotFoundPage';
 import LoginPage from '@/pages/auth/LoginPage';
-import { NAV_ITEMS } from './navigation';
+import { getAllNavRoutes } from './navigation';
 import { PATHS } from './paths';
 import ProtectedRoute from './ProtectedRoute';
 import PublicOnlyRoute from './PublicOnlyRoute';
@@ -61,7 +61,7 @@ export default function AppRoutes() {
         <Route element={<ProtectedRoute />}>
           <Route element={<DashboardLayout />}>
             <Route index element={<Navigate to={PATHS.dashboard} replace />} />
-            {NAV_ITEMS.map((item) => (
+            {getAllNavRoutes().map((item) => (
               <Route
                 key={item.path}
                 path={item.path}

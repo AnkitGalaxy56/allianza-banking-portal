@@ -2,16 +2,23 @@ import type { SvgIconComponent } from '@mui/icons-material';
 import AccountBalanceOutlinedIcon from '@mui/icons-material/AccountBalanceOutlined';
 import AttachMoneyOutlinedIcon from '@mui/icons-material/AttachMoneyOutlined';
 import BarChartOutlinedIcon from '@mui/icons-material/BarChartOutlined';
+import BlockOutlinedIcon from '@mui/icons-material/BlockOutlined';
+import CancelPresentationOutlinedIcon from '@mui/icons-material/CancelPresentationOutlined';
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
+import FactCheckOutlinedIcon from '@mui/icons-material/FactCheckOutlined';
 import GridViewOutlinedIcon from '@mui/icons-material/GridViewOutlined';
 import ImageOutlinedIcon from '@mui/icons-material/ImageOutlined';
 import ManageAccountsOutlinedIcon from '@mui/icons-material/ManageAccountsOutlined';
 import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
 import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined';
+import PersonAddAlt1OutlinedIcon from '@mui/icons-material/PersonAddAlt1Outlined';
+import PaymentsOutlinedIcon from '@mui/icons-material/PaymentsOutlined';
 import ShieldOutlinedIcon from '@mui/icons-material/ShieldOutlined';
 import SmartphoneOutlinedIcon from '@mui/icons-material/SmartphoneOutlined';
 import FactCheckOutlinedIcon from '@mui/icons-material/FactCheckOutlined';
 import PersonAddAlt1OutlinedIcon from '@mui/icons-material/PersonAddAlt1Outlined';
+import TrendingUpOutlinedIcon from '@mui/icons-material/TrendingUpOutlined';
+
 import { ROLES, type Role } from '@/config/roles';
 import { PATHS } from './paths';
 
@@ -19,18 +26,26 @@ export interface NavItem {
   label: string;
   path: string;
   icon: SvgIconComponent;
-  /** Roles that can see this menu item AND open this route */
+  /** Roles that can see this menu item and access its route. */
   roles: Role[];
+  /** Optional nested sidebar links. */
+  children?: NavItem[];
 }
 
 const { SUPER_ADMIN, BANK_ADMIN, BANK_USER } = ROLES;
+const ALL_BANK_ROLES: Role[] = [SUPER_ADMIN, BANK_ADMIN, BANK_USER];
 
 /**
- * The single source of truth for the sidebar menu AND the route table (see AppRoutes.tsx).
- * Add an item here -> it appears in the menu and gets a protected route automatically.
+ * Single source of truth for sidebar navigation and generated protected routes.
+ * Nested items appear as collapsible submenu links and also receive protected routes.
  */
 export const NAV_ITEMS: NavItem[] = [
-  { label: 'Dashboard', path: PATHS.dashboard, icon: GridViewOutlinedIcon, roles: [SUPER_ADMIN, BANK_ADMIN, BANK_USER] },
+  {
+    label: 'Dashboard',
+    path: PATHS.dashboard,
+    icon: GridViewOutlinedIcon,
+    roles: ALL_BANK_ROLES,
+  },
   {
     label: 'Customer Onboarding',
     path: PATHS.customerOnboarding,
@@ -39,221 +54,142 @@ export const NAV_ITEMS: NavItem[] = [
   },
 
   // Allianza admin
-  { label: 'Bank Management', path: PATHS.banks, icon: AccountBalanceOutlinedIcon, roles: [SUPER_ADMIN] },
-  // { label: 'User Management', path: PATHS.users, icon: ManageAccountsOutlinedIcon, roles: [SUPER_ADMIN] },
+  {
+    label: 'Bank Management',
+    path: PATHS.banks,
+    icon: AccountBalanceOutlinedIcon,
+    roles: [SUPER_ADMIN],
+  },
+
+  // Request validation and its submenu pages
   {
     label: 'Request Validation',
     path: PATHS.requestValidation,
     icon: FactCheckOutlinedIcon,
-    roles: [SUPER_ADMIN,BANK_ADMIN, BANK_USER],
+    roles: ALL_BANK_ROLES,
+    children: [
+      {
+        label: 'Payments',
+        path: PATHS.requestValidationPayments,
+        icon: PaymentsOutlinedIcon,
+        roles: ALL_BANK_ROLES,
+
+      },
+      {
+        label: 'Opening Accounts',
+        path: PATHS.requestValidationOpeningAccounts,
+        icon: AccountBalanceOutlinedIcon,
+        roles: ALL_BANK_ROLES,
+      },
+      {
+        label: 'Closing Account',
+        path: PATHS.requestValidationClosingAccounts,
+        icon: CancelPresentationOutlinedIcon,
+        roles: ALL_BANK_ROLES,
+      },
+      {
+        label: 'Lead Management',
+        path: PATHS.requestValidationLeadManagement,
+        icon: TrendingUpOutlinedIcon,
+        roles: ALL_BANK_ROLES,
+      },
+      {
+        label: 'Stop Payment',
+        path: PATHS.requestValidationStopPayment,
+        icon: BlockOutlinedIcon,
+        roles: ALL_BANK_ROLES,
+      },
+    ],
   },
+
   // Bank admin
-  { label: 'Branches', path: PATHS.branches, icon: AccountBalanceOutlinedIcon, roles: [BANK_ADMIN] },
-  { label: 'User Management', path: PATHS.userManagement, icon: ShieldOutlinedIcon, roles: [BANK_ADMIN, SUPER_ADMIN] },
+  {
+    label: 'Branches',
+    path: PATHS.branches,
+    icon: AccountBalanceOutlinedIcon,
+    roles: [BANK_ADMIN],
+  },
+  {
+    label: 'User Management',
+    path: PATHS.userManagement,
+    icon: ShieldOutlinedIcon,
+    roles: [BANK_ADMIN, SUPER_ADMIN],
+
+  },
 
   // Bank admin + bank employee
-  { label: 'Customers', path: PATHS.customers, icon: PeopleAltOutlinedIcon, roles: [BANK_ADMIN, BANK_USER] },
-  { label: 'Service Requests', path: PATHS.serviceRequests, icon: DescriptionOutlinedIcon, roles: [BANK_ADMIN, BANK_USER] },
-  { label: 'Lead Enquiries', path: PATHS.leadEnquiries, icon: AttachMoneyOutlinedIcon, roles: [BANK_ADMIN, BANK_USER] },
+  {
+    label: 'Customers',
+    path: PATHS.customers,
+    icon: PeopleAltOutlinedIcon,
+    roles: [BANK_ADMIN, BANK_USER],
+  },
+  {
+    label: 'Service Requests',
+    path: PATHS.serviceRequests,
+    icon: DescriptionOutlinedIcon,
+    roles: [BANK_ADMIN, BANK_USER],
+  },
+  {
+    label: 'Lead Enquiries',
+    path: PATHS.leadEnquiries,
+    icon: AttachMoneyOutlinedIcon,
+    roles: [BANK_ADMIN, BANK_USER],
+  },
 
   // Shared admin tools
-  { label: 'Reports', path: PATHS.reports, icon: BarChartOutlinedIcon, roles: [SUPER_ADMIN, BANK_ADMIN] },
-  { label: 'Push Notifications', path: PATHS.pushNotifications, icon: NotificationsNoneOutlinedIcon, roles: [SUPER_ADMIN, BANK_ADMIN] },
-  { label: 'Device Reset', path: PATHS.deviceReset, icon: SmartphoneOutlinedIcon, roles: [SUPER_ADMIN, BANK_ADMIN] },
-  { label: 'Banners & Content', path: PATHS.banners, icon: ImageOutlinedIcon, roles: [BANK_ADMIN] },
-  { label: 'Upload Image', path: PATHS.uploadImages, icon: ImageOutlinedIcon, roles: [SUPER_ADMIN] },
+  {
+    label: 'Reports',
+    path: PATHS.reports,
+    icon: BarChartOutlinedIcon,
+    roles: [SUPER_ADMIN, BANK_ADMIN],
+  },
+  {
+    label: 'Push Notifications',
+    path: PATHS.pushNotifications,
+    icon: NotificationsNoneOutlinedIcon,
+    roles: [SUPER_ADMIN, BANK_ADMIN],
+  },
+  {
+    label: 'Device Reset',
+    path: PATHS.deviceReset,
+    icon: SmartphoneOutlinedIcon,
+    roles: [SUPER_ADMIN, BANK_ADMIN],
+  },
+  {
+    label: 'Banners & Content',
+    path: PATHS.banners,
+    icon: ImageOutlinedIcon,
+    roles: [BANK_ADMIN],
+  },
+  {
+    label: 'Upload Image',
+    path: PATHS.uploadImages,
+    icon: ImageOutlinedIcon,
+    roles: [SUPER_ADMIN],
+  },
 ];
 
+const filterItemsForRole = (items: NavItem[], role: Role): NavItem[] =>
+  items.flatMap((item) => {
+    if (!item.roles.includes(role)) {
+      return [];
+    }
+
+    const children = item.children
+      ? filterItemsForRole(item.children, role)
+      : undefined;
+
+    // Hide a parent if all its nested items are inaccessible and it has no route.
+    return [{ ...item, ...(children ? { children } : {}) }];
+  });
+
 export const getNavForRole = (role: Role): NavItem[] =>
-  NAV_ITEMS.filter((item) => item.roles.includes(role));
+  filterItemsForRole(NAV_ITEMS, role);
 
-
-
-
-
-
-
-
-
-
-
-
-// import type { SvgIconComponent } from '@mui/icons-material';
-
-// import AccountBalanceOutlinedIcon from '@mui/icons-material/AccountBalanceOutlined';
-// import AttachMoneyOutlinedIcon from '@mui/icons-material/AttachMoneyOutlined';
-// import BarChartOutlinedIcon from '@mui/icons-material/BarChartOutlined';
-// import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
-// import GridViewOutlinedIcon from '@mui/icons-material/GridViewOutlined';
-// import ImageOutlinedIcon from '@mui/icons-material/ImageOutlined';
-// import ManageAccountsOutlinedIcon from '@mui/icons-material/ManageAccountsOutlined';
-// import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
-// import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined';
-// import ShieldOutlinedIcon from '@mui/icons-material/ShieldOutlined';
-// import SmartphoneOutlinedIcon from '@mui/icons-material/SmartphoneOutlined';
-
-// import { ROLES, type Role } from '@/config/roles';
-// import { PATHS } from './paths';
-
-// export interface NavItem {
-//   label: string;
-//   path?: string;
-//   icon: SvgIconComponent;
-//   roles: Role[];
-//   children?: NavItem[];
-// }
-
-// const { SUPER_ADMIN, BANK_ADMIN, BANK_USER } = ROLES;
-
-// export const NAV_ITEMS: NavItem[] = [
-//   {
-//     label: 'Dashboard',
-//     path: PATHS.dashboard,
-//     icon: GridViewOutlinedIcon,
-//     roles: [SUPER_ADMIN, BANK_ADMIN, BANK_USER],
-//   },
-
-//   // Allianza platform administration
-//   {
-//     label: 'Platform Management',
-//     icon: AccountBalanceOutlinedIcon,
-//     roles: [SUPER_ADMIN],
-//     children: [
-//       {
-//         label: 'Bank Management',
-//         path: PATHS.banks,
-//         icon: AccountBalanceOutlinedIcon,
-//         roles: [SUPER_ADMIN],
-//       },
-//       {
-//         label: 'User Management',
-//         path: PATHS.users,
-//         icon: ManageAccountsOutlinedIcon,
-//         roles: [SUPER_ADMIN],
-//       },
-//       {
-//         label: 'Upload Image',
-//         path: PATHS.uploadImages,
-//         icon: ImageOutlinedIcon,
-//         roles: [SUPER_ADMIN],
-//       },
-//     ],
-//   },
-
-//   // Bank-specific administration
-//   {
-//     label: 'Branch Management',
-//     icon: AccountBalanceOutlinedIcon,
-//     roles: [BANK_ADMIN],
-//     children: [
-//       {
-//         label: 'Branches',
-//         path: PATHS.branches,
-//         icon: AccountBalanceOutlinedIcon,
-//         roles: [BANK_ADMIN],
-//       },
-//       {
-//         label: 'Branch Users',
-//         path: PATHS.branchUsers,
-//         icon: ShieldOutlinedIcon,
-//         roles: [BANK_ADMIN],
-//       },
-//     ],
-//   },
-
-//   // Customer-facing modules
-//   {
-//     label: 'Customer Services',
-//     icon: PeopleAltOutlinedIcon,
-//     roles: [BANK_ADMIN, BANK_USER],
-//     children: [
-//       {
-//         label: 'Customers',
-//         path: PATHS.customers,
-//         icon: PeopleAltOutlinedIcon,
-//         roles: [BANK_ADMIN, BANK_USER],
-//       },
-//       {
-//         label: 'Service Requests',
-//         path: PATHS.serviceRequests,
-//         icon: DescriptionOutlinedIcon,
-//         roles: [BANK_ADMIN, BANK_USER],
-//       },
-//       {
-//         label: 'Lead Enquiries',
-//         path: PATHS.leadEnquiries,
-//         icon: AttachMoneyOutlinedIcon,
-//         roles: [BANK_ADMIN, BANK_USER],
-//       },
-//     ],
-//   },
-
-//   // Shared administrative tools
-//   {
-//     label: 'Administration',
-//     icon: ManageAccountsOutlinedIcon,
-//     roles: [SUPER_ADMIN, BANK_ADMIN],
-//     children: [
-//       {
-//         label: 'Reports',
-//         path: PATHS.reports,
-//         icon: BarChartOutlinedIcon,
-//         roles: [SUPER_ADMIN, BANK_ADMIN],
-//       },
-//       {
-//         label: 'Push Notifications',
-//         path: PATHS.pushNotifications,
-//         icon: NotificationsNoneOutlinedIcon,
-//         roles: [SUPER_ADMIN, BANK_ADMIN],
-//       },
-//       {
-//         label: 'Device Reset',
-//         path: PATHS.deviceReset,
-//         icon: SmartphoneOutlinedIcon,
-//         roles: [SUPER_ADMIN, BANK_ADMIN],
-//       },
-//       {
-//         label: 'Banners & Content',
-//         path: PATHS.banners,
-//         icon: ImageOutlinedIcon,
-//         roles: [BANK_ADMIN],
-//       },
-//     ],
-//   },
-// ];
-
-// // Recursively filter menu and submenu items for the logged-in role.
-// const filterItemsForRole = (
-//   items: NavItem[],
-//   role: Role,
-// ): NavItem[] =>
-//   items.flatMap((item) => {
-//     if (!item.roles.includes(role)) {
-//       return [];
-//     }
-
-//     if (item.children) {
-//       const children = filterItemsForRole(item.children, role);
-
-//       return children.length > 0
-//         ? [{ ...item, children }]
-//         : [];
-//     }
-
-//     return [item];
-//   });
-
-// export const getNavForRole = (role: Role): NavItem[] =>
-//   filterItemsForRole(NAV_ITEMS, role);
-
-// // Return all route-bearing items, including nested children.
-// // Use this helper when AppRoutes generates protected routes from NAV_ITEMS.
-// export const getAllNavRoutes = (
-//   items: NavItem[] = NAV_ITEMS,
-// ): NavItem[] =>
-//   items.flatMap((item) => [
-//     ...(item.path ? [item] : []),
-//     ...(item.children ? getAllNavRoutes(item.children) : []),
-//   ]);
-
-
+/** Returns all parent and child items that have routes for AppRoutes. */
+export const getAllNavRoutes = (items: NavItem[] = NAV_ITEMS): NavItem[] =>
+  items.flatMap((item) => [
+    item,
+    ...(item.children ? getAllNavRoutes(item.children) : []),
+  ]);

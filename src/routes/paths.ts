@@ -11,12 +11,19 @@ export const PATHS = {
 
   // Bank admin / bank user
   branches: '/branches',
-  // users-management
   userManagement: '/user-management',
   customers: '/customers',
   serviceRequests: '/service-requests',
   leadEnquiries: '/lead-enquiries',
   banners: '/banners',
+
+  // Request validation and its submenu pages
+  requestValidation: '/request-validation',
+  requestValidationPayments: '/request-validation/payments',
+  requestValidationOpeningAccounts: '/request-validation/opening-accounts',
+  requestValidationClosingAccounts: '/request-validation/closing-accounts',
+  requestValidationLeadManagement: '/request-validation/lead-management',
+  requestValidationStopPayment: '/request-validation/stop-payment',
 
   // Shared
   reports: '/reports',
