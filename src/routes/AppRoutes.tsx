@@ -22,13 +22,13 @@ const ReportsPage = lazy(() => import('@/pages/reports/ReportsPage'));
 // Pages that are really built. Everything else in NAV_ITEMS shows a "Coming soon" placeholder.
 const DashboardPage = lazy(() => import('@/pages/dashboard/DashboardPage'));
 const BranchesPage = lazy(() => import('@/pages/branches/BranchesPage'));
-const BranchUsersPage = lazy(() => import('@/pages/branch-users/BranchUsersPage'));
+const UserManagement = lazy(() => import('@/pages/users-management/index'));
 const CustomersPage = lazy(() => import('@/pages/customers/CustomersPage'));
 
 const BUILT_PAGES: Record<string, ReactElement> = {
   [PATHS.dashboard]: <DashboardPage />,
   [PATHS.branches]: <BranchesPage />,
-  [PATHS.branchUsers]: <BranchUsersPage />,
+  [PATHS.userManagement]: <UserManagement />,
   [PATHS.customers]: <CustomersPage />,
   [PATHS.serviceRequests]: <ServiceRequestsPage />,
   [PATHS.leadEnquiries]: <LeadEnquiriesPage />,

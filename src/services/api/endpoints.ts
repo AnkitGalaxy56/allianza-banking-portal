@@ -18,8 +18,8 @@ export const ENDPOINTS = {
     byId: (id: string) => `/branches/${encodeURIComponent(id)}`,
   },
   branchUsers: {
-    base: '/branch-users',
-    byId: (id: string) => `/branch-users/${encodeURIComponent(id)}`,
+    base: '/user-management',
+    byId: (id: string) => `/user-management/${encodeURIComponent(id)}`,
   },
   customers: {
     base: '/customers',

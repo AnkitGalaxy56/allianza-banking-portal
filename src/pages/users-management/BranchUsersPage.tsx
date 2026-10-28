@@ -306,7 +306,7 @@ export default function BranchUsersPage() {
       nowrap: true,
       render: (user) => (
         <Stack direction="row" spacing={0.5}>
-          <Button size="small" onClick={() => openEditForm(user)}>Edit</Button>
+          <Button size="small" onClick={() => openEditForm(user)}>View</Button>
           <Button size="small" onClick={() => void resetUserLogin(user)}>Reset</Button>
         </Stack>
       ),
@@ -326,7 +326,7 @@ export default function BranchUsersPage() {
       /> */}
       <PageHeader
         title="User Management"
-        subtitle="Manage bank employees, system roles and access permissions"
+        subtitle="Manage users, system roles and access permissions"
         actions={
           <>
             <Button
@@ -414,7 +414,11 @@ export default function BranchUsersPage() {
 
         {error && <Box sx={{ px: 2.5, pb: 2 }}><ErrorState message={error} onRetry={reload} /></Box>}
         <Box sx={{ opacity: loading ? 0.55 : 1, transition: 'opacity .2s' }}>
-          <DataTable rows={rows} columns={columns} getRowId={(user) => user.id} emptyMessage="No user records match your search." />
+          <DataTable
+            rows={rows}
+            columns={columns}
+            getRowId={(user) => user.id}
+            emptyMessage="No user records match your search." />
         </Box>
 
         <Box

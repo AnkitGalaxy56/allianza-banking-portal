@@ -7,10 +7,12 @@ export const PATHS = {
   banks: '/banks',
   users: '/users',
   uploadImages: '/upload-images',
+  customerOnboarding: '/customer-Onboarding',
 
   // Bank admin / bank user
   branches: '/branches',
-  branchUsers: '/branch-users',
+  // users-management
+  userManagement: '/user-management',
   customers: '/customers',
   serviceRequests: '/service-requests',
   leadEnquiries: '/lead-enquiries',
@@ -20,4 +22,5 @@ export const PATHS = {
   reports: '/reports',
   pushNotifications: '/push-notifications',
   deviceReset: '/device-reset',
+  requestValidation: '/request-validation',
 } as const;
