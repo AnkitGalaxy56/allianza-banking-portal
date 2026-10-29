@@ -15,6 +15,8 @@ import AddOutlinedIcon from '@mui/icons-material/AddOutlined';
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import PendingActionsOutlinedIcon from '@mui/icons-material/PendingActionsOutlined';
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
+import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
@@ -27,7 +29,7 @@ import { useAsyncData } from '@/hooks/useAsyncData';
 import { useAppSelector } from '@/redux/hooks';
 import { selectTheme } from '@/redux/slices/themeSlice';
 import { branchUserService } from '@/services/branch-user.service';
-import type { BranchUser, BranchUserInput, BranchUserRole } from '@/types/branchUser';
+import type { BranchUser, BranchUserInput, BranchUserRole, UserAuthorizationStatus } from '@/types/branchUser';
 import BranchUserFormDialog from './components/BranchUserFormDialog';
 import { BRANCHES } from './data/branchUserOptions';
 import {
@@ -56,6 +58,8 @@ export default function BankUsersPage() {
   const [search, setSearch] = useState('');
   const [branchId, setBranchId] = useState('all');
   const [role, setRole] = useState<BranchUserRole | 'all'>('all');
+  const [authorizationFilter, setAuthorizationFilter] = useState<UserAuthorizationStatus | 'all'>('all');
+  const [readOnly, setReadOnly] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<BranchUser | null>(null);
   const [formError, setFormError] = useState('');
@@ -72,8 +76,9 @@ export default function BankUsersPage() {
         search: debouncedSearch,
         branchId,
         role,
+        authorizationStatus: authorizationFilter,
       }),
-    [page, debouncedSearch, branchId, role, refreshKey],
+    [page, debouncedSearch, branchId, role, authorizationFilter, refreshKey],
   );
 
   const rows = data?.items ?? [];
@@ -93,13 +98,23 @@ export default function BankUsersPage() {
 
   const openAddForm = () => {
     setEditingUser(null);
+    setReadOnly(false);
     reset(EMPTY_BRANCH_USER);
     setFormError('');
     setFormOpen(true);
   };
 
   const openEditForm = (user: BranchUser) => {
+    setReadOnly(false);
     setEditingUser(user);
+    reset(userToFormValues(user));
+    setFormError('');
+    setFormOpen(true);
+  };
+
+  const openViewForm = (user: BranchUser) => {
+    setEditingUser(user);
+    setReadOnly(true);
     reset(userToFormValues(user));
     setFormError('');
     setFormOpen(true);
@@ -109,6 +124,7 @@ export default function BankUsersPage() {
     if (saving) return;
     setFormOpen(false);
     setEditingUser(null);
+    setReadOnly(false);
     reset(EMPTY_BRANCH_USER);
     setFormError('');
   };
@@ -172,20 +188,17 @@ export default function BankUsersPage() {
     }
   };
 
-  const resetUserLogin = async (user: BranchUser) => {
+  const authorizeUser = async (user: BranchUser) => {
     try {
-      // The current service exposes status update only; keep its existing reset behavior.
-      await branchUserService.updateStatus(user.id, 'Active');
-      setFeedback({ message: `Login reset requested for ${user.name}.`, severity: 'success' });
+      await branchUserService.authorize(user.id);
+      setFeedback({ message: `${user.name} authorised successfully.`, severity: 'success' });
       setRefreshKey((value) => value + 1);
       reload();
     } catch (e) {
-      setFeedback({
-        message: e instanceof Error ? e.message : 'Could not reset user.',
-        severity: 'error',
-      });
+      setFeedback({ message: e instanceof Error ? e.message : 'Could not authorise user.', severity: 'error' });
     }
   };
+
 
   const columns: DataTableColumn<BranchUser>[] = [
     {
@@ -231,12 +244,15 @@ export default function BankUsersPage() {
     {
       key: 'actions',
       label: 'Actions',
-      minWidth: 125,
+      minWidth: 220,
       nowrap: true,
       render: (user) => (
-        <Stack direction="row" spacing={0.5}>
-          <Button size="small" onClick={() => openEditForm(user)}>View</Button>
-          <Button size="small" onClick={() => void resetUserLogin(user)}>Reset</Button>
+        <Stack direction="row" spacing={0.25}>
+          <Button size="small" onClick={() => openViewForm(user)}>View</Button>
+          <Button size="small" startIcon={<EditOutlinedIcon />} onClick={() => openEditForm(user)}>Edit</Button>
+          {(user.authorizationStatus ?? 'Authorized') === 'Pending' && (
+            <Button size="small" color="success" startIcon={<CheckCircleOutlineOutlinedIcon />} onClick={() => void authorizeUser(user)}>Authorise</Button>
+          )}
         </Stack>
       ),
     },
@@ -263,9 +279,7 @@ export default function BankUsersPage() {
               color="inherit"
               size="small"
               startIcon={<VisibilityOutlinedIcon />}
-              onClick={() => {
-                // TODO: Implement View functionality.
-              }}
+              onClick={() => { setAuthorizationFilter('all'); setPage(1); }}
             >
               View
             </Button>
@@ -276,7 +290,7 @@ export default function BankUsersPage() {
               size="small"
               onClick={openAddForm}
             >
-              Create New
+             Create New
             </Button>
 
             <Button
@@ -284,9 +298,7 @@ export default function BankUsersPage() {
               color="inherit"
               size="small"
               startIcon={<PendingActionsOutlinedIcon />}
-              onClick={() => {
-                // TODO: Implement Pending for Authorisation.
-              }}
+              onClick={() => { setAuthorizationFilter('Pending'); setPage(1); }}
             >
               Pending for Authorisation
             </Button>
@@ -386,6 +398,7 @@ export default function BankUsersPage() {
         handleSubmit={handleSubmit}
         onSubmit={submit}
         themeName={theme.name}
+        readOnly={readOnly}
       />
 
       <Snackbar

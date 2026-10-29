@@ -24,10 +24,10 @@ export const PATHS = {
   requestValidationClosingAccounts: '/request-validation/closing-accounts',
   requestValidationLeadManagement: '/request-validation/lead-management',
   requestValidationStopPayment: '/request-validation/stop-payment',
+  requestValidationStandingInstructions: '/request-validation/standing-instructions',
 
   // Shared
   reports: '/reports',
   pushNotifications: '/push-notifications',
   deviceReset: '/device-reset',
-  requestValidation: '/request-validation',
 } as const;

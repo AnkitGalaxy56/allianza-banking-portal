@@ -18,6 +18,7 @@ import SmartphoneOutlinedIcon from '@mui/icons-material/SmartphoneOutlined';
 import FactCheckOutlinedIcon from '@mui/icons-material/FactCheckOutlined';
 import PersonAddAlt1OutlinedIcon from '@mui/icons-material/PersonAddAlt1Outlined';
 import TrendingUpOutlinedIcon from '@mui/icons-material/TrendingUpOutlined';
+import RepeatOutlinedIcon from '@mui/icons-material/RepeatOutlined';
 
 import { ROLES, type Role } from '@/config/roles';
 import { PATHS } from './paths';
@@ -91,6 +92,12 @@ export const NAV_ITEMS: NavItem[] = [
         label: 'Lead Management',
         path: PATHS.requestValidationLeadManagement,
         icon: TrendingUpOutlinedIcon,
+        roles: ALL_BANK_ROLES,
+      },
+      {
+        label: 'Standing Instructions',
+        path: PATHS.requestValidationStandingInstructions,
+        icon: RepeatOutlinedIcon,
         roles: ALL_BANK_ROLES,
       },
       {

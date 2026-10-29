@@ -29,6 +29,13 @@ export const branchUserService = {
     const { data } = await api.put<BranchUser>(ENDPOINTS.branchUsers.byId(id), input);
     return data;
   },
+  async authorize(id: string): Promise<void> {
+    if (import.meta.env.DEV && env.useMockApi) {
+      const { mockAuthorizeBranchUser } = await import('./mock/mockBranchUsers');
+      return mockAuthorizeBranchUser(id);
+    }
+    await api.patch(ENDPOINTS.branchUsers.byId(id), { authorizationStatus: 'Authorized' });
+  },
   async updateStatus(id: string, status: BranchUser['status']): Promise<void> {
     if (import.meta.env.DEV && env.useMockApi) {
       const { mockUpdateBranchUserStatus } = await import('./mock/mockBranchUsers');

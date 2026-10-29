@@ -46,6 +46,7 @@ interface BranchUserFormDialogProps {
   handleSubmit: UseFormHandleSubmit<BranchUserFormValues>;
   onSubmit: SubmitHandler<BranchUserFormValues>;
   themeName: string;
+  readOnly?: boolean;
 }
 
 export default function BranchUserFormDialog({
@@ -59,6 +60,7 @@ export default function BranchUserFormDialog({
   handleSubmit,
   onSubmit,
   themeName,
+  readOnly = false,
 }: BranchUserFormDialogProps) {
   return (
       <Dialog open={open}
@@ -69,10 +71,10 @@ export default function BranchUserFormDialog({
         <DialogTitle sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 2, pb: 1.5 }}>
           <Box>
             <Typography variant="h6" fontWeight={800}>
-              {editingUser ? 'Edit User Master' : 'User Master'}
+              {readOnly ? 'View User Master' : editingUser ? 'Edit User Master' : 'User Master'}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              {editingUser ? 'Update employee details and application permissions.' : 'Create a bank user and configure their login and access.'}
+              {readOnly ? 'Read-only view of employee details and application permissions.' : editingUser ? 'Update employee details and application permissions.' : 'Create a bank user and configure their login and access.'}
             </Typography>
           </Box>
           <IconButton aria-label="Close form" onClick={onClose} disabled={saving} size="small">
@@ -84,13 +86,13 @@ export default function BranchUserFormDialog({
         <DialogContent dividers sx={{ p: { xs: 2, md: 3 } }}>
           {formError && <Alert severity="error" sx={{ mb: 2 }}>{formError}</Alert>}
 
-          <Box component="form" id="branch-user-form" noValidate onSubmit={handleSubmit(onSubmit)}>
+          <Box component="form" id="branch-user-form" noValidate onSubmit={readOnly ? (event) => event.preventDefault() : handleSubmit(onSubmit)}>
             <Grid container spacing={2.25}>
               {/* Column 1: employee identity and login controls */}
               <Grid item xs={12} md={4}>
                 <Stack spacing={2}>
                   <FormTextField<BranchUserFormValues>
-                    name="employeeId" control={control} label="Emp ID" placeholder="Enter employee ID" disabled={saving} size="small"
+                    name="employeeId" control={control} label="Emp ID" placeholder="Enter employee ID" disabled={saving || readOnly} size="small"
                   />
 
                   <Box sx={{ minWidth: 0 }}>
@@ -110,14 +112,14 @@ export default function BranchUserFormDialog({
                         control={control}
                         label="Mr/Ms"
                         options={TITLE_OPTIONS}
-                        disabled={saving}
+                        disabled={saving || readOnly}
                       />
                       <FormTextField<BranchUserFormValues>
                         name="firstName"
                         control={control}
                         label="First name"
                         placeholder="First"
-                        disabled={saving}
+                        disabled={saving || readOnly}
                         size="small"
                         showLabel={false}
                       />
@@ -126,7 +128,7 @@ export default function BranchUserFormDialog({
                         control={control}
                         label="Middle name"
                         placeholder="Middle"
-                        disabled={saving}
+                        disabled={saving || readOnly}
                         size="small"
                         showLabel={false}
                       />
@@ -135,7 +137,7 @@ export default function BranchUserFormDialog({
                         control={control}
                         label="Last name"
                         placeholder="Last"
-                        disabled={saving}
+                        disabled={saving || readOnly}
                         size="small"
                         showLabel={false}
                       />
@@ -143,22 +145,22 @@ export default function BranchUserFormDialog({
                   </Box>
 
                   <FormTextField<BranchUserFormValues>
-                    name="mobile" control={control} label="Mobile" placeholder="10-digit mobile number" type="tel" disabled={saving} size="small"
+                    name="mobile" control={control} label="Mobile" placeholder="10-digit mobile number" type="tel" disabled={saving || readOnly} size="small"
                   />
                   <FormTextField<BranchUserFormValues>
-                    name="userName" control={control} label="User Name" placeholder="Enter username" disabled={saving} size="small"
+                    name="userName" control={control} label="User Name" placeholder="Enter username" disabled={saving || readOnly} size="small"
                   />
                   <FormLookupField<BranchUserFormValues>
-                    name="role" control={control} label="User Role" options={USER_ROLE_OPTIONS} disabled={saving}
+                    name="role" control={control} label="User Role" options={USER_ROLE_OPTIONS} disabled={saving || readOnly}
                   />
                   <FormMultiLookupField<BranchUserFormValues>
-                    name="multiBranchAccess" control={control} label="Multi Branch Access" options={BRANCH_OPTIONS} disabled={saving}
+                    name="multiBranchAccess" control={control} label="Multi Branch Access" options={BRANCH_OPTIONS} disabled={saving || readOnly}
                   />
                   <FormTextField<BranchUserFormValues>
-                    name="loginTime" control={control} label="LogIn Time" type="time" disabled={saving} size="small"
+                    name="loginTime" control={control} label="LogIn Time" type="time" disabled={saving || readOnly} size="small"
                   />
                   <FormLookupField<BranchUserFormValues>
-                    name="twoFactorLogin" control={control} label="2FA Login" options={TWO_FACTOR_OPTIONS} disabled={saving}
+                    name="twoFactorLogin" control={control} label="2FA Login" options={TWO_FACTOR_OPTIONS} disabled={saving || readOnly}
                   />
                 </Stack>
               </Grid>
@@ -167,22 +169,22 @@ export default function BranchUserFormDialog({
               <Grid item xs={12} md={4}>
                 <Stack spacing={2}>
                   <FormTextField<BranchUserFormValues>
-                    name="email" control={control} label="Email ID" placeholder="name@bank.example" type="email" disabled={saving} size="small"
+                    name="email" control={control} label="Email ID" placeholder="name@bank.example" type="email" disabled={saving || readOnly} size="small"
                   />
                   <FormTextField<BranchUserFormValues>
-                    name="displayName" control={control} label="Display Name" placeholder="Name shown in the portal" disabled={saving} size="small"
+                    name="displayName" control={control} label="Display Name" placeholder="Name shown in the portal" disabled={saving || readOnly} size="small"
                   />
                   <FormLookupField<BranchUserFormValues>
-                    name="systemRole" control={control} label="System Role" options={SYSTEM_ROLE_OPTIONS} disabled={saving}
+                    name="systemRole" control={control} label="System Role" options={SYSTEM_ROLE_OPTIONS} disabled={saving || readOnly}
                   />
                   <FormTextField<BranchUserFormValues>
-                    name="idleTimeoutSeconds" control={control} label="Idle Timeout In Secs" type="number" placeholder="300" disabled={saving} size="small"
+                    name="idleTimeoutSeconds" control={control} label="Idle Timeout In Secs" type="number" placeholder="300" disabled={saving || readOnly} size="small"
                   />
                   <FormTextField<BranchUserFormValues>
-                    name="logoutTime" control={control} label="LogOut Time" type="time" disabled={saving} size="small"
+                    name="logoutTime" control={control} label="LogOut Time" type="time" disabled={saving || readOnly} size="small"
                   />
                   <FormLookupField<BranchUserFormValues>
-                    name="authenticationType" control={control} label="Authentication Type" options={AUTHENTICATION_OPTIONS} disabled={saving}
+                    name="authenticationType" control={control} label="Authentication Type" options={AUTHENTICATION_OPTIONS} disabled={saving || readOnly}
                   />
                 </Stack>
               </Grid>
@@ -191,22 +193,22 @@ export default function BranchUserFormDialog({
               <Grid item xs={12} md={4}>
                 <Stack spacing={2}>
                   <FormSelectField<BranchUserFormValues>
-                    name="status" control={control} label="Status" options={STATUS_OPTIONS} disabled={saving} labelAbove
+                    name="status" control={control} label="Status" options={STATUS_OPTIONS} disabled={saving || readOnly} labelAbove
                   />
                   <FormTextField<BranchUserFormValues>
-                    name="dateOfBirth" control={control} label="Date of Birth" type="date" disabled={saving} size="small"
+                    name="dateOfBirth" control={control} label="Date of Birth" type="date" disabled={saving || readOnly} size="small"
                   />
                   <FormLookupField<BranchUserFormValues>
-                    name="twoFactorDesignation" control={control} label="2FA Login Designation" options={TWO_FACTOR_DESIGNATION_OPTIONS} disabled={saving}
+                    name="twoFactorDesignation" control={control} label="2FA Login Designation" options={TWO_FACTOR_DESIGNATION_OPTIONS} disabled={saving || readOnly}
                   />
                   <FormLookupField<BranchUserFormValues>
-                    name="branchId" control={control} label="Branch" options={BRANCH_OPTIONS} disabled={saving}
+                    name="branchId" control={control} label="Branch" options={BRANCH_OPTIONS} disabled={saving || readOnly}
                   />
                   <FormTextField<BranchUserFormValues>
-                    name="badLoginCount" control={control} label="No. of Bad Login" type="number" placeholder="0" disabled={saving} size="small"
+                    name="badLoginCount" control={control} label="No. of Bad Login" type="number" placeholder="0" disabled={saving || readOnly} size="small"
                   />
                   <FormTextField<BranchUserFormValues>
-                    name="inoperativeDate" control={control} label="In-Operative Date" type="date" disabled={saving} size="small"
+                    name="inoperativeDate" control={control} label="In-Operative Date" type="date" disabled={saving || readOnly} size="small"
                   />
                 </Stack>
               </Grid>
@@ -241,7 +243,7 @@ export default function BranchUserFormDialog({
                             <Checkbox
                               checked={Boolean(field.value)}
                               onChange={(_event, checked) => field.onChange(checked)}
-                              disabled={saving}
+                              disabled={saving || readOnly}
                             />
                           }
                           label={label}
@@ -263,7 +265,7 @@ export default function BranchUserFormDialog({
                     <Checkbox
                       checked={Boolean(field.value)}
                       onChange={(_event, checked) => field.onChange(checked)}
-                      disabled={saving || Boolean(editingUser)}
+                      disabled={saving || readOnly || Boolean(editingUser)}
                     />
                   )}
                 />
@@ -283,9 +285,9 @@ export default function BranchUserFormDialog({
 
         <DialogActions sx={{ p: 2.5 }}>
           <Button variant="outlined" color="inherit" onClick={onClose} disabled={saving}>
-            Cancel
+            {readOnly ? 'Close' : 'Cancel'}
           </Button>
-          <Button
+          {!readOnly && <Button
             type="submit"
             form="branch-user-form"
             variant="contained"
@@ -293,7 +295,7 @@ export default function BranchUserFormDialog({
             startIcon={editingUser ? undefined : <AddOutlinedIcon />}
           >
             {saving ? 'Saving…' : editingUser ? 'Save changes' : 'Save user'}
-          </Button>
+          </Button>}
         </DialogActions>
       </Dialog>
   );
