@@ -190,13 +190,13 @@ export const NAV_ITEMS: NavItem[] = [
   // 2. Profile
   {
     label: 'Profile',
-    path: '/profile',
+    path: PATHS.PROFILE.ROOT,
     icon: ManageAccountsOutlinedIcon,
     roles: ALL_BANK_ROLES,
     children: [
       {
         label: 'Photo',
-        path: '/profile/photo',
+        path: PATHS.PROFILE.PHOTO,
         icon: ImageOutlinedIcon,
         roles: ALL_BANK_ROLES,
       },
@@ -224,13 +224,13 @@ export const NAV_ITEMS: NavItem[] = [
   // 3. Request Handling (replaces Request Validation)
   {
     label: 'Request Handling',
-    path: PATHS.requestValidation,
+    path: PATHS.REQUEST_HANDLING.ROOT,
     icon: FactCheckOutlinedIcon,
     roles: ALL_BANK_ROLES,
     children: [
       {
         label: 'Payments',
-        path: PATHS.requestValidationPayments,
+        path:  PATHS.REQUEST_HANDLING.PAYMENTS,
         icon: PaymentsOutlinedIcon,
         roles: ALL_BANK_ROLES,
       },
@@ -304,19 +304,19 @@ export const NAV_ITEMS: NavItem[] = [
     label: 'Masters',
     path: '/masters',
     icon: AccountBalanceOutlinedIcon,
-    roles: [SUPER_ADMIN, BANK_ADMIN],
+    roles: ALL_BANK_ROLES,
     children: [
       {
         label: 'Bank Master',
         path: PATHS.banks,
         icon: AccountBalanceOutlinedIcon,
-        roles: [SUPER_ADMIN],
+        roles: ALL_BANK_ROLES,
       },
       {
         label: 'Branch Master',
         path: PATHS.branches,
         icon: AccountBalanceOutlinedIcon,
-        roles: [BANK_ADMIN],
+        roles: ALL_BANK_ROLES,
       },
     ],
   },
@@ -326,25 +326,25 @@ export const NAV_ITEMS: NavItem[] = [
     label: 'Mobile Utilities',
     path: '/mobile-utilities',
     icon: SmartphoneOutlinedIcon,
-    roles: [SUPER_ADMIN, BANK_ADMIN],
+    roles: ALL_BANK_ROLES,
     children: [
       {
         label: 'Image Uploading',
         path: PATHS.uploadImages,
         icon: ImageOutlinedIcon,
-        roles: [SUPER_ADMIN],
+        roles: ALL_BANK_ROLES,
       },
       {
         label: 'Push Notification',
         path: PATHS.pushNotifications,
         icon: NotificationsNoneOutlinedIcon,
-        roles: [SUPER_ADMIN, BANK_ADMIN],
+        roles: ALL_BANK_ROLES,
       },
       {
         label: 'Device Reset',
         path: PATHS.deviceReset,
         icon: SmartphoneOutlinedIcon,
-        roles: [SUPER_ADMIN, BANK_ADMIN],
+        roles:ALL_BANK_ROLES,
       },
     ],
   },
@@ -354,19 +354,19 @@ export const NAV_ITEMS: NavItem[] = [
     label: 'User Management',
     path: PATHS.userManagement,
     icon: ShieldOutlinedIcon,
-    roles: [SUPER_ADMIN, BANK_ADMIN],
+    roles: ALL_BANK_ROLES,
     children: [
       {
         label: 'User Master',
         path: PATHS.userManagement,
         icon: ManageAccountsOutlinedIcon,
-        roles: [SUPER_ADMIN, BANK_ADMIN],
+        roles: ALL_BANK_ROLES,
       },
       {
         label: 'Assign Password',
         path: '/user-management/assign-password',
         icon: ShieldOutlinedIcon,
-        roles: [SUPER_ADMIN, BANK_ADMIN],
+        roles: ALL_BANK_ROLES,
       },
     ],
   },
@@ -376,25 +376,25 @@ export const NAV_ITEMS: NavItem[] = [
     label: 'Reports',
     path: PATHS.reports,
     icon: BarChartOutlinedIcon,
-    roles: [SUPER_ADMIN, BANK_ADMIN],
+    roles:ALL_BANK_ROLES,
     children: [
       {
         label: 'Requests',
         path: '/reports/requests',
         icon: DescriptionOutlinedIcon,
-        roles: [SUPER_ADMIN, BANK_ADMIN],
+        roles: ALL_BANK_ROLES,
       },
       {
         label: 'User Master',
         path: '/reports/user-master',
         icon: ManageAccountsOutlinedIcon,
-        roles: [SUPER_ADMIN, BANK_ADMIN],
+        roles: ALL_BANK_ROLES,
       },
       {
         label: 'Notification',
         path: '/reports/notification',
         icon: NotificationsNoneOutlinedIcon,
-        roles: [SUPER_ADMIN, BANK_ADMIN],
+        roles: ALL_BANK_ROLES,
       },
     ],
   },
@@ -422,7 +422,7 @@ export const NAV_ITEMS: NavItem[] = [
         label: 'Roles and Access Control',
         path: '/settings/roles-access-control',
         icon: ShieldOutlinedIcon,
-        roles: [SUPER_ADMIN, BANK_ADMIN],
+        roles:ALL_BANK_ROLES,
       },
       {
         label: 'Change Colour Theme',
