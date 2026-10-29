@@ -230,7 +230,7 @@ export const NAV_ITEMS: NavItem[] = [
     children: [
       {
         label: 'Payments',
-        path:  PATHS.REQUEST_HANDLING.PAYMENTS,
+        path: PATHS.REQUEST_HANDLING.PAYMENTS,
         icon: PaymentsOutlinedIcon,
         roles: ALL_BANK_ROLES,
       },
@@ -308,7 +308,7 @@ export const NAV_ITEMS: NavItem[] = [
     children: [
       {
         label: 'Bank Master',
-        path: PATHS.banks,
+        path: PATHS.MASTERS.BANK_MASTER,
         icon: AccountBalanceOutlinedIcon,
         roles: ALL_BANK_ROLES,
       },
@@ -344,7 +344,7 @@ export const NAV_ITEMS: NavItem[] = [
         label: 'Device Reset',
         path: PATHS.deviceReset,
         icon: SmartphoneOutlinedIcon,
-        roles:ALL_BANK_ROLES,
+        roles: ALL_BANK_ROLES,
       },
     ],
   },
@@ -352,19 +352,19 @@ export const NAV_ITEMS: NavItem[] = [
   // 6. User Management
   {
     label: 'User Management',
-    path: PATHS.userManagement,
+    path: PATHS.USER_MANAGEMENT.ROOT,
     icon: ShieldOutlinedIcon,
     roles: ALL_BANK_ROLES,
     children: [
       {
         label: 'User Master',
-        path: PATHS.userManagement,
+        path: PATHS.USER_MANAGEMENT.USER_MASTER,
         icon: ManageAccountsOutlinedIcon,
         roles: ALL_BANK_ROLES,
       },
       {
         label: 'Assign Password',
-        path: '/user-management/assign-password',
+        path: PATHS.USER_MANAGEMENT.ASSIGN_PASSWORD,
         icon: ShieldOutlinedIcon,
         roles: ALL_BANK_ROLES,
       },
@@ -376,7 +376,7 @@ export const NAV_ITEMS: NavItem[] = [
     label: 'Reports',
     path: PATHS.reports,
     icon: BarChartOutlinedIcon,
-    roles:ALL_BANK_ROLES,
+    roles: ALL_BANK_ROLES,
     children: [
       {
         label: 'Requests',
@@ -408,21 +408,22 @@ export const NAV_ITEMS: NavItem[] = [
     children: [
       {
         label: 'Change Password',
-        path: '/settings/change-password',
+        path: PATHS.SETTINGS.CHANGE_PASSWORD,
         icon: ShieldOutlinedIcon,
         roles: ALL_BANK_ROLES,
       },
       {
         label: 'Profile',
-        path: '/settings/profile',
+        path: PATHS.SETTINGS.PROFILE,
         icon: ManageAccountsOutlinedIcon,
         roles: ALL_BANK_ROLES,
+
       },
       {
         label: 'Roles and Access Control',
-        path: '/settings/roles-access-control',
+        path: PATHS.SETTINGS.ROLES_ACCESS_CONTROL,
         icon: ShieldOutlinedIcon,
-        roles:ALL_BANK_ROLES,
+        roles: ALL_BANK_ROLES,
       },
       {
         label: 'Change Colour Theme',

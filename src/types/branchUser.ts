@@ -1,5 +1,5 @@
-export type BranchUserStatus = 'Active' | 'Inactive' | 'Invited' | 'Locked';
-export type BranchUserRole = 'Manager' | 'Officer';
+export type BranchUserStatus = 'Entered' | 'Operative' | 'In-Operative' | 'Suspended' | 'Password Blocked';
+export type BranchUserRole = 'Bank User' | 'Admin User';
 export type BranchUserTitle = 'Mr' | 'Ms';
 
 export interface MenuFunctionAccessLevel {

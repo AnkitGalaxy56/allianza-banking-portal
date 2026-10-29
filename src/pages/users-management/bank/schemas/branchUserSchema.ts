@@ -4,7 +4,7 @@ const employeeTitleSchema = z.enum(['Mr', 'Ms'], {
   required_error: 'Select a title',
 });
 
-const SYSTEM_ROLE_VALUES = ['Branch Administrator', 'Branch Manager', 'Branch Officer', 'Auditor'] as const;
+const SYSTEM_ROLE_VALUES = ['Checker', 'Maker'] as const;
 const TWO_FACTOR_DESIGNATION_VALUES = ['Primary', 'Secondary', 'Not Applicable'] as const;
 const AUTHENTICATION_TYPE_VALUES = ['Password', 'OTP', 'Password + OTP', 'Authenticator App'] as const;
 
@@ -14,7 +14,7 @@ const getAllowedValue = <T extends string>(
   fallback: T,
 ): T => allowedValues.find((item) => item === value) ?? fallback;
 
-const branchUserRoleSchema = z.enum(['Manager', 'Officer'], {
+const branchUserRoleSchema = z.enum(['Bank User', 'Admin User'], {
   required_error: 'Select a user role',
 });
 
@@ -22,7 +22,7 @@ const systemRoleSchema = z.enum(SYSTEM_ROLE_VALUES, {
   required_error: 'Select a system role',
 });
 
-const statusSchema = z.enum(['Active', 'Inactive', 'Invited', 'Locked'], {
+const statusSchema = z.enum(['Entered', 'Operative', 'In-Operative', 'Suspended', 'Password Blocked'], {
   required_error: 'Select a status',
 });
 
@@ -49,13 +49,13 @@ export const branchUserSchema = z.object({
   branchId: z.string().min(1, 'Select a branch'),
   multiBranchAccess: z.array(z.string()),
   status: statusSchema,
-  dateOfBirth: z.string(),
+  dateOfBirth: z.string().min(1, 'Select date of birth').refine((value) => !Number.isNaN(Date.parse(value)) && Date.parse(value) < Date.now(), 'Date of birth must be a valid past date'),
   twoFactorDesignation: twoFactorDesignationSchema,
-  idleTimeoutSeconds: z.string().regex(/^\d+$/, 'Enter timeout in seconds'),
-  badLoginCount: z.string().regex(/^\d+$/, 'Enter a valid login count'),
-  loginTime: z.string(),
-  logoutTime: z.string(),
-  inoperativeDate: z.string(),
+  idleTimeoutSeconds: z.string().regex(/^\d+$/, 'Enter timeout in seconds').refine((value) => Number(value) >= 30 && Number(value) <= 86400, 'Timeout must be between 30 and 86400 seconds'),
+  badLoginCount: z.string().regex(/^\d+$/, 'Enter a valid login count').refine((value) => Number(value) >= 0 && Number(value) <= 999, 'Login count must be between 0 and 999'),
+  loginTime: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Select a valid login time'),
+  logoutTime: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Select a valid logout time'),
+  inoperativeDate: z.string().refine((value) => value === '' || !Number.isNaN(Date.parse(value)), 'Select a valid in-operative date'),
   twoFactorLogin: z.enum(['Yes', 'No'], { required_error: 'Select 2FA login' }),
   authenticationType: authenticationTypeSchema,
   accessLevel: z.object({
@@ -79,11 +79,11 @@ export const EMPTY_BRANCH_USER: BranchUserFormValues = {
   email: '',
   userName: '',
   displayName: '',
-  role: 'Officer',
-  systemRole: 'Branch Officer',
+  role: 'Bank User',
+  systemRole: 'Maker',
   branchId: '',
   multiBranchAccess: [],
-  status: 'Invited',
+  status: 'Entered',
   dateOfBirth: '',
   twoFactorDesignation: 'Primary',
   idleTimeoutSeconds: '300',
@@ -114,11 +114,11 @@ export const userToFormValues = (user: import('@/types/branchUser').BranchUser):
     email: user.email ?? '',
     userName: user.userName ?? (user.email ? user.email.split('@')[0] : ''),
     displayName: user.displayName ?? user.name ?? '',
-    role: user.role ?? 'Officer',
-    systemRole: getAllowedValue(user.systemRole, SYSTEM_ROLE_VALUES, 'Branch Officer'),
+    role: user.role === 'Admin User' ? 'Admin User' : 'Bank User',
+    systemRole: getAllowedValue(user.systemRole, SYSTEM_ROLE_VALUES, 'Maker'),
     branchId: user.branchId ?? '',
     multiBranchAccess: user.multiBranchAccess ?? (user.branchId ? [user.branchId] : []),
-    status: user.status ?? 'Active',
+    status: user.status ?? 'Entered',
     dateOfBirth: user.dateOfBirth ?? '',
     twoFactorDesignation: getAllowedValue(user.twoFactorDesignation, TWO_FACTOR_DESIGNATION_VALUES, 'Primary'),
     idleTimeoutSeconds: String(user.idleTimeoutSeconds ?? 300),

@@ -22,22 +22,21 @@ export const TITLE_OPTIONS: SelectOption[] = [
 ];
 
 export const USER_ROLE_OPTIONS: SelectOption[] = [
-  { value: 'Manager', label: 'Manager' },
-  { value: 'Officer', label: 'Officer' },
+  { value: 'Bank User', label: 'Bank User' },
+  { value: 'Admin User', label: 'Admin User' },
 ];
 
 export const SYSTEM_ROLE_OPTIONS: SelectOption[] = [
-  { value: 'Branch Administrator', label: 'Branch Administrator' },
-  { value: 'Branch Manager', label: 'Branch Manager' },
-  { value: 'Branch Officer', label: 'Branch Officer' },
-  { value: 'Auditor', label: 'Auditor' },
+  { value: 'Checker', label: 'Checker' },
+  { value: 'Maker', label: 'Maker' },
 ];
 
 export const STATUS_OPTIONS: SelectOption[] = [
-  { value: 'Active', label: 'Active' },
-  { value: 'Inactive', label: 'Inactive' },
-  { value: 'Invited', label: 'Invited' },
-  { value: 'Locked', label: 'Locked' },
+  { value: 'Entered', label: '001 - Entered' },
+  { value: 'Operative', label: '002 - Operative' },
+  { value: 'In-Operative', label: '003 - In-Operative' },
+  { value: 'Suspended', label: '004 - Suspended' },
+  { value: 'Password Blocked', label: '005 - Password Blocked' },
 ];
 
 export const TWO_FACTOR_DESIGNATION_OPTIONS: SelectOption[] = [

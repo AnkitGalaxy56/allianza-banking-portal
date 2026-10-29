@@ -60,6 +60,7 @@ export default function BankUsersPage() {
   const [role, setRole] = useState<BranchUserRole | 'all'>('all');
   const [authorizationFilter, setAuthorizationFilter] = useState<UserAuthorizationStatus | 'all'>('all');
   const [readOnly, setReadOnly] = useState(false);
+  const [verifyingUser, setVerifyingUser] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<BranchUser | null>(null);
   const [formError, setFormError] = useState('');
@@ -99,6 +100,7 @@ export default function BankUsersPage() {
   const openAddForm = () => {
     setEditingUser(null);
     setReadOnly(false);
+    setVerifyingUser(false);
     reset(EMPTY_BRANCH_USER);
     setFormError('');
     setFormOpen(true);
@@ -106,7 +108,17 @@ export default function BankUsersPage() {
 
   const openEditForm = (user: BranchUser) => {
     setReadOnly(false);
+    setVerifyingUser(false);
     setEditingUser(user);
+    reset(userToFormValues(user));
+    setFormError('');
+    setFormOpen(true);
+  };
+
+  const openVerifyForm = (user: BranchUser) => {
+    setEditingUser(user);
+    setReadOnly(true);
+    setVerifyingUser(true);
     reset(userToFormValues(user));
     setFormError('');
     setFormOpen(true);
@@ -115,6 +127,7 @@ export default function BankUsersPage() {
   const openViewForm = (user: BranchUser) => {
     setEditingUser(user);
     setReadOnly(true);
+    setVerifyingUser(false);
     reset(userToFormValues(user));
     setFormError('');
     setFormOpen(true);
@@ -125,6 +138,7 @@ export default function BankUsersPage() {
     setFormOpen(false);
     setEditingUser(null);
     setReadOnly(false);
+    setVerifyingUser(false);
     reset(EMPTY_BRANCH_USER);
     setFormError('');
   };
@@ -153,7 +167,7 @@ export default function BankUsersPage() {
       systemRole: values.systemRole,
       branchId: values.branchId,
       multiBranchAccess: values.multiBranchAccess,
-      status: values.status,
+      status: editingUser ? values.status : 'Entered',
       dateOfBirth: values.dateOfBirth,
       twoFactorDesignation: values.twoFactorDesignation,
       idleTimeoutSeconds: Number(values.idleTimeoutSeconds),
@@ -188,17 +202,18 @@ export default function BankUsersPage() {
     }
   };
 
-  const authorizeUser = async (user: BranchUser) => {
+  const authenticateUser = async () => {
+    if (!editingUser) return;
+    setSaving(true);
     try {
-      await branchUserService.authorize(user.id);
-      setFeedback({ message: `${user.name} authorised successfully.`, severity: 'success' });
-      setRefreshKey((value) => value + 1);
-      reload();
+      await branchUserService.authorize(editingUser.id);
+      setFeedback({ message: `${editingUser.name} authenticated successfully.`, severity: 'success' });
+      setFormOpen(false); setEditingUser(null); setVerifyingUser(false); setReadOnly(false);
+      setRefreshKey((value) => value + 1); reload();
     } catch (e) {
-      setFeedback({ message: e instanceof Error ? e.message : 'Could not authorise user.', severity: 'error' });
-    }
+      setFormError(e instanceof Error ? e.message : 'Could not authenticate user.');
+    } finally { setSaving(false); }
   };
-
 
   const columns: DataTableColumn<BranchUser>[] = [
     {
@@ -248,10 +263,10 @@ export default function BankUsersPage() {
       nowrap: true,
       render: (user) => (
         <Stack direction="row" spacing={0.25}>
-          <Button size="small" onClick={() => openViewForm(user)}>View</Button>
-          <Button size="small" startIcon={<EditOutlinedIcon />} onClick={() => openEditForm(user)}>Edit</Button>
-          {(user.authorizationStatus ?? 'Authorized') === 'Pending' && (
-            <Button size="small" color="success" startIcon={<CheckCircleOutlineOutlinedIcon />} onClick={() => void authorizeUser(user)}>Authorise</Button>
+          <Button size="small" disabled={user.status === 'Entered'} onClick={() => openViewForm(user)}>View</Button>
+          <Button size="small" disabled={user.status === 'Entered'} startIcon={<EditOutlinedIcon />} onClick={() => openEditForm(user)}>Edit</Button>
+          {user.status === 'Entered' && (
+            <Button size="small" color="success" startIcon={<CheckCircleOutlineOutlinedIcon />} onClick={() => openVerifyForm(user)}>Verify</Button>
           )}
         </Stack>
       ),
@@ -348,8 +363,8 @@ export default function BankUsersPage() {
             sx={{ minWidth: 145 }}
           >
             <MenuItem value="all">All user roles</MenuItem>
-            <MenuItem value="Manager">Manager</MenuItem>
-            <MenuItem value="Officer">Officer</MenuItem>
+            <MenuItem value="Bank User">Bank User</MenuItem>
+            <MenuItem value="Admin User">Admin User</MenuItem>
           </TextField>
         </Box>
 
@@ -399,6 +414,8 @@ export default function BankUsersPage() {
         onSubmit={submit}
         themeName={theme.name}
         readOnly={readOnly}
+        verifying={verifyingUser}
+        onAuthenticate={() => void authenticateUser()}
       />
 
       <Snackbar

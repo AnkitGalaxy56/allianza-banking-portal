@@ -34,7 +34,7 @@ export const branchUserService = {
       const { mockAuthorizeBranchUser } = await import('./mock/mockBranchUsers');
       return mockAuthorizeBranchUser(id);
     }
-    await api.patch(ENDPOINTS.branchUsers.byId(id), { authorizationStatus: 'Authorized' });
+    await api.patch(ENDPOINTS.branchUsers.byId(id), { status: 'Operative', authorizationStatus: 'Authorized' });
   },
   async updateStatus(id: string, status: BranchUser['status']): Promise<void> {
     if (import.meta.env.DEV && env.useMockApi) {

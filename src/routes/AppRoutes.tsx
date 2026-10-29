@@ -18,6 +18,9 @@ const PushNotificationsPage = lazy(() => import('@/pages/push-notifications/Push
 const DeviceResetPage = lazy(() => import('@/pages/device-reset/DeviceResetPage'));
 const BannersPage = lazy(() => import('@/pages/banners-content/BannersPage'));
 const ReportsPage = lazy(() => import('@/pages/reports/ReportsPage'));
+const ProfilePage = lazy(() => import('@/pages/profile'));
+const ChangePasswordPage = lazy(() => import('@/pages/change-password'));
+const RolesAccessControlPage = lazy(() => import('@/pages/settings/roles-access-control'));
 
 const RequestValidationIndex = lazy(() => import('@/pages/request-validation/index'));
 const PaymentsPage = lazy(() => import('@/pages/request-validation/payments'));
@@ -34,18 +37,25 @@ const BranchesPage = lazy(() => import('@/pages/branches/BranchesPage'));
 const UserManagement = lazy(() => import('@/pages/users-management/index'));
 const CustomersPage = lazy(() => import('@/pages/customers/CustomersPage'));
 const UploadImagesPage = lazy(() => import('@/pages/upload-images/UploadImagesPage'));
-const BankPage = lazy(() => import('@/pages/bank/BankPage'));
+const BankPage = lazy(() => import('@/pages/banks-management/BankPage'));
 
 const BUILT_PAGES: Record<string, ReactElement> = {
-  [PATHS.banks]: <BankPage />,
+  [PATHS.USER_MANAGEMENT.ROOT]: <UserManagement />,
+  [PATHS.USER_MANAGEMENT.USER_MASTER]: <UserManagement />,
+  [PATHS.MASTERS.BANK_MASTER]: <BankPage />,
   [PATHS.dashboard]: <DashboardPage />,
+
+
+  // [PATHS.SETTINGS.PROFILE]: <ProfilePage />,
+  // [PATHS.SETTINGS.CHANGE_PASSWORD]: <ChangePasswordPage />,
   [PATHS.branches]: <BranchesPage />,
-  [PATHS.userManagement]: <UserManagement />,
+  // [PATHS.userManagement]: <UserManagement />,
   [PATHS.customers]: <CustomersPage />,
   [PATHS.uploadImages]: <UploadImagesPage />,
   [PATHS.serviceRequests]: <ServiceRequestsPage />,
   [PATHS.leadEnquiries]: <LeadEnquiriesPage />,
   [PATHS.reports]: <ReportsPage />,
+  [PATHS.SETTINGS.ROLES_ACCESS_CONTROL]: <RolesAccessControlPage />,
   [PATHS.pushNotifications]: <PushNotificationsPage />,
   [PATHS.deviceReset]: <DeviceResetPage />,
   [PATHS.banners]: <BannersPage />,
@@ -62,8 +72,8 @@ export default function AppRoutes() {
   return (
     <Suspense fallback={<FullPageLoader />}>
       <Routes>
-       
-       
+
+
         <Route element={<PublicOnlyRoute />}>
           <Route path={PATHS.login} element={<LoginPage />} />
         </Route>
