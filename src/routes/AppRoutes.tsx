@@ -18,6 +18,7 @@ const PushNotificationsPage = lazy(() => import('@/pages/push-notifications/Push
 const DeviceResetPage = lazy(() => import('@/pages/device-reset/DeviceResetPage'));
 const BannersPage = lazy(() => import('@/pages/banners-content/BannersPage'));
 const ReportsPage = lazy(() => import('@/pages/reports/ReportsPage'));
+const RolesAccessControlPage = lazy(() => import('@/pages/settings/roles-access-control'));
 
 const RequestValidationIndex = lazy(() => import('@/pages/request-validation/index'));
 const PaymentsPage = lazy(() => import('@/pages/request-handling/rtgs-neft-imps'));
@@ -45,16 +46,19 @@ const UploadImagesPage = lazy(() => import('@/pages/upload-images/UploadImagesPa
 const BankPage = lazy(() => import('@/pages/banks-management/BankPage'));
 
 const BUILT_PAGES: Record<string, ReactElement> = {
-  [PATHS.banks]: <BankPage />,
+  [PATHS.USER_MANAGEMENT.ROOT]: <UserManagement />,
+  [PATHS.USER_MANAGEMENT.USER_MASTER]: <UserManagement />,
+  [PATHS.MASTERS.BANK_MASTER]: <BankPage />,
   [PATHS.dashboard]: <DashboardPage />,
   [PATHS.branches]: <BranchesPage />,
-  [PATHS.userManagement]: <UserManagement />,
+  // [PATHS.userManagement]: <UserManagement />,
   [PATHS.customers]: <CustomersPage />,
   [PATHS.customerOnboarding]: <CustomerOnboardingPage />,
   [PATHS.uploadImages]: <UploadImagesPage />,
   [PATHS.serviceRequests]: <ServiceRequestsPage />,
   [PATHS.leadEnquiries]: <LeadEnquiriesPage />,
   [PATHS.reports]: <ReportsPage />,
+  [PATHS.SETTINGS.ROLES_ACCESS_CONTROL]: <RolesAccessControlPage />,
   [PATHS.pushNotifications]: <PushNotificationsPage />,
   [PATHS.deviceReset]: <DeviceResetPage />,
   [PATHS.banners]: <BannersPage />,
