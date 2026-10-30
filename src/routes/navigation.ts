@@ -49,13 +49,13 @@ const ALL_BANK_ROLES: Role[] = [SUPER_ADMIN, BANK_ADMIN, BANK_USER];
 
 //   {
 //     label: 'Dashboard',
-//     path: PATHS.AUTH.DASHBOARD,
+//     path: PATHS.dashboard,
 //     icon: GridViewOutlinedIcon,
 //     roles: ALL_BANK_ROLES,
 //   },
 //   {
 //     label: 'Customer Onboarding',
-//     path: PATHS.CUSTOMER_ONBOARDING.ROOT,
+//     path: PATHS.customerOnboarding,
 //     icon: PersonAddAlt1OutlinedIcon,
 //     roles: [SUPER_ADMIN],
 //   },
@@ -63,7 +63,7 @@ const ALL_BANK_ROLES: Role[] = [SUPER_ADMIN, BANK_ADMIN, BANK_USER];
 //   // Allianza admin
 //   {
 //     label: 'Bank Management',
-//     path: PATHS.BANKS.ROOT,
+//     path: PATHS.banks,
 //     icon: AccountBalanceOutlinedIcon,
 //     roles: [SUPER_ADMIN],
 //   },
@@ -71,38 +71,38 @@ const ALL_BANK_ROLES: Role[] = [SUPER_ADMIN, BANK_ADMIN, BANK_USER];
 //   // Request validation and its submenu pages
 //   {
 //     label: 'Request Validation',
-//     path: PATHS.REQUEST_VALIDATION.ROOT,
+//     path: PATHS.requestValidation,
 //     icon: FactCheckOutlinedIcon,
 //     roles: ALL_BANK_ROLES,
 //     children: [
 //       {
 //         label: 'Payments',
-//         path: PATHS.REQUEST_VALIDATION.PAYMENTS,
+//         path: PATHS.requestValidationPayments,
 //         icon: PaymentsOutlinedIcon,
 //         roles: ALL_BANK_ROLES,
 
 //       },
 //       {
 //         label: 'Opening Accounts',
-//         path: PATHS.REQUEST_VALIDATION.OPENING_ACCOUNTS,
+//         path: PATHS.requestValidationOpeningAccounts,
 //         icon: AccountBalanceOutlinedIcon,
 //         roles: ALL_BANK_ROLES,
 //       },
 //       {
 //         label: 'Closing Account',
-//         path: PATHS.REQUEST_VALIDATION.CLOSING_ACCOUNTS,
+//         path: PATHS.requestValidationClosingAccounts,
 //         icon: CancelPresentationOutlinedIcon,
 //         roles: ALL_BANK_ROLES,
 //       },
 //       {
 //         label: 'Lead Management',
-//         path: PATHS.REQUEST_VALIDATION.LEAD_MANAGEMENT,
+//         path: PATHS.requestValidationLeadManagement,
 //         icon: TrendingUpOutlinedIcon,
 //         roles: ALL_BANK_ROLES,
 //       },
 //       {
 //         label: 'Stop Payment',
-//         path: PATHS.REQUEST_VALIDATION.STOP_PAYMENT,
+//         path: PATHS.requestValidationStopPayment,
 //         icon: BlockOutlinedIcon,
 //         roles: ALL_BANK_ROLES,
 //       },
@@ -112,13 +112,13 @@ const ALL_BANK_ROLES: Role[] = [SUPER_ADMIN, BANK_ADMIN, BANK_USER];
 //   // Bank admin
 //   {
 //     label: 'Branches',
-//     path: PATHS.BRANCHES.ROOT,
+//     path: PATHS.branches,
 //     icon: AccountBalanceOutlinedIcon,
 //     roles: [BANK_ADMIN],
 //   },
 //   {
 //     label: 'User Management',
-//     path: PATHS.USER_MANAGEMENT.ROOT,
+//     path: PATHS.userManagement,
 //     icon: ShieldOutlinedIcon,
 //     roles: [BANK_ADMIN, SUPER_ADMIN],
 
@@ -127,19 +127,19 @@ const ALL_BANK_ROLES: Role[] = [SUPER_ADMIN, BANK_ADMIN, BANK_USER];
 //   // Bank admin + bank employee
 //   {
 //     label: 'Customers',
-//     path: PATHS.CUSTOMERS.ROOT,
+//     path: PATHS.customers,
 //     icon: PeopleAltOutlinedIcon,
 //     roles: [BANK_ADMIN, BANK_USER],
 //   },
 //   {
 //     label: 'Service Requests',
-//     path: PATHS.SERVICE_REQUESTS.ROOT,
+//     path: PATHS.serviceRequests,
 //     icon: DescriptionOutlinedIcon,
 //     roles: [BANK_ADMIN, BANK_USER],
 //   },
 //   {
 //     label: 'Lead Enquiries',
-//     path: PATHS.LEAD_ENQUIRIES.ROOT,
+//     path: PATHS.leadEnquiries,
 //     icon: AttachMoneyOutlinedIcon,
 //     roles: [BANK_ADMIN, BANK_USER],
 //   },
@@ -147,31 +147,31 @@ const ALL_BANK_ROLES: Role[] = [SUPER_ADMIN, BANK_ADMIN, BANK_USER];
 //   // Shared admin tools
 //   {
 //     label: 'Reports',
-//     path: PATHS.REPORTS.ROOT,
+//     path: PATHS.reports,
 //     icon: BarChartOutlinedIcon,
 //     roles: [SUPER_ADMIN, BANK_ADMIN],
 //   },
 //   {
 //     label: 'Push Notifications',
-//     path: PATHS.PUSH_NOTIFICATIONS.ROOT,
+//     path: PATHS.pushNotifications,
 //     icon: NotificationsNoneOutlinedIcon,
 //     roles: [SUPER_ADMIN, BANK_ADMIN],
 //   },
 //   {
 //     label: 'Device Reset',
-//     path: PATHS.DEVICE_RESET.ROOT,
+//     path: PATHS.deviceReset,
 //     icon: SmartphoneOutlinedIcon,
 //     roles: [SUPER_ADMIN, BANK_ADMIN],
 //   },
 //   {
 //     label: 'Banners & Content',
-//     path: PATHS.BANNERS.ROOT,
+//     path: PATHS.banners,
 //     icon: ImageOutlinedIcon,
 //     roles: [BANK_ADMIN],
 //   },
 //   {
 //     label: 'Upload Image',
-//     path: PATHS.UPLOAD_IMAGES.ROOT,
+//     path: PATHS.uploadImages,
 //     icon: ImageOutlinedIcon,
 //     roles: [SUPER_ADMIN],
 //   },
@@ -182,7 +182,7 @@ export const NAV_ITEMS: NavItem[] = [
   // 1. Dashboard
   {
     label: 'Dashboard',
-    path: PATHS.AUTH.DASHBOARD,
+    path: PATHS.dashboard,
     icon: GridViewOutlinedIcon,
     roles: ALL_BANK_ROLES,
   },
@@ -190,31 +190,31 @@ export const NAV_ITEMS: NavItem[] = [
   // 2. Profile
   {
     label: 'Profile',
-    path: PATHS.PROFILE.ROOT,
+    path: '/profile',
     icon: ManageAccountsOutlinedIcon,
     roles: ALL_BANK_ROLES,
     children: [
       {
         label: 'Photo',
-        path: PATHS.PROFILE.PHOTO,
+        path: '/profile/photo',
         icon: ImageOutlinedIcon,
         roles: ALL_BANK_ROLES,
       },
       {
         label: 'Name',
-        path: PATHS.PROFILE.NAME,
+        path: '/profile/name',
         icon: ManageAccountsOutlinedIcon,
         roles: ALL_BANK_ROLES,
       },
       {
         label: 'Email',
-        path: PATHS.PROFILE.EMAIL,
+        path: '/profile/email',
         icon: DescriptionOutlinedIcon,
         roles: ALL_BANK_ROLES,
       },
       {
         label: 'Mobile No',
-        path: PATHS.PROFILE.MOBILE,
+        path: '/profile/mobile',
         icon: SmartphoneOutlinedIcon,
         roles: ALL_BANK_ROLES,
       },
@@ -224,13 +224,13 @@ export const NAV_ITEMS: NavItem[] = [
   // 3. Request Handling (replaces Request Validation)
   {
     label: 'Request Handling',
-    path: PATHS.REQUEST_HANDLING.ROOT,
+    path: PATHS.requestValidation,
     icon: FactCheckOutlinedIcon,
     roles: ALL_BANK_ROLES,
     children: [
       {
         label: 'Payments',
-        path: PATHS.REQUEST_HANDLING.PAYMENTS,
+        path: PATHS.requestValidationPayments,
         icon: PaymentsOutlinedIcon,
         roles: ALL_BANK_ROLES,
       },
@@ -242,7 +242,7 @@ export const NAV_ITEMS: NavItem[] = [
       },
       {
         label: 'Stop Payment',
-        path: PATHS.REQUEST_VALIDATION.STOP_PAYMENT,
+        path: PATHS.requestValidationStopPayment,
         icon: BlockOutlinedIcon,
         roles: ALL_BANK_ROLES,
       },
@@ -260,7 +260,7 @@ export const NAV_ITEMS: NavItem[] = [
       },
       {
         label: 'FD / RD Closing',
-        path: PATHS.REQUEST_VALIDATION.CLOSING_ACCOUNTS,
+        path: PATHS.requestValidationClosingAccounts,
         icon: CancelPresentationOutlinedIcon,
         roles: ALL_BANK_ROLES,
       },
@@ -291,14 +291,14 @@ export const NAV_ITEMS: NavItem[] = [
 
       // Existing request screens retained
       {
-        label: 'Opening Accounts',
-        path: PATHS.REQUEST_HANDLING.CUSTOMER_ONBOARDING,
-        icon: AccountBalanceOutlinedIcon,
+        label: 'Opening Accounts / Customer Onboarding',
+        path: PATHS.customerOnboarding,
+        icon: PersonAddAlt1OutlinedIcon,
         roles: ALL_BANK_ROLES,
       },
       {
         label: 'Lead Management',
-        path: PATHS.REQUEST_VALIDATION.LEAD_MANAGEMENT,
+        path: PATHS.requestValidationLeadManagement,
         icon: TrendingUpOutlinedIcon,
         roles: ALL_BANK_ROLES,
       },
@@ -310,19 +310,19 @@ export const NAV_ITEMS: NavItem[] = [
     label: 'Masters',
     path: '/masters',
     icon: AccountBalanceOutlinedIcon,
-    roles: ALL_BANK_ROLES,
+    roles: [SUPER_ADMIN, BANK_ADMIN],
     children: [
       {
         label: 'Bank Master',
-        path: PATHS.MASTERS.BANK_MASTER,
+        path: PATHS.banks,
         icon: AccountBalanceOutlinedIcon,
-        roles: ALL_BANK_ROLES,
+        roles: [SUPER_ADMIN],
       },
       {
         label: 'Branch Master',
-        path: PATHS.BRANCHES.ROOT,
+        path: PATHS.branches,
         icon: AccountBalanceOutlinedIcon,
-        roles: ALL_BANK_ROLES,
+        roles: [BANK_ADMIN],
       },
     ],
   },
@@ -332,25 +332,25 @@ export const NAV_ITEMS: NavItem[] = [
     label: 'Mobile Utilities',
     path: '/mobile-utilities',
     icon: SmartphoneOutlinedIcon,
-    roles: ALL_BANK_ROLES,
+    roles: [SUPER_ADMIN, BANK_ADMIN],
     children: [
       {
         label: 'Image Uploading',
-        path: PATHS.UPLOAD_IMAGES.ROOT,
+        path: PATHS.uploadImages,
         icon: ImageOutlinedIcon,
-        roles: ALL_BANK_ROLES,
+        roles: [SUPER_ADMIN],
       },
       {
         label: 'Push Notification',
-        path: PATHS.PUSH_NOTIFICATIONS.ROOT,
+        path: PATHS.pushNotifications,
         icon: NotificationsNoneOutlinedIcon,
-        roles: ALL_BANK_ROLES,
+        roles: [SUPER_ADMIN, BANK_ADMIN],
       },
       {
         label: 'Device Reset',
-        path: PATHS.DEVICE_RESET.ROOT,
+        path: PATHS.deviceReset,
         icon: SmartphoneOutlinedIcon,
-        roles: ALL_BANK_ROLES,
+        roles: [SUPER_ADMIN, BANK_ADMIN],
       },
     ],
   },
@@ -358,21 +358,21 @@ export const NAV_ITEMS: NavItem[] = [
   // 6. User Management
   {
     label: 'User Management',
-    path: PATHS.USER_MANAGEMENT.ROOT,
+    path: PATHS.userManagement,
     icon: ShieldOutlinedIcon,
-    roles: ALL_BANK_ROLES,
+    roles: [SUPER_ADMIN, BANK_ADMIN],
     children: [
       {
         label: 'User Master',
-        path: PATHS.USER_MANAGEMENT.USER_MASTER,
+        path: PATHS.userManagement,
         icon: ManageAccountsOutlinedIcon,
-        roles: ALL_BANK_ROLES,
+        roles: [SUPER_ADMIN, BANK_ADMIN],
       },
       {
         label: 'Assign Password',
-        path: PATHS.USER_MANAGEMENT.ASSIGN_PASSWORD,
+        path: '/user-management/assign-password',
         icon: ShieldOutlinedIcon,
-        roles: ALL_BANK_ROLES,
+        roles: [SUPER_ADMIN, BANK_ADMIN],
       },
     ],
   },
@@ -380,27 +380,27 @@ export const NAV_ITEMS: NavItem[] = [
   // 7. Reports
   {
     label: 'Reports',
-    path: PATHS.REPORTS.ROOT,
+    path: PATHS.reports,
     icon: BarChartOutlinedIcon,
-    roles: ALL_BANK_ROLES,
+    roles: [SUPER_ADMIN, BANK_ADMIN],
     children: [
       {
         label: 'Requests',
         path: '/reports/requests',
         icon: DescriptionOutlinedIcon,
-        roles: ALL_BANK_ROLES,
+        roles: [SUPER_ADMIN, BANK_ADMIN],
       },
       {
         label: 'User Master',
         path: '/reports/user-master',
         icon: ManageAccountsOutlinedIcon,
-        roles: ALL_BANK_ROLES,
+        roles: [SUPER_ADMIN, BANK_ADMIN],
       },
       {
         label: 'Notification',
         path: '/reports/notification',
         icon: NotificationsNoneOutlinedIcon,
-        roles: ALL_BANK_ROLES,
+        roles: [SUPER_ADMIN, BANK_ADMIN],
       },
     ],
   },
@@ -414,22 +414,21 @@ export const NAV_ITEMS: NavItem[] = [
     children: [
       {
         label: 'Change Password',
-        path: PATHS.SETTINGS.CHANGE_PASSWORD,
+        path: '/settings/change-password',
         icon: ShieldOutlinedIcon,
         roles: ALL_BANK_ROLES,
       },
       {
         label: 'Profile',
-        path: PATHS.SETTINGS.PROFILE,
+        path: '/settings/profile',
         icon: ManageAccountsOutlinedIcon,
         roles: ALL_BANK_ROLES,
-
       },
       {
         label: 'Roles and Access Control',
-        path: PATHS.SETTINGS.ROLES_ACCESS_CONTROL,
+        path: '/settings/roles-access-control',
         icon: ShieldOutlinedIcon,
-        roles: ALL_BANK_ROLES,
+        roles: [SUPER_ADMIN, BANK_ADMIN],
       },
       {
         label: 'Change Colour Theme',
@@ -445,57 +444,50 @@ export const NAV_ITEMS: NavItem[] = [
   // --------------------------------------------------
 
   {
-    label: 'Customer Onboarding',
-    path: PATHS.CUSTOMER_ONBOARDING.ROOT,
-    icon: PersonAddAlt1OutlinedIcon,
-    roles: [SUPER_ADMIN],
-  },
-
-  {
     label: 'Bank Management',
-    path: PATHS.BANKS.ROOT,
+    path: PATHS.banks,
     icon: AccountBalanceOutlinedIcon,
     roles: [SUPER_ADMIN],
   },
 
   {
     label: 'Branches',
-    path: PATHS.BRANCHES.ROOT,
+    path: PATHS.branches,
     icon: AccountBalanceOutlinedIcon,
     roles: [BANK_ADMIN],
   },
 
   {
     label: 'Customers',
-    path: PATHS.CUSTOMERS.ROOT,
+    path: PATHS.customers,
     icon: PeopleAltOutlinedIcon,
     roles: [BANK_ADMIN, BANK_USER],
   },
 
   {
     label: 'Service Requests',
-    path: PATHS.SERVICE_REQUESTS.ROOT,
+    path: PATHS.serviceRequests,
     icon: DescriptionOutlinedIcon,
     roles: [BANK_ADMIN, BANK_USER],
   },
 
   {
     label: 'Lead Enquiries',
-    path: PATHS.LEAD_ENQUIRIES.ROOT,
+    path: PATHS.leadEnquiries,
     icon: AttachMoneyOutlinedIcon,
     roles: [BANK_ADMIN, BANK_USER],
   },
 
   {
     label: 'Banners & Content',
-    path: PATHS.BANNERS.ROOT,
+    path: PATHS.banners,
     icon: ImageOutlinedIcon,
     roles: [BANK_ADMIN],
   },
 
   {
     label: 'Upload Image',
-    path: PATHS.UPLOAD_IMAGES.ROOT,
+    path: PATHS.uploadImages,
     icon: ImageOutlinedIcon,
     roles: [SUPER_ADMIN],
   },
