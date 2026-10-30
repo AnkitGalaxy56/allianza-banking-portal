@@ -18,6 +18,8 @@ const PushNotificationsPage = lazy(() => import('@/pages/push-notifications/Push
 const DeviceResetPage = lazy(() => import('@/pages/device-reset/DeviceResetPage'));
 const BannersPage = lazy(() => import('@/pages/banners-content/BannersPage'));
 const ReportsPage = lazy(() => import('@/pages/reports/ReportsPage'));
+const ProfilePage = lazy(() => import('@/pages/profile'));
+const ChangePasswordPage = lazy(() => import('@/pages/change-password'));
 const RolesAccessControlPage = lazy(() => import('@/pages/settings/roles-access-control'));
 
 const RequestValidationIndex = lazy(() => import('@/pages/request-validation/index'));
@@ -61,7 +63,8 @@ const BUILT_PAGES: Record<string, ReactElement> = {
 
   //------Setting START-----
   [PATHS.SETTINGS.ROLES_ACCESS_CONTROL]: <RolesAccessControlPage />,
-  
+  [PATHS.SETTINGS.PROFILE]: <ProfilePage />,
+  // [PATHS.SETTINGS.CHANGE_PASSWORD]: <ChangePasswordPage />,
   //------Setting END-----
 
 

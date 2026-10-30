@@ -477,9 +477,29 @@ const filterItemsForRole = (items: NavItem[], role: Role): NavItem[] =>
 export const getNavForRole = (role: Role): NavItem[] =>
   filterItemsForRole(NAV_ITEMS, role);
 
-/** Returns all parent and child items that have routes for AppRoutes. */
-export const getAllNavRoutes = (items: NavItem[] = NAV_ITEMS): NavItem[] =>
-  items.flatMap((item) => [
-    item,
-    ...(item.children ? getAllNavRoutes(item.children) : []),
-  ]);
+
+export const getAllNavRoutes = (items: NavItem[] = NAV_ITEMS): NavItem[] => {
+  const routesByPath = new Map<string, NavItem>();
+
+  const visit = (navItems: NavItem[]) => {
+    navItems.forEach((item) => {
+      const existing = routesByPath.get(item.path);
+
+      if (existing) {
+        routesByPath.set(item.path, {
+          ...existing,
+          roles: Array.from(new Set([...existing.roles, ...item.roles])),
+        });
+      } else {
+        routesByPath.set(item.path, item);
+      }
+
+      if (item.children?.length) {
+        visit(item.children);
+      }
+    });
+  };
+
+  visit(items);
+  return Array.from(routesByPath.values());
+};

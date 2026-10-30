@@ -2,8 +2,9 @@ import { useState } from 'react';
 import {
   Avatar,
   Box,
+  Tooltip,
   Button,
-  Collapse,
+  // Collapse,
   IconButton,
   List,
   ListItemButton,
@@ -14,7 +15,8 @@ import {
 
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import MenuIcon from '@mui/icons-material/Menu';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
 
 import { NavLink, useLocation } from 'react-router-dom';
@@ -29,6 +31,7 @@ import { getNavForRole, type NavItem } from '@/routes/navigation';
 interface SidebarProps {
   onNavigate?: () => void;
   onToggleSidebar?: () => void;
+  collapsed?: boolean;
 }
 
 const initials = (name: string): string =>
@@ -54,6 +57,7 @@ const hasActiveChild = (item: NavItem, pathname: string): boolean =>
 export default function Sidebar({
   onNavigate,
   onToggleSidebar,
+  collapsed = false,
 }: SidebarProps) {
   const dispatch = useAppDispatch();
   const user = useAppSelector(selectUser);
@@ -87,29 +91,13 @@ export default function Sidebar({
 
     const buttonContent = (
       <>
-        <ListItemIcon
-          sx={{
-            minWidth: nested ? 30 : 36,
-            color: 'inherit',
-          }}
-        >
+        <ListItemIcon sx={{ minWidth: collapsed ? 0 : nested ? 30 : 36, color: 'inherit', justifyContent: 'center' }}>
           <Icon fontSize="small" />
         </ListItemIcon>
 
-        <ListItemText
-          primary={item.label}
-          primaryTypographyProps={{
-            fontWeight: selected ? 700 : 600,
-            fontSize: nested ? 13 : 14,
-          }}
-        />
+        {!collapsed && <ListItemText primary={item.label} primaryTypographyProps={{ fontWeight: selected ? 700 : 600, fontSize: nested ? 13 : 14 }} />}
 
-        {hasChildren &&
-          (expanded ? (
-            <ExpandLessIcon fontSize="small" />
-          ) : (
-            <ExpandMoreIcon fontSize="small" />
-          ))}
+        {!collapsed && hasChildren && (expanded ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />)}
       </>
     );
 
@@ -117,7 +105,9 @@ export default function Sidebar({
       mb: 0.5,
       width: '100%',
       textAlign: 'left' as const,
-      pl: nested ? 4 : 1.5,
+      pl: collapsed ? 0 : nested ? 4 : 1.5,
+      justifyContent: collapsed ? 'center' : 'flex-start',
+      minHeight: 44,
       color: 'text.primary',
       '&.Mui-selected, &.Mui-selected:hover': {
         bgcolor: 'primary.light',
@@ -128,6 +118,7 @@ export default function Sidebar({
     return (
       <Box key={item.path}>
         {hasChildren ? (
+          <Tooltip title={collapsed ? item.label : ''} placement="right" arrow>
           <ListItemButton
             component="button"
             type="button"
@@ -140,7 +131,9 @@ export default function Sidebar({
           >
             {buttonContent}
           </ListItemButton>
+          </Tooltip>
         ) : (
+          <Tooltip title={collapsed ? item.label : ''} placement="right" arrow>
           <ListItemButton
             component={NavLink}
             to={item.path}
@@ -151,24 +144,24 @@ export default function Sidebar({
           >
             {buttonContent}
           </ListItemButton>
+          </Tooltip>
         )}
-
-        {hasChildren && (
-          <Collapse in={expanded} timeout="auto" unmountOnExit>
-            <List
-              id={submenuId}
-              disablePadding
-              sx={{
-                pl: 0,
-                mb: 0.5,
-                borderLeft: 1,
-                borderColor: 'divider',
-                ml: 2.5,
-              }}
-            >
-              {item.children!.map((child) => renderNavItem(child, true))}
-            </List>
-          </Collapse>
+        {/* //{hasChildren && (
+          //        <Collapse in={expanded} timeout="auto" unmountOnExit> */}
+        {hasChildren && expanded && !collapsed && (
+          <List
+            id={submenuId}
+            disablePadding
+            sx={{
+              pl: 0,
+              mb: 0.5,
+              borderLeft: 1,
+              borderColor: 'divider',
+              ml: 2.5,
+            }}
+          >
+            {item.children!.map((child) => renderNavItem(child, true))}
+          </List>
         )}
       </Box>
     );
@@ -183,7 +176,7 @@ export default function Sidebar({
         height: '100%',
         width: '100%',
         boxSizing: 'border-box',
-        p: 2,
+        p: collapsed ? 1 : 2,
         bgcolor: 'background.paper',
         overflow: 'hidden',
       }}
@@ -194,8 +187,9 @@ export default function Sidebar({
           display: 'flex',
           alignItems: 'center',
           gap: 1,
-          px: 0.5,
+          px: collapsed ? 0 : 0.5,
           pb: 2.5,
+          justifyContent: collapsed ? 'center' : 'flex-start',
           minWidth: 0,
         }}
       >
@@ -207,13 +201,13 @@ export default function Sidebar({
             onClick={onToggleSidebar}
             sx={{ flexShrink: 0 }}
           >
-            <MenuIcon />
+            {collapsed ? <ChevronRightIcon /> : <ChevronLeftIcon />}
           </IconButton>
         )}
 
         <BrandLogo theme={brand} size={40} />
 
-        <Box sx={{ minWidth: 0, flex: 1 }}>
+        {!collapsed && <Box sx={{ minWidth: 0, flex: 1 }}>
           <Typography
             variant="subtitle2"
             fontWeight={800}
@@ -226,7 +220,7 @@ export default function Sidebar({
           <Typography variant="caption" color="text.secondary" noWrap>
             {ROLE_LABELS[user.role]}
           </Typography>
-        </Box>
+        </Box>}
       </Box>
 
       {/* Role-based navigation with expandable submenus */}
@@ -242,7 +236,7 @@ export default function Sidebar({
       </List>
 
       {/* Logged-in user */}
-      <Box
+      {!collapsed && <Box
         sx={{
           display: 'flex',
           alignItems: 'center',
@@ -281,21 +275,26 @@ export default function Sidebar({
             {user.email}
           </Typography>
         </Box>
-      </Box>
+      </Box>}
 
       {/* Logout */}
+      <Tooltip title={collapsed ? 'Logout' : ''} placement="right" arrow>
       <Button
         color="inherit"
         startIcon={<LogoutOutlinedIcon />}
         onClick={() => void dispatch(logoutUser())}
         sx={{
-          justifyContent: 'flex-start',
+          justifyContent: collapsed ? 'center' : 'flex-start',
+          minWidth: 0,
           mt: 1,
           fontWeight: 600,
+          px: collapsed ? 0 : 2,
+          '& .MuiButton-startIcon': { mr: collapsed ? 0 : 1 },
         }}
       >
-        Logout
+        {!collapsed && 'Logout'}
       </Button>
+      </Tooltip>
     </Box>
   );
 }
