@@ -119,31 +119,31 @@ export default function Sidebar({
       <Box key={item.path}>
         {hasChildren ? (
           <Tooltip title={collapsed ? item.label : ''} placement="right" arrow>
-          <ListItemButton
-            component="button"
-            type="button"
-            selected={selected}
-            onClick={() => toggleMenu(item.path, childIsActive)}
-            aria-expanded={expanded}
-            aria-controls={submenuId}
-            className="app-nav-item"
-            sx={buttonSx}
-          >
-            {buttonContent}
-          </ListItemButton>
+            <ListItemButton
+              component="button"
+              type="button"
+              selected={selected}
+              onClick={() => toggleMenu(item.path, childIsActive)}
+              aria-expanded={expanded}
+              aria-controls={submenuId}
+              className="app-nav-item"
+              sx={buttonSx}
+            >
+              {buttonContent}
+            </ListItemButton>
           </Tooltip>
         ) : (
           <Tooltip title={collapsed ? item.label : ''} placement="right" arrow>
-          <ListItemButton
-            component={NavLink}
-            to={item.path}
-            selected={selected}
-            onClick={onNavigate}
-            className="app-nav-item"
-            sx={buttonSx}
-          >
-            {buttonContent}
-          </ListItemButton>
+            <ListItemButton
+              component={NavLink}
+              to={item.path}
+              selected={selected}
+              onClick={onNavigate}
+              className="app-nav-item"
+              sx={buttonSx}
+            >
+              {buttonContent}
+            </ListItemButton>
           </Tooltip>
         )}
         {/* //{hasChildren && (
@@ -224,7 +224,7 @@ export default function Sidebar({
       </Box>
 
       {/* Role-based navigation with expandable submenus */}
-      <List
+      {/* <List
         disablePadding
         sx={{
           flexGrow: 1,
@@ -233,8 +233,35 @@ export default function Sidebar({
         }}
       >
         {items.map((item) => renderNavItem(item))}
-      </List>
+      </List> */}
+      <List
+        disablePadding
+        sx={{
+          flexGrow: 1,
+          overflowY: 'auto',
+          overflowX: 'hidden',
 
+          // Slim scrollbar
+          scrollbarWidth: 'thin',
+          scrollbarColor: 'rgba(120, 130, 150, 0.5) transparent',
+
+          '&::-webkit-scrollbar': {
+            width: '4px',
+          },
+          '&::-webkit-scrollbar-track': {
+            background: 'transparent',
+          },
+          '&::-webkit-scrollbar-thumb': {
+            backgroundColor: 'rgba(120, 130, 150, 0.5)',
+            borderRadius: '8px',
+          },
+          '&::-webkit-scrollbar-thumb:hover': {
+            backgroundColor: 'rgba(120, 130, 150, 0.8)',
+          },
+        }}
+      >
+        {items.map((item) => renderNavItem(item))}
+      </List>
       {/* Logged-in user */}
       {!collapsed && <Box
         sx={{
@@ -279,21 +306,21 @@ export default function Sidebar({
 
       {/* Logout */}
       <Tooltip title={collapsed ? 'Logout' : ''} placement="right" arrow>
-      <Button
-        color="inherit"
-        startIcon={<LogoutOutlinedIcon />}
-        onClick={() => void dispatch(logoutUser())}
-        sx={{
-          justifyContent: collapsed ? 'center' : 'flex-start',
-          minWidth: 0,
-          mt: 1,
-          fontWeight: 600,
-          px: collapsed ? 0 : 2,
-          '& .MuiButton-startIcon': { mr: collapsed ? 0 : 1 },
-        }}
-      >
-        {!collapsed && 'Logout'}
-      </Button>
+        <Button
+          color="inherit"
+          startIcon={<LogoutOutlinedIcon />}
+          onClick={() => void dispatch(logoutUser())}
+          sx={{
+            justifyContent: collapsed ? 'center' : 'flex-start',
+            minWidth: 0,
+            mt: 1,
+            fontWeight: 600,
+            px: collapsed ? 0 : 2,
+            '& .MuiButton-startIcon': { mr: collapsed ? 0 : 1 },
+          }}
+        >
+          {!collapsed && 'Logout'}
+        </Button>
       </Tooltip>
     </Box>
   );

@@ -40,7 +40,7 @@ export default function ProfilePopover() {
         PaperProps={{ sx: { width: 330, maxWidth: 'calc(100vw - 24px)', borderRadius: 2, mt: 1 } }}
       >
         <Box sx={{ px: 2.5, py: 2 }}>
-          <Typography fontWeight={800}>Profile</Typography>
+         
           <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mt: 2 }}>
             <Avatar sx={{ width: 56, height: 56, bgcolor: 'primary.main' }}>{initials(name) || <AccountCircleOutlinedIcon />}</Avatar>
             <Box sx={{ minWidth: 0 }}>
