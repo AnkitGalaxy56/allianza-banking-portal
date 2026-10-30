@@ -46,24 +46,38 @@ const UploadImagesPage = lazy(() => import('@/pages/upload-images/UploadImagesPa
 const BankPage = lazy(() => import('@/pages/banks-management/BankPage'));
 
 const BUILT_PAGES: Record<string, ReactElement> = {
+  [PATHS.dashboard]: <DashboardPage />,
+
+  //-------User managenet start---
   [PATHS.USER_MANAGEMENT.ROOT]: <UserManagement />,
   [PATHS.USER_MANAGEMENT.USER_MASTER]: <UserManagement />,
+  [PATHS.USER_MANAGEMENT.ASSIGN_PASSWORD]: <UserManagement />,
+  //---------User managenet END---
+
+  //------Masters START-------
   [PATHS.MASTERS.BANK_MASTER]: <BankPage />,
-  [PATHS.dashboard]: <DashboardPage />,
-  [PATHS.branches]: <BranchesPage />,
-  // [PATHS.userManagement]: <UserManagement />,
+  [PATHS.MASTERS.BRANCH_MASTER]: <BranchesPage />,
+  //------Masters END-------
+
+  //------Setting START-----
+  [PATHS.SETTINGS.ROLES_ACCESS_CONTROL]: <RolesAccessControlPage />,
+  
+  //------Setting END-----
+
+
   [PATHS.customers]: <CustomersPage />,
   [PATHS.customerOnboarding]: <CustomerOnboardingPage />,
   [PATHS.uploadImages]: <UploadImagesPage />,
   [PATHS.serviceRequests]: <ServiceRequestsPage />,
   [PATHS.leadEnquiries]: <LeadEnquiriesPage />,
   [PATHS.reports]: <ReportsPage />,
-  [PATHS.SETTINGS.ROLES_ACCESS_CONTROL]: <RolesAccessControlPage />,
   [PATHS.pushNotifications]: <PushNotificationsPage />,
   [PATHS.deviceReset]: <DeviceResetPage />,
   [PATHS.banners]: <BannersPage />,
+
+  //-----Request handling start-------
   [PATHS.requestValidation]: <RequestValidationIndex />,
-  [PATHS.requestValidationPayments]: <PaymentsPage />,
+  [PATHS.REQUEST_HANDLING.PAYMENTS]: <PaymentsPage />,
   [PATHS.requestValidationOpeningAccounts]: <OpeningAccountsPage />,
   [PATHS.requestValidationClosingAccounts]: <ClosingAccountsPage />,
   [PATHS.requestValidationStandingInstructions]: <StandingInstructionsPage />,
@@ -76,14 +90,15 @@ const BUILT_PAGES: Record<string, ReactElement> = {
   [PATHS.REQUEST_HANDLING.STANDING_INSTRUCTIONS]: <StandingInstructionsRequestPage />,
   [PATHS.REQUEST_HANDLING.FRESH_LOAN_APPLICATION]: <FreshLoanApplicationPage />,
   [PATHS.REQUEST_HANDLING.LOAN_EMI_PAYMENT]: <LoanEMIPaymentPage />,
+  //---------Request Handling end-----------------------------
 };
 
 export default function AppRoutes() {
   return (
     <Suspense fallback={<FullPageLoader />}>
       <Routes>
-       
-       
+
+
         <Route element={<PublicOnlyRoute />}>
           <Route path={PATHS.login} element={<LoginPage />} />
         </Route>

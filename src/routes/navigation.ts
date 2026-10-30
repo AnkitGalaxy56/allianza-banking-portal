@@ -287,7 +287,7 @@ export const NAV_ITEMS: NavItem[] = [
       },
       {
         label: 'Branch Master',
-        path: PATHS.branches,
+        path: PATHS.MASTERS.BRANCH_MASTER,
         icon: AccountBalanceOutlinedIcon,
         roles: ALL_BANK_ROLES,
       },
