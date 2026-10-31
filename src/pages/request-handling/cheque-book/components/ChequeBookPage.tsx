@@ -20,11 +20,12 @@ export default function ChequeBookPage() {
  const [editing, setEditing] = useState<RecordItem | null>(null);
  const [form, setForm] = useState(empty);
  const [message, setMessage] = useState('');
+ const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
  const filtered = useMemo(() => rows.filter((record) => `${record.id} ${record.accountNumber} ${record.customerName}`.toLowerCase().includes(search.toLowerCase()) && (tab === 'view' || record.requestStatus === 'Pending')), [rows, search, tab]);
  const field = (key: keyof typeof empty, value: string | boolean) => setForm((old) => ({ ...old, [key]: value }));
- const startNew = () => { setEditing(null); setForm(empty); setOpen(true); };
- const startEdit = (record: RecordItem) => { setEditing(record); setForm({ accountNumber: record.accountNumber, customerName: record.customerName, chequeBookType: record.chequeBookType, deliveryMethod: record.deliveryMethod, deliveryAddress: record.deliveryAddress, primary: record.primary, default: record.default, statusCode: record.statusCode }); setOpen(true); };
- const save = () => { if (!form.accountNumber.trim() || !form.customerName.trim()) return; setConfirm(true); };
+ const startNew = () => { setEditing(null); setForm(empty); setFieldErrors({}); setOpen(true); };
+ const startEdit = (record: RecordItem) => { setEditing(record); setForm({ accountNumber: record.accountNumber, customerName: record.customerName, chequeBookType: record.chequeBookType, deliveryMethod: record.deliveryMethod, deliveryAddress: record.deliveryAddress, primary: record.primary, default: record.default, statusCode: record.statusCode }); setFieldErrors({}); setOpen(true); };
+ const save = () => { const next: Record<string, string> = {}; if (!form.accountNumber.trim()) next.accountNumber = 'Account number is required.'; else if (!/^[A-Za-z0-9 Xx-]{4,24}$/.test(form.accountNumber.trim())) next.accountNumber = 'Enter a valid account number.'; if (!form.customerName.trim()) next.customerName = 'Customer name is required.'; else if (form.customerName.trim().length < 2) next.customerName = 'Enter at least 2 characters.'; if (form.deliveryMethod === 'Delivery address' && !form.deliveryAddress.trim()) next.deliveryAddress = 'Delivery address is required for delivery.'; setFieldErrors(next); if (Object.keys(next).length) return; setConfirm(true); };
  const commit = () => { if (editing) setRows((old) => old.map((record) => record.id === editing.id ? { ...form, id: editing.id, requestStatus: record.requestStatus } : record)); else setRows((old) => [{ ...form, id: `CHQ-${Date.now().toString().slice(-6)}`, requestStatus: 'Pending' }, ...old]); setConfirm(false); setOpen(false); setMessage(editing ? 'Cheque book request updated.' : 'Cheque book request created.'); };
 
  const columns: DataTableColumn<RecordItem>[] = [
@@ -57,11 +58,11 @@ export default function ChequeBookPage() {
    <DialogTitle sx={{ fontWeight: 800 }}>{editing ? 'Edit Cheque Book Request' : 'Create Cheque Book Request'}</DialogTitle>
    <DialogContent dividers>
     <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2, pt: 1 }}>
-     <TextField size="small" required label="Account Number" value={form.accountNumber} onChange={(event) => field('accountNumber', event.target.value)} />
-     <TextField size="small" required label="Account Name / Customer Name" value={form.customerName} onChange={(event) => field('customerName', event.target.value)} />
+     <TextField size="small" required label="Account Number" value={form.accountNumber} error={Boolean(fieldErrors.accountNumber)} helperText={fieldErrors.accountNumber || ' '} onChange={(event) => { field('accountNumber', event.target.value); setFieldErrors((old) => ({ ...old, accountNumber: '' })); }} />
+     <TextField size="small" required label="Account Name / Customer Name" value={form.customerName} error={Boolean(fieldErrors.customerName)} helperText={fieldErrors.customerName || ' '} onChange={(event) => { field('customerName', event.target.value); setFieldErrors((old) => ({ ...old, customerName: '' })); }} />
      <TextField size="small" select label="Cheque Book Type" value={form.chequeBookType} onChange={(event) => field('chequeBookType', event.target.value)}><MenuItem value="25 pages">25 pages</MenuItem><MenuItem value="50 pages">50 pages</MenuItem></TextField>
      <TextField size="small" select label="Delivery Method" value={form.deliveryMethod} onChange={(event) => field('deliveryMethod', event.target.value)}><MenuItem value="Collect from branch">Collect from branch</MenuItem><MenuItem value="Delivery address">Delivery address</MenuItem></TextField>
-     {form.deliveryMethod === 'Delivery address' && <TextField size="small" label="Delivery Address" multiline value={form.deliveryAddress} onChange={(event) => field('deliveryAddress', event.target.value)} />}
+     {form.deliveryMethod === 'Delivery address' && <TextField size="small" label="Delivery Address" multiline value={form.deliveryAddress} error={Boolean(fieldErrors.deliveryAddress)} helperText={fieldErrors.deliveryAddress || ' '} onChange={(event) => { field('deliveryAddress', event.target.value); setFieldErrors((old) => ({ ...old, deliveryAddress: '' })); }} />}
      <TextField size="small" select label="Account Status" value={form.statusCode} onChange={(event) => field('statusCode', event.target.value)}>{ACCOUNT_STATUS_OPTIONS.map((status) => <MenuItem key={status.value} value={status.value}>{status.label}</MenuItem>)}</TextField>
      <TextField size="small" select label="Primary" value={String(form.primary)} onChange={(event) => field('primary', event.target.value === 'true')}><MenuItem value="true">Yes</MenuItem><MenuItem value="false">No</MenuItem></TextField>
      <TextField size="small" select label="Default" value={String(form.default)} onChange={(event) => field('default', event.target.value === 'true')}><MenuItem value="true">Yes</MenuItem><MenuItem value="false">No</MenuItem></TextField>

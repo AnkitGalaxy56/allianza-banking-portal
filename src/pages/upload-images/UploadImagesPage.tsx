@@ -13,6 +13,7 @@ import ImageOutlinedIcon from '@mui/icons-material/ImageOutlined';
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
 import DataTable, { type DataTableColumn } from '@/components/common/DataTable';
 import PageHeader from '@/components/common/PageHeader';
+import { imageSchema } from './schemas/imageSchema';
 
 type ImageType = 'Banner' | 'App Logo' | 'Icon' | 'Onboarding' | 'Promotion' | 'Other';
 type ImageStatus = 'Active' | 'Inactive';
@@ -69,14 +70,14 @@ export default function UploadImagesPage() {
     setError('');
   };
   const saveImage = () => {
-    if (!form.name.trim()) { setError('Image name is required.'); return; }
-    if (!form.path.trim()) { setError('Image path is required. Upload an image or enter its path.'); return; }
-    if (images.some((item) => item.name.trim().toLowerCase() === form.name.trim().toLowerCase() && item.id !== editing?.id)) { setError('An image with this name already exists.'); return; }
+    const parsed = imageSchema.safeParse(form);
+    if (!parsed.success) { setError(parsed.error.issues[0]?.message ?? 'Please check the image details.'); return; }
+    if (images.some((item) => item.name.trim().toLowerCase() === parsed.data.name.trim().toLowerCase() && item.id !== editing?.id)) { setError('An image with this name already exists.'); return; }
     if (editing) {
-      setImages((current) => current.map((item) => item.id === editing.id ? { ...form, id: editing.id, updatedAt: today() } : item));
+      setImages((current) => current.map((item) => item.id === editing.id ? { ...parsed.data, id: editing.id, updatedAt: today() } : item));
       setMessage('Image details updated.');
     } else {
-      setImages((current) => [...current, { ...form, id: `img-${Date.now()}`, updatedAt: today() }]);
+      setImages((current) => [...current, { ...parsed.data, id: `img-${Date.now()}`, updatedAt: today() }]);
       setMessage('Image added to the list.');
     }
     closeDialog();
@@ -125,9 +126,9 @@ export default function UploadImagesPage() {
             {form.previewUrl ? <Box component="img" src={form.previewUrl} alt="Selected image preview" sx={{ width: 100, height: 80, objectFit: 'contain', borderRadius: 1, bgcolor: 'background.default' }} /> : <Avatar variant="rounded" sx={{ width: 100, height: 80, bgcolor: 'primary.light', color: 'primary.dark' }}><AddPhotoAlternateOutlinedIcon fontSize="large" /></Avatar>}
             <Box sx={{ flex: 1, minWidth: 180 }}><Typography fontWeight={700}>Image file</Typography><Typography variant="body2" color="text.secondary">Image formats supported · maximum 10 MB</Typography><Button sx={{ mt: 1 }} variant="outlined" startIcon={<CloudUploadOutlinedIcon />} onClick={() => fileRef.current?.click()}>Choose file</Button><input ref={fileRef} hidden type="file" accept="image/*" onChange={(event) => selectFile(event.target.files?.[0])} /></Box>{form.size > 0 && <Chip label={formatBytes(form.size)} />}
           </Box>
-          <TextField label="Image Name" size="small" value={form.name} required onChange={(event) => updateField('name', event.target.value)} />
+          <TextField label="Image Name" size="small" value={form.name} required inputProps={{ maxLength: 100 }} onChange={(event) => updateField('name', event.target.value)} />
           <TextField select label="Image Type" size="small" value={form.type} onChange={(event) => updateField('type', event.target.value as ImageType)}>{(['Banner', 'App Logo', 'Icon', 'Onboarding', 'Promotion', 'Other'] as ImageType[]).map((type) => <MenuItem key={type} value={type}>{type}</MenuItem>)}</TextField>
-          <TextField label="Image Path / URL" size="small" value={form.path} required onChange={(event) => updateField('path', event.target.value)} helperText="Storage path or URL returned by your upload API" sx={{ gridColumn: { xs: 'auto', sm: 'span 2' } }} />
+          <TextField label="Image Path / URL" size="small" value={form.path} required inputProps={{ maxLength: 2048 }} onChange={(event) => updateField('path', event.target.value)} helperText="Storage path or URL returned by your upload API" sx={{ gridColumn: { xs: 'auto', sm: 'span 2' } }} />
           <TextField label="File Size (bytes)" size="small" type="number" value={form.size || ''} onChange={(event) => updateField('size', Math.max(0, Number(event.target.value)))} />
           <TextField label="File Format" size="small" value={form.format} onChange={(event) => updateField('format', event.target.value.toUpperCase())} placeholder="PNG, JPG, WEBP..." />
           <TextField label="Dimensions (width × height)" size="small" value={form.dimensions} onChange={(event) => updateField('dimensions', event.target.value)} placeholder="1200 × 480" />

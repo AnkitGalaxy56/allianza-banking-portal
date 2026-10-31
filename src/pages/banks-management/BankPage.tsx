@@ -27,25 +27,28 @@ export default function BankPage() {
   const [form, setForm] = useState<BankForm>(emptyForm);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const rows = useMemo(() => banks.filter((bank) =>
     `${bank.code} ${bank.name} ${bank.type} ${bank.city} ${bank.ifsc}`.toLowerCase().includes(search.toLowerCase().trim())), [banks, search]);
 
-  const openAdd = () => { setEditing(null); setForm(emptyForm); setError(''); setDialogOpen(true); };
+  const openAdd = () => { setEditing(null); setForm(emptyForm); setError(''); setFieldErrors({}); setDialogOpen(true); };
   const openEdit = (bank: Bank) => {
     setEditing(bank);
     const { id: _id, ...values } = bank;
     setForm(values);
     setError('');
+    setFieldErrors({});
     setDialogOpen(true);
   };
-  const closeDialog = () => { setDialogOpen(false); setEditing(null); setError(''); };
+  const closeDialog = () => { setDialogOpen(false); setEditing(null); setError(''); setFieldErrors({}); };
   const updateField = (key: keyof BankForm, value: string) => setForm((current) => ({ ...current, [key]: value }));
   const saveBank = () => {
     const parsed = bankSchema.safeParse(form);
-    if (!parsed.success) { setError(parsed.error.issues[0]?.message ?? 'Please check the bank details.'); return; }
+    if (!parsed.success) { setFieldErrors(Object.fromEntries(parsed.error.issues.map((issue) => [String(issue.path[0]), issue.message]))); setError('Please correct the highlighted fields before saving.'); return; }
     if (banks.some((bank) => bank.code.toLowerCase() === form.code.trim().toLowerCase() && bank.id !== editing?.id)) {
-      setError('A bank with this code already exists.'); return;
+      setFieldErrors({ code: 'A bank with this code already exists.' }); setError('Please correct the highlighted fields before saving.'); return;
     }
+    setFieldErrors({});
     if (editing) {
       setBanks((current) => current.map((bank) => bank.id === editing.id ? { ...form, id: editing.id } : bank));
       setMessage('Bank updated successfully.');
@@ -88,10 +91,10 @@ export default function BankPage() {
       <DialogContent dividers>
         {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
         <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, minmax(0, 1fr))' }, gap: 2, pt: 0.5 }}>
-          {fieldRows.map((field) => <TextField key={field.name} label={field.label} size="small" value={form[field.name]} onChange={(event) => updateField(field.name, event.target.value)} required={field.name === 'code' || field.name === 'name'} sx={{ gridColumn: { xs: 'auto', sm: field.span === 2 ? 'span 2' : 'span 1' } }} />)}
+          {fieldRows.map((field) => <TextField key={field.name} label={field.label} size="small" value={form[field.name]} error={Boolean(fieldErrors[field.name])} helperText={fieldErrors[field.name] || ' '} onChange={(event) => { updateField(field.name, event.target.value); setFieldErrors((old) => ({ ...old, [field.name]: '' })); }} required={field.name === 'code' || field.name === 'name'} sx={{ gridColumn: { xs: 'auto', sm: field.span === 2 ? 'span 2' : 'span 1' } }} />)}
           <Box sx={{ gridColumn: { xs: 'auto', sm: 'span 2' }, display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
-            <TextField label="Working Timings From" size="small" type="time" value={form.workingFrom} onChange={(event) => updateField('workingFrom', event.target.value)} InputLabelProps={{ shrink: true }} />
-            <TextField label="Working Timings To" size="small" type="time" value={form.workingTo} onChange={(event) => updateField('workingTo', event.target.value)} InputLabelProps={{ shrink: true }} />
+            <TextField label="Working Timings From" size="small" type="time" value={form.workingFrom} error={Boolean(fieldErrors.workingFrom)} helperText={fieldErrors.workingFrom || ' '} onChange={(event) => updateField('workingFrom', event.target.value)} InputLabelProps={{ shrink: true }} />
+            <TextField label="Working Timings To" size="small" type="time" value={form.workingTo} error={Boolean(fieldErrors.workingTo)} helperText={fieldErrors.workingTo || ' '} onChange={(event) => { updateField('workingTo', event.target.value); setFieldErrors((old) => ({ ...old, workingTo: '' })); }} InputLabelProps={{ shrink: true }} />
           </Box>
         </Box>
       </DialogContent>

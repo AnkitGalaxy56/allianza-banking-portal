@@ -5,23 +5,23 @@ import PageHeader from '@/components/common/PageHeader';
 import ConfirmDialog from '@/components/common/ConfirmDialog';
 import DataTable, { type DataTableColumn } from '@/components/common/DataTable';
 import type { RequestModuleConfig, RequestRecord, RequestStatus } from './types';
-import { validateRequestFields } from './schema';
+import { validateRequestForm } from './schema';
 export default function RequestHandlingPage({ config }: {config: RequestModuleConfig}) {
  const [records,setRecords]=useState<RequestRecord[]>(config.initialRecords); const [search,setSearch]=useState('');
  const [tab,setTab]=useState<'view'|'pending'>('view'); const [selected,setSelected]=useState<RequestRecord|null>(null);
  const [formOpen,setFormOpen]=useState(false); const [confirmOpen,setConfirmOpen]=useState(false); const [editing,setEditing]=useState<RequestRecord|null>(null);
- const [fields,setFields]=useState<Record<string,string>>({}); const [feedback,setFeedback]=useState('');
+ const [fields,setFields]=useState<Record<string,string>>({}); const [feedback,setFeedback]=useState(''); const [fieldErrors,setFieldErrors]=useState<Record<string,string>>({});
  const filtered=useMemo(()=>records.filter(r=>`${r.id} ${r.status} ${r.submittedOn} ${Object.values(r.fields).join(' ')}`.toLowerCase().includes(search.toLowerCase()) && (tab==='view'||r.status==='Pending')),[records,search,tab]);
- const startCreate=()=>{setEditing(null);setFields(Object.fromEntries(config.detailFields.map(f=>[f.key,''])));setFormOpen(true)};
- const startEdit=(r:RequestRecord)=>{setEditing(r);setFields({...r.fields});setFormOpen(true)};
- const save=()=>{const required=config.detailFields.slice(0,2).map(f=>f.key); if(!validateRequestFields(fields,required)){setFeedback(`Please complete: ${config.detailFields.slice(0,2).map(f=>f.label).join(' and ')}.`);return;}setConfirmOpen(true)};
+ const startCreate=()=>{setEditing(null);setFields(Object.fromEntries(config.detailFields.map(f=>[f.key,''])));setFieldErrors({});setFeedback('');setFormOpen(true)};
+ const startEdit=(r:RequestRecord)=>{setEditing(r);setFields({...r.fields});setFieldErrors({});setFeedback('');setFormOpen(true)};
+ const save=()=>{const required=config.detailFields.slice(0,2).map(f=>f.key);const errors=validateRequestForm(fields,required);setFieldErrors(errors);if(Object.keys(errors).length){setFeedback('Please correct the highlighted fields before submitting.');return;}setFeedback('');setConfirmOpen(true)};
  const commit=()=>{if(editing){setRecords(old=>old.map(r=>r.id===editing.id?{...r,fields:{...fields}}:r));setFeedback('Request updated successfully.')}else{setRecords(old=>[{id:`REQ-${Date.now().toString().slice(-6)}`,status:'Pending',submittedOn:new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}),fields:{...fields}},...old]);setFeedback('Request created and sent for authorisation.')}setConfirmOpen(false);setFormOpen(false)};
  const decide=(status:RequestStatus)=>{if(!selected)return;setRecords(old=>old.map(r=>r.id===selected.id?{...r,status}:r));setFeedback(`${selected.id} ${status.toLowerCase()} successfully.`);setSelected(null)};
  const columns: DataTableColumn<RequestRecord>[] = [
-  { key: 'id', label: 'Request ID', minWidth: 125, nowrap: true, render: (record) => <Typography fontWeight={700} fontSize={13}>{record.id}</Typography> },
-  ...config.columns.map((column) => ({ key: column.key, label: column.label, minWidth: 130, nowrap: true, render: (record: RequestRecord) => record.fields[column.key] || '—' })),
-  { key: 'status', label: 'Status', minWidth: 110, render: (record) => <Chip size="small" variant="outlined" color={record.status === 'Pending' ? 'warning' : record.status === 'Authorised' ? 'success' : 'error'} label={record.status} /> },
-  { key: 'actions', label: 'Actions', minWidth: 140, nowrap: true, render: (record) => <Stack direction="row" spacing={0.5}><Button size="small" onClick={() => setSelected(record)}>View</Button><Button size="small" onClick={() => startEdit(record)}>Edit</Button></Stack> },
+  { key: 'id', label: 'Request ID', minWidth: 25, nowrap: true, render: (record) => <Typography fontWeight={700} fontSize={13}>{record.id}</Typography> },
+  ...config.columns.map((column) => ({ key: column.key, label: column.label, minWidth: 25, nowrap: true, render: (record: RequestRecord) => record.fields[column.key] || '—' })),
+  { key: 'status', label: 'Status', minWidth: 25, render: (record) => <Chip size="small" variant="outlined" color={record.status === 'Pending' ? 'warning' : record.status === 'Authorised' ? 'success' : 'error'} label={record.status} /> },
+  { key: 'actions', label: 'Actions', minWidth: 25, nowrap: true, render: (record) => <Stack direction="row" spacing={0.5}><Button size="small" onClick={() => setSelected(record)}>View</Button><Button size="small" onClick={() => startEdit(record)}>Edit</Button></Stack> },
  ];
  return <Box>
   <PageHeader title={config.title} subtitle={config.description} />
@@ -49,7 +49,7 @@ export default function RequestHandlingPage({ config }: {config: RequestModuleCo
   </Dialog>
   <Dialog open={formOpen} onClose={() => setFormOpen(false)} fullWidth maxWidth="md">
    <DialogTitle sx={{ fontWeight: 800 }}>{editing ? 'Edit' : 'Create'} {config.title.replace(/ Requests?$/, '')} Request</DialogTitle>
-   <DialogContent dividers><Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2, pt: 1 }}>{config.detailFields.map((field, index) => <TextField key={field.key} size="small" label={field.label} required={index < 2} value={fields[field.key] ?? ''} onChange={(event) => setFields((old) => ({ ...old, [field.key]: event.target.value }))} multiline={['remarks', 'reason'].includes(field.key)} minRows={['remarks', 'reason'].includes(field.key) ? 2 : 1} />)}</Box></DialogContent>
+   <DialogContent dividers><Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2, pt: 1 }}>{config.detailFields.map((field, index) => <TextField key={field.key} size="small" label={field.label} required={index < 2} error={Boolean(fieldErrors[field.key])} helperText={fieldErrors[field.key] || ' '} value={fields[field.key] ?? ''} onChange={(event) => { setFields((old) => ({ ...old, [field.key]: event.target.value })); setFieldErrors((old) => ({ ...old, [field.key]: '' })); }} multiline={['remarks', 'reason'].includes(field.key)} minRows={['remarks', 'reason'].includes(field.key) ? 2 : 1} />)}</Box></DialogContent>
    <DialogActions sx={{ p: 2 }}><Button size="small" onClick={() => setFormOpen(false)}>Cancel</Button><Button size="small" variant="contained" onClick={save}>Submit</Button></DialogActions>
   </Dialog>
   <ConfirmDialog open={confirmOpen} title="Confirm Request" message={`Confirm ${editing ? 'updating' : 'creating'} this request?`} onCancel={() => setConfirmOpen(false)} onConfirm={commit} />
