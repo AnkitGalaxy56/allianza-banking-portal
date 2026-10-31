@@ -203,49 +203,49 @@ export const NAV_ITEMS: NavItem[] = [
       },
       {
         label: 'Cheque Book',
-        path: PATHS.REQUEST_HANDLING.CHEQUE_BOOK,
+        path: '/request-handling/cheque-book',
         icon: DescriptionOutlinedIcon,
         roles: ALL_BANK_ROLES,
       },
       {
         label: 'Stop Payment',
-        path: PATHS.REQUEST_HANDLING.STOP_PAYMENT,
+        path: PATHS.requestValidationStopPayment,
         icon: BlockOutlinedIcon,
         roles: ALL_BANK_ROLES,
       },
       {
         label: 'FD Opening',
-        path: PATHS.REQUEST_HANDLING.FD_OPENING,
+        path: '/request-handling/fd-opening',
         icon: AccountBalanceOutlinedIcon,
         roles: ALL_BANK_ROLES,
       },
       {
         label: 'RD Opening',
-        path: PATHS.REQUEST_HANDLING.RD_OPENING,
+        path: '/request-handling/rd-opening',
         icon: AccountBalanceOutlinedIcon,
         roles: ALL_BANK_ROLES,
       },
       {
         label: 'FD / RD Closing',
-        path: PATHS.REQUEST_HANDLING.FD_RD_CLOSING,
+        path: PATHS.requestValidationClosingAccounts,
         icon: CancelPresentationOutlinedIcon,
         roles: ALL_BANK_ROLES,
       },
       {
         label: 'Locker Application',
-        path: PATHS.REQUEST_HANDLING.LOCKER_APPLICATION,
+        path: '/request-handling/locker-application',
         icon: DescriptionOutlinedIcon,
         roles: ALL_BANK_ROLES,
       },
       {
         label: 'Standing Instructions',
-        path: PATHS.REQUEST_HANDLING.STANDING_INSTRUCTIONS,
+        path: '/request-handling/standing-instructions',
         icon: DescriptionOutlinedIcon,
         roles: ALL_BANK_ROLES,
       },
       {
         label: 'Fresh Loan Application',
-        path: PATHS.REQUEST_HANDLING.FRESH_LOAN_APPLICATION,
+        path: '/request-handling/fresh-loan-application',
         icon: AttachMoneyOutlinedIcon,
         roles: ALL_BANK_ROLES,
       },
@@ -265,7 +265,7 @@ export const NAV_ITEMS: NavItem[] = [
       // },
       {
         label: 'Lead Management',
-        path: PATHS.REQUEST_HANDLING.LEAD_MANAGEMENT,
+        path: PATHS.requestValidationLeadManagement,
         icon: TrendingUpOutlinedIcon,
         roles: ALL_BANK_ROLES,
       },
@@ -303,19 +303,19 @@ export const NAV_ITEMS: NavItem[] = [
     children: [
       {
         label: 'Image Uploading',
-        path: PATHS.MOBILE_UTILITIES.IMAGE_UPLOADING,
+        path: PATHS.uploadImages,
         icon: ImageOutlinedIcon,
         roles: ALL_BANK_ROLES,
       },
       {
         label: 'Push Notification',
-        path: PATHS.MOBILE_UTILITIES.PUSH_NOTIFICATION,
+        path: PATHS.pushNotifications,
         icon: NotificationsNoneOutlinedIcon,
         roles: ALL_BANK_ROLES,
       },
       {
         label: 'Device Reset',
-        path: PATHS.MOBILE_UTILITIES.DEVICE_RESET,
+        path: PATHS.deviceReset,
         icon: SmartphoneOutlinedIcon,
         roles: ALL_BANK_ROLES,
       },
@@ -410,12 +410,7 @@ export const NAV_ITEMS: NavItem[] = [
   // EXISTING MENUS — retained below the new menus
   // --------------------------------------------------
 
-  // {
-  //   label: 'Bank Management',
-  //   path: PATHS.banks,
-  //   icon: AccountBalanceOutlinedIcon,
-  //   roles: [SUPER_ADMIN],
-  // },
+
 
   // {
   //   label: 'Branches',
@@ -424,40 +419,35 @@ export const NAV_ITEMS: NavItem[] = [
   //   roles: [BANK_ADMIN],
   // },
 
-  {
-    label: 'Customers',
-    path: PATHS.customers,
-    icon: PeopleAltOutlinedIcon,
-    roles: [BANK_ADMIN, BANK_USER],
-  },
+  // {
+  //   label: 'Customers',
+  //   path: PATHS.customers,
+  //   icon: PeopleAltOutlinedIcon,
+  //   roles: [BANK_ADMIN, BANK_USER],
+  // },
 
-  {
-    label: 'Service Requests',
-    path: PATHS.serviceRequests,
-    icon: DescriptionOutlinedIcon,
-    roles: [BANK_ADMIN, BANK_USER],
-  },
+  // {
+  //   label: 'Service Requests',
+  //   path: PATHS.serviceRequests,
+  //   icon: DescriptionOutlinedIcon,
+  //   roles: [BANK_ADMIN, BANK_USER],
+  // },
 
-  {
-    label: 'Lead Enquiries',
-    path: PATHS.leadEnquiries,
-    icon: AttachMoneyOutlinedIcon,
-    roles: [BANK_ADMIN, BANK_USER],
-  },
+  // {
+  //   label: 'Lead Enquiries',
+  //   path: PATHS.leadEnquiries,
+  //   icon: AttachMoneyOutlinedIcon,
+  //   roles: [BANK_ADMIN, BANK_USER],
+  // },
 
   {
     label: 'Banners & Content',
     path: PATHS.banners,
     icon: ImageOutlinedIcon,
-    roles: [BANK_ADMIN],
+    roles: [SUPER_ADMIN, BANK_ADMIN, BANK_USER],
   },
 
-  // {
-  //   label: 'Upload Image',
-  //   path: PATHS.uploadImages,
-  //   icon: ImageOutlinedIcon,
-  //   roles: [SUPER_ADMIN],
-  // },
+ 
 ];
 
 const filterItemsForRole = (items: NavItem[], role: Role): NavItem[] =>

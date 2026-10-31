@@ -6,6 +6,7 @@ import ConfirmDialog from '@/components/common/ConfirmDialog';
 import { useLocation } from 'react-router-dom';
 import type { RequestRecord } from './genericTypes';
 import { getModuleConfig, getSampleRows, getRequiredFields } from './genericModuleConfig';
+import { validateRequestForm } from './schema';
 
 const STORAGE_PREFIX = 'bank-request-handling:';
 
@@ -53,12 +54,12 @@ export default function GenericRequestModule() {
    try { window.localStorage.setItem(`${STORAGE_PREFIX}${location.pathname}`, JSON.stringify(rowsState.rows)); } catch { /* Storage may be unavailable; sample rows still render. */ }
   }
  }, [location.pathname, rowsState]);
- const [search,setSearch]=useState(''); const [tab,setTab]=useState<'view'|'pending'>('view'); const [open,setOpen]=useState(false); const [editing,setEditing]=useState<RequestRecord|null>(null); const [form,setForm]=useState<Record<string,string>>(empty); const [confirm,setConfirm]=useState(false); const [message,setMessage]=useState(''); const [error,setError]=useState('');
+ const [search,setSearch]=useState(''); const [tab,setTab]=useState<'view'|'pending'>('view'); const [open,setOpen]=useState(false); const [editing,setEditing]=useState<RequestRecord|null>(null); const [form,setForm]=useState<Record<string,string>>(empty); const [confirm,setConfirm]=useState(false); const [message,setMessage]=useState(''); const [error,setError]=useState(''); const [fieldErrors,setFieldErrors]=useState<Record<string,string>>({});
  const filtered=useMemo(()=>rows.filter(r=>JSON.stringify(r).toLowerCase().includes(search.toLowerCase())&&(tab==='view'||r.requestStatus==='Pending')),[rows,search,tab]);
- const startNew=()=>{setEditing(null);setForm({...empty});setError('');setOpen(true)};
- const startEdit=(r:RequestRecord)=>{setEditing(r);setForm(Object.fromEntries(config.fields.map((f:any)=>[f.key,String(r[f.key]??'')])));setError('');setOpen(true)};
+ const startNew=()=>{setEditing(null);setForm({...empty});setError('');setFieldErrors({});setOpen(true)};
+ const startEdit=(r:RequestRecord)=>{setEditing(r);setForm(Object.fromEntries(config.fields.map((f:any)=>[f.key,String(r[f.key]??'')])));setError('');setFieldErrors({});setOpen(true)};
  const change=(key:string,value:string)=>{setForm(old=>{const next={...old,[key]:value}; if(config.eligibility){const income=Number(next.totalIncome||0),expense=Number(next.totalExpense||0);next.eligibility=String(Math.max(0,(income-expense)*12*3));}return next;});};
- const save=()=>{if(!requiredFields.every((k:string)=>String(form[k]??'').trim())){setError('Please complete all required fields.');return;}if(location.pathname.endsWith('loan-emi-payment')&&Number(form.debitAmount)>Number(form.currentBalance)){setError('Dear Customer, Your request has been rejected due to insufficient funds in your account. Kindly maintain sufficient balance and generate the request.');return;}setError('');setConfirm(true)};
+ const save=()=>{const validation=validateRequestForm(form,requiredFields);setFieldErrors(validation);if(Object.keys(validation).length){setError('Please correct the highlighted fields before submitting.');return;}if(location.pathname.endsWith('loan-emi-payment')&&Number(form.debitAmount)>Number(form.currentBalance)){setError('Dear Customer, Your request has been rejected due to insufficient funds in your account. Kindly maintain sufficient balance and generate the request.');return;}setError('');setConfirm(true)};
  const commit=()=>{if(editing)setRows(old=>old.map(r=>r.id===editing.id?{...r,...form}:r));else setRows(old=>[{id:`REQ-${Date.now().toString().slice(-6)}`,requestStatus:'Pending',...form},...old]);setConfirm(false);setOpen(false);setMessage(editing?'Request updated successfully.':'Request created and sent for authorisation.');};
  const columns: DataTableColumn<RequestRecord>[] = [
   ...config.columns.map((column: string, index: number) => ({
@@ -96,7 +97,7 @@ export default function GenericRequestModule() {
      {config.sections.map((section: any) => <Box key={section.title} sx={{ minWidth: 0 }}>
       <Typography variant="subtitle2" sx={{ fontWeight: 800, mb: 1 }}>{section.title}</Typography>
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'minmax(0, 1fr)', sm: 'repeat(2, minmax(0, 1fr))' }, gap: 2 }}>
-       {config.fields.filter((field: any) => section.fields.includes(field.key)).map((field: any) => <TextField key={field.key} fullWidth size="small" type={field.type === 'select' ? 'text' : field.type} select={field.type === 'select'} required={field.required} label={field.label} InputLabelProps={field.type === 'date' ? { shrink: true } : undefined} sx={{ minWidth: 0 }} value={form[field.key] ?? ''} onChange={(event) => change(field.key, event.target.value)} inputProps={field.type === 'number' ? { min: 0 } : undefined}>{field.type === 'select' && field.options.map((option: string) => <MenuItem key={option} value={option}>{option}</MenuItem>)}</TextField>)}
+       {config.fields.filter((field: any) => section.fields.includes(field.key)).map((field: any) => <TextField key={field.key} fullWidth size="small" type={field.type === 'select' ? 'text' : field.type} select={field.type === 'select'} required={field.required} label={field.label} error={Boolean(fieldErrors[field.key])} helperText={fieldErrors[field.key] || ' '} InputLabelProps={field.type === 'date' ? { shrink: true } : undefined} sx={{ minWidth: 0 }} value={form[field.key] ?? ''} onChange={(event) => { change(field.key, event.target.value); setFieldErrors((old) => ({ ...old, [field.key]: '' })); }} inputProps={field.type === 'number' ? { min: 0 } : undefined}>{field.type === 'select' && field.options.map((option: string) => <MenuItem key={option} value={option}>{option}</MenuItem>)}</TextField>)}
       </Box>
      </Box>)}
      {config.notifications?.map((notification: any) => <Alert key={notification[0]} severity="info"><b>{notification[0]}:</b> {notification[1]}</Alert>)}

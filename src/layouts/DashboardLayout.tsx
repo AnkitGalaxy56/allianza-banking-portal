@@ -27,7 +27,7 @@ import { logoutUser, selectUser } from '@/redux/slices/authSlice';
 import { selectTheme } from '@/redux/slices/themeSlice';
 import { ROLE_LABELS } from '@/config/roles';
 
-const DRAWER_WIDTH = 230;
+const DRAWER_WIDTH = 280;
 const COLLAPSED_WIDTH = 76;
 
 export default function DashboardLayout() {

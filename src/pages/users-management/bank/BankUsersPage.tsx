@@ -219,14 +219,14 @@ export default function BankUsersPage() {
     {
       key: 'employeeId',
       label: 'Emp ID',
-      minWidth: 50,
+      minWidth: 105,
       nowrap: true,
       render: (user) => <Typography variant="body2" fontWeight={700}>{user.employeeId}</Typography>,
     },
     {
       key: 'employee',
       label: 'Employee Name',
-      minWidth: 125,
+      minWidth: 225,
       render: (user) => (
         <Stack direction="row" spacing={1.25} alignItems="center">
           <Avatar
@@ -248,20 +248,19 @@ export default function BankUsersPage() {
         </Stack>
       ),
     },
-    { key: 'userName', label: 'User Name', minWidth: 25, render: (user) => user.userName },
-    { key: 'mobile', label: 'Mobile', minWidth: 25, nowrap: true, render: (user) => user.mobile },
-    { key: 'branch', label: 'Branch', minWidth: 25, render: (user) => user.branchName },
-    { key: 'userRole', label: 'User Role', minWidth: 25, render: (user) => user.role },
-    { key: 'systemRole', label: 'System Role', minWidth: 25, render: (user) => user.systemRole },
-    { key: 'status', label: 'Status', minWidth: 25, render: (user) => <StatusChip status={user.status.toLowerCase()} /> },
-    { key: 'loginTime', label: 'Login Time', minWidth: 25, nowrap: true, render: (user) => user.loginTime || '—' },
-    { key: 'logoutTime', label: 'Logout Time', minWidth: 25, nowrap: true, render: (user) => user.logoutTime || '—' },
+    { key: 'userName', label: 'User Name', minWidth: 125, render: (user) => user.userName },
+    { key: 'mobile', label: 'Mobile', minWidth: 115, nowrap: true, render: (user) => user.mobile },
+    { key: 'branch', label: 'Branch', minWidth: 130, render: (user) => user.branchName },
+    { key: 'userRole', label: 'User Role', minWidth: 105, render: (user) => user.role },
+    { key: 'systemRole', label: 'System Role', minWidth: 155, render: (user) => user.systemRole },
+    { key: 'status', label: 'Status', minWidth: 100, render: (user) => <StatusChip status={user.status.toLowerCase()} /> },
+    { key: 'loginTime', label: 'Login Time', minWidth: 100, nowrap: true, render: (user) => user.loginTime || '—' },
+    { key: 'logoutTime', label: 'Logout Time', minWidth: 105, nowrap: true, render: (user) => user.logoutTime || '—' },
     {
       key: 'actions',
       label: 'Actions',
       minWidth: 220,
       nowrap: true,
-      //  sticky: 'left',
       render: (user) => (
         <Stack direction="row" spacing={0.25}>
           <Button size="small" disabled={user.status === 'Entered'} onClick={() => openViewForm(user)}>View</Button>
@@ -332,11 +331,12 @@ export default function BankUsersPage() {
               setSearch(event.target.value);
               setPage(1);
             }}
-            sx={{ flex: '1 1 150px' }}
+            sx={{ flex: '1 1 320px' }}
             InputProps={{
               startAdornment: <SearchOutlinedIcon sx={{ mr: 1, color: 'text.secondary' }} fontSize="small" />,
             }}
           />
+          <TextField
           <TextField
             select
             size="small"
@@ -367,6 +367,7 @@ export default function BankUsersPage() {
             <MenuItem value="all">All user roles</MenuItem>
             <MenuItem value="Bank User">Bank User</MenuItem>
             <MenuItem value="Admin User">Admin User</MenuItem>
+          </TextField>
           </TextField>
         </Box>
         <Stack direction={{ xs: 'column', md: 'row' }} spacing={1.5} sx={{ p: 2 }}>

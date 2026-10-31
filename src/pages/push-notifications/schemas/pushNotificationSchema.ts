@@ -10,6 +10,10 @@ export const pushNotificationSchema = z.object({
 }).superRefine((value, ctx) => {
   if (value.schedule === 'scheduled' && !value.dateTime) {
     ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['dateTime'], message: 'Choose a date and time for scheduled delivery' });
+  } else if (value.schedule === 'scheduled' && value.dateTime) {
+    const scheduledAt = new Date(value.dateTime).getTime();
+    if (!Number.isFinite(scheduledAt)) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['dateTime'], message: 'Enter a valid scheduled date and time' });
+    else if (scheduledAt <= Date.now()) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['dateTime'], message: 'Scheduled delivery must be in the future' });
   }
 });
 export type PushNotificationFormValues = z.infer<typeof pushNotificationSchema>;
