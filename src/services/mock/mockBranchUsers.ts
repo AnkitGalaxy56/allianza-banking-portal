@@ -13,7 +13,7 @@ export const MOCK_BRANCHES = [
   { id: 'br-008', name: 'Branch 8' },
 ];
 
-const STATUSES: BranchUser['status'][] = ['Active', 'Active', 'Active', 'Invited', 'Locked'];
+const STATUSES: BranchUser['status'][] = ['Entered', 'Operative', 'Operative', 'In-Operative', 'Suspended', 'Password Blocked'];
 const LOGIN_TIMES = ['09:00', '09:15', '09:30', '10:00', '10:42'];
 const LOGOUT_TIMES = ['17:30', '18:00', '18:15', '18:30', ''];
 
@@ -54,6 +54,7 @@ const USERS: BranchUser[] = Array.from({ length: 96 }, (_, i) => {
     branchName: branch.name,
     multiBranchAccess: i % 4 === 0 ? [branch.id, MOCK_BRANCHES[(i + 1) % MOCK_BRANCHES.length].id] : [branch.id],
     status,
+    authorizationStatus: status === 'Entered' ? 'Pending' : 'Authorized',
     dateOfBirth: i % 4 === 0 ? '1992-05-14' : '',
     twoFactorDesignation: i % 2 === 0 ? 'Primary' : 'Secondary',
     idleTimeoutSeconds: 300,
@@ -82,7 +83,8 @@ export async function mockListBranchUsers(q: BranchUserQuery): Promise<Paginated
     (!term || [u.title, u.employeeId, u.name, u.userName, u.displayName, u.email, u.mobile, u.branchName]
       .some((v) => v.toLowerCase().includes(term))) &&
     (!q.branchId || q.branchId === 'all' || u.branchId === q.branchId) &&
-    (!q.role || q.role === 'all' || u.role === q.role),
+    (!q.role || q.role === 'all' || u.role === q.role) &&
+    (!q.authorizationStatus || q.authorizationStatus === 'all' || (u.authorizationStatus ?? 'Authorized') === q.authorizationStatus),
   );
   const start = (q.page - 1) * q.pageSize;
   return {
@@ -115,7 +117,8 @@ const inputToUser = (input: BranchUserInput, id: string, existing?: BranchUser):
     branchId: branch.id,
     branchName: branch.name,
     multiBranchAccess: input.multiBranchAccess,
-    status: input.status,
+    status: existing?.status === 'Entered' ? existing.status : (existing ? input.status : 'Entered'),
+    authorizationStatus: existing?.authorizationStatus ?? 'Pending',
     dateOfBirth: input.dateOfBirth,
     twoFactorDesignation: input.twoFactorDesignation,
     idleTimeoutSeconds: input.idleTimeoutSeconds,
@@ -164,6 +167,14 @@ export async function mockUpdateBranchUser(id: string, input: BranchUserInput): 
   const updated = inputToUser(input, id, existing);
   users = users.map((u) => u.id === id ? updated : u);
   return updated;
+}
+
+export async function mockAuthorizeBranchUser(id: string): Promise<void> {
+  await delay(250);
+  const existing = users.find((u) => u.id === id);
+  if (!existing) throw new Error('Branch user not found.');
+  if (existing.status !== 'Entered') throw new Error('Only Entered users can be authenticated.');
+  users = users.map((u) => u.id === id ? { ...u, status: 'Operative', authorizationStatus: 'Authorized' } : u);
 }
 
 export async function mockUpdateBranchUserStatus(id: string, status: BranchUser['status']): Promise<void> {

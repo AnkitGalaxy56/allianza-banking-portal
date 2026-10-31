@@ -1,0 +1,1 @@
+export const accountStatusOptions = [{ code: '001', label: 'Entered' }, { code: '002', label: 'Operative' }, { code: '003', label: 'In-Operative' }, { code: '004', label: 'Suspended' }, { code: '005', label: 'Password Blocked' }];

@@ -1,5 +1,5 @@
-export type BranchUserStatus = 'Active' | 'Inactive' | 'Invited' | 'Locked';
-export type BranchUserRole = 'Manager' | 'Officer';
+export type BranchUserStatus = 'Entered' | 'Operative' | 'In-Operative' | 'Suspended' | 'Password Blocked';
+export type BranchUserRole = 'Bank User' | 'Admin User';
 export type BranchUserTitle = 'Mr' | 'Ms';
 
 export interface MenuFunctionAccessLevel {
@@ -8,7 +8,7 @@ export interface MenuFunctionAccessLevel {
   view: boolean;
   authorise: boolean;
 }
-
+export type UserAuthorizationStatus = 'Pending' | 'Authorized';
 /** User Master record used by the bank's user-management screen. */
 export interface BranchUser {
   id: string;
@@ -28,6 +28,7 @@ export interface BranchUser {
   branchName: string;
   multiBranchAccess: string[];
   status: BranchUserStatus;
+  authorizationStatus?: UserAuthorizationStatus;
   dateOfBirth: string;
   twoFactorDesignation: string;
   idleTimeoutSeconds: number;
@@ -58,6 +59,7 @@ export interface BranchUserInput {
   branchId: string;
   multiBranchAccess: string[];
   status: BranchUserStatus;
+  authorizationStatus?: UserAuthorizationStatus;
   dateOfBirth: string;
   twoFactorDesignation: string;
   idleTimeoutSeconds: number;
@@ -77,4 +79,5 @@ export interface BranchUserQuery {
   search?: string;
   branchId?: string;
   role?: BranchUserRole | 'all';
+  authorizationStatus?: UserAuthorizationStatus | 'all';
 }

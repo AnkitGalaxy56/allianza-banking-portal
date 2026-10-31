@@ -1,0 +1,11 @@
+import { Box, Chip, Divider, Drawer, IconButton, Stack, Typography } from '@mui/material';
+import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
+import type { AccessRole } from '../types/role';
+interface Props { role: AccessRole | null; open: boolean; onClose: () => void; }
+export default function RoleDetailsDrawer({ role, open, onClose }: Props) {
+  return <Drawer anchor="right" open={open} onClose={onClose} PaperProps={{ sx: { width: { xs: '100%', sm: 560, md: 680 }, maxWidth: '100%' } }}>
+    <Box sx={{ p: 3 }}><Stack direction="row" justifyContent="space-between" alignItems="flex-start"><Box><Typography variant="overline" color="text.secondary">ROLE DETAILS</Typography><Typography variant="h5" fontWeight={750}>{role?.name ?? 'Role details'}</Typography></Box><IconButton onClick={onClose}><CloseOutlinedIcon /></IconButton></Stack></Box><Divider />
+    {role && <Box sx={{ p: 3 }}><Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2.5, mb: 3 }}><Box><Typography variant="caption" color="text.secondary">Role name</Typography><Typography fontWeight={700}>{role.name}</Typography></Box><Box><Typography variant="caption" color="text.secondary">Description</Typography><Typography fontWeight={600}>{role.description}</Typography></Box><Box><Typography variant="caption" color="text.secondary">Assigned users</Typography><Typography fontWeight={700}>{role.assignedUsers}</Typography></Box><Box><Typography variant="caption" color="text.secondary">Status</Typography><Box><Chip size="small" label={role.status} color={role.status === 'Active' ? 'success' : 'default'} /></Box></Box></Box>
+    <Typography variant="h6" fontWeight={750} sx={{ mb: 1.5 }}>Permissions</Typography><Stack spacing={1.25}>{role.permissions.map(permission => <Box key={permission.module} sx={{ p: 1.75, border: 1, borderColor: 'divider', borderRadius: 2 }}><Typography fontWeight={750} fontSize={14} sx={{ mb: 1 }}>{permission.module}</Typography><Stack direction="row" flexWrap="wrap" gap={0.75}>{permission.actions.map(action => <Chip key={action} size="small" label={action} sx={{ bgcolor: 'primary.50', color: 'primary.dark', fontWeight: 700 }} />)}</Stack></Box>)}</Stack></Box>}
+  </Drawer>;
+}

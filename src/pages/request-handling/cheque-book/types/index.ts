@@ -1,0 +1,1 @@
+export interface ChequeBookRequest { id: string; accountNumber: string; customerName: string; chequeBookType: '25 pages' | '50 pages'; deliveryMethod: 'Collect from branch' | 'Delivery address'; deliveryAddress: string; primary: boolean; default: boolean; statusCode: string; }

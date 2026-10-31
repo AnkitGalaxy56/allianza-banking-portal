@@ -1,8 +1,18 @@
 import type { ReactNode } from 'react';
-import { Box, InputAdornment, TextField, Typography } from '@mui/material';
-import { Controller, type Control, type FieldValues, type Path } from 'react-hook-form';
+import {
+  Box,
+  InputAdornment,
+  TextField,
+  Typography,
+} from '@mui/material';
+import {
+  Controller,
+  type Control,
+  type FieldValues,
+  type Path,
+} from 'react-hook-form';
 
-interface Props<T extends FieldValues> {
+export interface FormTextFieldProps<T extends FieldValues> {
   name: Path<T>;
   control: Control<T>;
   label: string;
@@ -11,13 +21,24 @@ interface Props<T extends FieldValues> {
   autoComplete?: string;
   disabled?: boolean;
   autoFocus?: boolean;
+  required?: boolean;
+  readOnly?: boolean;
   endAdornment?: ReactNode;
+  startAdornment?: ReactNode;
   size?: 'small' | 'medium';
-  /** Set false when this field sits inside a labelled composite row, such as Employee Name. */
+  /** Hide the label above the input when used inside a labelled composite row. */
   showLabel?: boolean;
+  /** Supports notes/comments without needing a separate Controller in the page. */
+  multiline?: boolean;
+  minRows?: number;
+  maxRows?: number;
+  rows?: number;
+  maxLength?: number;
+  inputMode?: 'none' | 'text' | 'tel' | 'url' | 'email' | 'numeric' | 'decimal' | 'search';
+  helperText?: ReactNode;
 }
 
-/** Label-above text field wired to React Hook Form. */
+/** Reusable React Hook Form text input. Defaults to small sizing to match MUI selects. */
 export default function FormTextField<T extends FieldValues>({
   name,
   control,
@@ -27,10 +48,20 @@ export default function FormTextField<T extends FieldValues>({
   autoComplete,
   disabled,
   autoFocus,
+  required,
+  readOnly,
   endAdornment,
-  size = 'medium',
+  startAdornment,
+  size = 'small',
   showLabel = true,
-}: Props<T>) {
+  multiline = false,
+  minRows,
+  maxRows,
+  rows,
+  maxLength,
+  inputMode,
+  helperText,
+}: FormTextFieldProps<T>) {
   const id = `field-${String(name).replace(/\./g, '-')}`;
 
   return (
@@ -48,6 +79,7 @@ export default function FormTextField<T extends FieldValues>({
               sx={{ display: 'block', mb: 0.75 }}
             >
               {label}
+              {required ? ' *' : ''}
             </Typography>
           )}
           <TextField
@@ -62,12 +94,25 @@ export default function FormTextField<T extends FieldValues>({
             autoComplete={autoComplete}
             disabled={disabled}
             autoFocus={autoFocus}
+            required={required}
             fullWidth
             size={size}
+            multiline={multiline}
+            minRows={minRows}
+            maxRows={maxRows}
+            rows={rows}
             error={Boolean(fieldState.error)}
-            helperText={fieldState.error?.message}
-            inputProps={!showLabel ? { 'aria-label': label } : undefined}
+            helperText={fieldState.error?.message ?? helperText}
+            inputProps={{
+              ...(maxLength !== undefined ? { maxLength } : {}),
+              ...(inputMode ? { inputMode } : {}),
+              ...(readOnly ? { readOnly: true } : {}),
+              ...(!showLabel ? { 'aria-label': label } : {}),
+            }}
             InputProps={{
+              startAdornment: startAdornment ? (
+                <InputAdornment position="start">{startAdornment}</InputAdornment>
+              ) : undefined,
               endAdornment: endAdornment ? (
                 <InputAdornment position="end">{endAdornment}</InputAdornment>
               ) : undefined,

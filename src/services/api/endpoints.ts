@@ -4,6 +4,9 @@ export const ENDPOINTS = {
     login: '/auth/login',
     logout: '/auth/logout',
     refresh: '/auth/refresh',
+    profile: '/auth/profile',
+    changePasswordRequestOtp: '/auth/change-password/request-otp',
+    changePasswordVerifyOtp: '/auth/change-password/verify-otp',
   },
   themes: {
     /** Must be PUBLIC (no token) - the login page needs it before anyone is signed in. */
@@ -18,8 +21,8 @@ export const ENDPOINTS = {
     byId: (id: string) => `/branches/${encodeURIComponent(id)}`,
   },
   branchUsers: {
-    base: '/branch-users',
-    byId: (id: string) => `/branch-users/${encodeURIComponent(id)}`,
+    base: '/user-management',
+    byId: (id: string) => `/user-management/${encodeURIComponent(id)}`,
   },
   customers: {
     base: '/customers',
