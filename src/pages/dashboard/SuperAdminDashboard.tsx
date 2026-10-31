@@ -51,7 +51,7 @@ export default function SuperAdminDashboard() {
         title="Dashboard"
         subtitle="Banks, application users and requests across the platform"
         actions={
-          <Button component={RouterLink} to={PATHS.banks} variant="contained" startIcon={<AccountBalanceOutlinedIcon />}>
+          <Button component={RouterLink} to={PATHS.MASTERS.BANK_MASTER} variant="contained" startIcon={<AccountBalanceOutlinedIcon />}>
             Manage banks
           </Button>
         }

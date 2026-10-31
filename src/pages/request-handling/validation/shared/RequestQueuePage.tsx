@@ -7,6 +7,7 @@ import {
 } from '@mui/material';
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import PageHeader from '@/components/common/PageHeader';
+import DataTable, { type DataTableColumn } from '@/components/common/DataTable';
 import type { ValidationModuleConfig, ValidationRecord, RequestDecision } from './types';
 
 interface Props { config: ValidationModuleConfig }
@@ -25,6 +26,19 @@ export default function RequestQueuePage({ config }: Props) {
     return text.includes(search.toLowerCase()) && (statusFilter === 'All' || record.status === statusFilter);
   }), [records, search, statusFilter]);
 
+  const columns: DataTableColumn<ValidationRecord>[] = [
+    { key: 'id', label: 'Request ID', nowrap: true, render: (record) => <Typography fontWeight={750}>{record.id}</Typography> },
+    ...config.columns.map((column) => ({
+      key: column.key,
+      label: column.label,
+      nowrap: true,
+      render: (record: ValidationRecord) => record.fields[column.key] || '—',
+    })),
+    { key: 'submittedOn', label: 'Submitted On', nowrap: true, render: (record) => record.submittedOn },
+    { key: 'status', label: 'Status', render: (record) => <Chip size="small" label={record.status} color={statusColor(record.status)} variant="outlined" /> },
+    { key: 'action', label: 'Action', render: (record) => <Button size="small" variant={record.status === 'Pending' ? 'contained' : 'outlined'} onClick={() => setSelected(record)}>{record.status === 'Pending' ? 'Review' : 'View'}</Button> },
+  ];
+
   const decide = (decision: 'Authorised' | 'Rejected') => {
     if (!selected) return;
     setRecords((current) => current.map((record) => record.id === selected.id ? { ...record, status: decision } : record));
@@ -42,27 +56,7 @@ export default function RequestQueuePage({ config }: Props) {
           {['All', 'Pending', 'Authorised', 'Rejected'].map((status) => <MenuItem key={status} value={status}>{status === 'All' ? 'All statuses' : status}</MenuItem>)}
         </TextField>
       </Stack>
-      <TableContainer sx={{ maxHeight: 560 }}>
-        <Table stickyHeader size="small">
-          <TableHead><TableRow>
-            <TableCell sx={{ fontWeight: 800, fontSize: 11, whiteSpace: 'nowrap' }}>REQUEST ID</TableCell>
-            {config.columns.map((column) => <TableCell key={column.key} sx={{ fontWeight: 800, fontSize: 11, whiteSpace: 'nowrap' }}>{column.label.toUpperCase()}</TableCell>)}
-            <TableCell sx={{ fontWeight: 800, fontSize: 11, whiteSpace: 'nowrap' }}>SUBMITTED ON</TableCell>
-            <TableCell sx={{ fontWeight: 800, fontSize: 11 }}>STATUS</TableCell>
-            <TableCell sx={{ fontWeight: 800, fontSize: 11 }}>ACTION</TableCell>
-          </TableRow></TableHead>
-          <TableBody>
-            {filtered.map((record) => <TableRow key={record.id} hover>
-              <TableCell sx={{ fontWeight: 750, whiteSpace: 'nowrap' }}>{record.id}</TableCell>
-              {config.columns.map((column) => <TableCell key={column.key} sx={{ whiteSpace: 'nowrap' }}>{record.fields[column.key] || '—'}</TableCell>)}
-              <TableCell sx={{ whiteSpace: 'nowrap' }}>{record.submittedOn}</TableCell>
-              <TableCell><Chip size="small" label={record.status} color={statusColor(record.status)} variant="outlined" /></TableCell>
-              <TableCell><Button size="small" variant={record.status === 'Pending' ? 'contained' : 'outlined'} onClick={() => setSelected(record)}>{record.status === 'Pending' ? 'Review' : 'View'}</Button></TableCell>
-            </TableRow>)}
-            {!filtered.length && <TableRow><TableCell colSpan={config.columns.length + 4} align="center" sx={{ py: 5, color: 'text.secondary' }}>No requests match your filters.</TableCell></TableRow>}
-          </TableBody>
-        </Table>
-      </TableContainer>
+      <DataTable rows={filtered} columns={columns} getRowId={(record) => record.id} emptyMessage="No requests match your filters." />
       <Stack direction="row" justifyContent="space-between" sx={{ p: 2 }}>
         <Typography variant="caption" color="text.secondary">Showing {filtered.length} of {records.length} requests</Typography>
         <Typography variant="caption" color="text.secondary">Pending: {records.filter((record) => record.status === 'Pending').length}</Typography>

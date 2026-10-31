@@ -25,6 +25,8 @@ export const PATHS = {
     STANDING_INSTRUCTIONS: "/request-handling/standing-instructions",
     FRESH_LOAN_APPLICATION: "/request-handling/fresh-loan-application",
     LOAN_EMI_PAYMENT: "/request-handling/loan-emi-payment",
+    OPENING_ACCOUNTS: "/customer-Onboarding",
+    LEAD_MANAGEMENT: "/request-handling/lead-management",
   },
 
   MASTERS: {
