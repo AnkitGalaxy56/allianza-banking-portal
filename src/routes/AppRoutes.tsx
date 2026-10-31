@@ -22,13 +22,13 @@ const ProfilePage = lazy(() => import('@/pages/profile'));
 const ChangePasswordPage = lazy(() => import('@/pages/change-password'));
 const RolesAccessControlPage = lazy(() => import('@/pages/settings/roles-access-control'));
 
-const RequestValidationIndex = lazy(() => import('@/pages/request-validation/index'));
+const RequestValidationIndex = lazy(() => import('@/pages/request-handling/index'));
 const PaymentsPage = lazy(() => import('@/pages/request-handling/rtgs-neft-imps'));
-const OpeningAccountsPage = lazy(() => import('@/pages/request-validation/opening-accounts'));
-const ClosingAccountsPage = lazy(() => import('@/pages/request-validation/closing-accounts'));
-const StandingInstructionsPage = lazy(() => import('@/pages/request-validation/standing-instructions'));
+const OpeningAccountsPage = lazy(() => import('@/pages/request-handling/opening-accounts'));
+const ClosingAccountsPage = lazy(() => import('@/pages/request-handling/closing-accounts'));
+const StandingInstructionsPage = lazy(() => import('@/pages/request-handling/standing-instructions'));
 const StopPaymentPage = lazy(() => import('@/pages/request-handling/stop-payment'));
-const RequestLeadManagementPage = lazy(() => import('@/pages/request-validation/lead-management'));
+const RequestLeadManagementPage = lazy(() => import('@/pages/request-handling/lead-management'));
 const ChequeBookPage = lazy(() => import('@/pages/request-handling/cheque-book'));
 const FDOpeningPage = lazy(() => import('@/pages/request-handling/fd-opening'));
 const RDOpeningPage = lazy(() => import('@/pages/request-handling/rd-opening'));

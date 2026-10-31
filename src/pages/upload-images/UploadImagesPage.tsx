@@ -95,7 +95,7 @@ export default function UploadImagesPage() {
   ], [images]);
 
   return <Box>
-    <PageHeader title="Upload Images" subtitle="Manage images and visual assets used in the mobile application" actions={<Button variant="contained" startIcon={<AddPhotoAlternateOutlinedIcon />} onClick={openAdd}>Add Image</Button>} />
+    <PageHeader title="Upload Images" subtitle="Manage images and visual assets used in the mobile application" />
     <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, minmax(0, 1fr))' }, gap: 2, mb: 2.5 }}>
       {[
         { label: 'Total images', value: images.length, icon: <ImageOutlinedIcon /> },
@@ -110,6 +110,7 @@ export default function UploadImagesPage() {
           <TextField size="small" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search name or path" sx={{ width: { xs: '100%', sm: 230 } }} InputProps={{ startAdornment: <InputAdornment position="start"><SearchOutlinedIcon fontSize="small" /></InputAdornment> }} />
           <TextField select size="small" label="Type" value={typeFilter} onChange={(event) => setTypeFilter(event.target.value)} sx={{ minWidth: 135 }}><MenuItem value="all">All types</MenuItem>{(['Banner', 'App Logo', 'Icon', 'Onboarding', 'Promotion', 'Other'] as ImageType[]).map((type) => <MenuItem key={type} value={type}>{type}</MenuItem>)}</TextField>
           <TextField select size="small" label="Status" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)} sx={{ minWidth: 125 }}><MenuItem value="all">All statuses</MenuItem><MenuItem value="Active">Active</MenuItem><MenuItem value="Inactive">Inactive</MenuItem></TextField>
+          <Button variant="contained" startIcon={<AddPhotoAlternateOutlinedIcon />} onClick={openAdd} sx={{ whiteSpace: 'nowrap' }}>Add Image</Button>
         </Stack>
       </Box>
       <DataTable rows={rows} columns={columns} getRowId={(item) => item.id} emptyMessage="No images match these filters. Add an image to get started." />

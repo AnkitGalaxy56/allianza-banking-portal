@@ -1,41 +1,24 @@
 import { useState } from 'react';
 import {
-  Alert,
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  InputAdornment,
-  MenuItem,
-  Paper,
-  Select,
-  Snackbar,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TextField,
-  Typography,
+  Alert, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle,
+  InputAdornment, MenuItem, Paper, Select, Snackbar, Stack, TextField, Typography,
 } from '@mui/material';
 import AddOutlinedIcon from '@mui/icons-material/AddOutlined';
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
-import ErrorState from '@/components/common/ErrorState';
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import PageHeader from '@/components/common/PageHeader';
+import DataTable, { type DataTableColumn } from '@/components/common/DataTable';
+import ErrorState from '@/components/common/ErrorState';
 import StatusChip from '@/components/common/StatusChip';
 import { useAsyncData } from '@/hooks/useAsyncData';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { branchService } from '@/services/branch.service';
-import type { Branch, BranchStatus } from '@/types/branch';
+import type { Branch, BranchStatus } from './types/branch';
 import { formatNumber } from '@/utils/format';
-import BranchForm from './BranchForm';
+import BranchForm from './components/BranchForm';
+import { BRANCH_PAGE_SIZE, BRANCH_STATUS_OPTIONS } from './data/branchMasterConfig';
 
-const PAGE_SIZE = 8;
-
-/** Bank Admin -> Branches (list + add/edit form), follows the "Branches" reference screen. */
 export default function BranchesPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
@@ -45,227 +28,130 @@ export default function BranchesPage() {
   const [focusSignal, setFocusSignal] = useState(0);
   const [toast, setToast] = useState<string | null>(null);
   const [formOpen, setFormOpen] = useState(false);
-
   const debouncedSearch = useDebouncedValue(search, 350);
-
   const { data, loading, error, reload } = useAsyncData(
-    () => branchService.list({ page, pageSize: PAGE_SIZE, search: debouncedSearch, status }),
+    () => branchService.list({ page, pageSize: BRANCH_PAGE_SIZE, search: debouncedSearch, status }),
     [page, debouncedSearch, status],
   );
 
+  const rows = data?.items ?? [];
   const total = data?.total ?? 0;
-  const from = total === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
-  const to = Math.min(page * PAGE_SIZE, total);
+  const from = total === 0 ? 0 : (page - 1) * BRANCH_PAGE_SIZE + 1;
+  const to = Math.min(page * BRANCH_PAGE_SIZE, total);
+  const openAdd = () => {
+    setEditing(null);
+    setFormOpen(true);
+    setFocusSignal((value) => value + 1);
+  };
+  const openEdit = (branch: Branch) => {
+    setEditing(branch);
+    setFormOpen(true);
+  };
+  const closeForm = () => {
+    setFormOpen(false);
+    setEditing(null);
+  };
+
+  const columns: DataTableColumn<Branch>[] = [
+    { key: 'name', label: 'Branch', minWidth: 180, render: (branch) => <Typography fontWeight={700} fontSize={13}>{branch.name}</Typography> },
+    { key: 'code', label: 'Branch Code', minWidth: 110, nowrap: true, render: (branch) => branch.code },
+    { key: 'ifsc', label: 'IFSC Code', minWidth: 130, nowrap: true, render: (branch) => branch.ifsc },
+    { key: 'city', label: 'City', minWidth: 110, render: (branch) => branch.city },
+    { key: 'customers', label: 'Customers', align: 'right', minWidth: 100, render: (branch) => formatNumber(branch.customers) },
+    { key: 'status', label: 'Status', minWidth: 100, render: (branch) => <StatusChip status={branch.status} /> },
+    { key: 'actions', label: 'Actions', align: 'right', minWidth: 150, nowrap: true, render: (branch) => (
+      <Stack direction="row" spacing={0.25} justifyContent="flex-end">
+        <Button size="small" startIcon={<VisibilityOutlinedIcon />} onClick={() => setViewing(branch)}>View</Button>
+        <Button size="small" startIcon={<EditOutlinedIcon />} onClick={() => openEdit(branch)}>Edit</Button>
+      </Stack>
+    ) },
+  ];
 
   return (
     <Box>
       <PageHeader
-        title="Branches"
-        subtitle="Branches of your bank that appear in the mobile app"
-        actions={
-          <Button
-            variant="contained"
-            startIcon={<AddOutlinedIcon />}
-            onClick={() => {
-              setEditing(null);
-              setFormOpen(true);
-              setFocusSignal((n) => n + 1);
-            }}
-          >
-            Add branch
-          </Button>
-        }
+        title="Branch Master"
+        subtitle="Create, view and maintain branch details"
       />
+      <Paper variant="outlined" className="app-card" sx={{ borderRadius: 3, overflow: 'hidden', minWidth: 0 }}>
+        <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', p: 2.5 }}>
+          <TextField
+            size="small"
+            placeholder="Search by branch, code, IFSC or city"
+            value={search}
+            onChange={(event) => { setSearch(event.target.value); setPage(1); }}
+            sx={{ flex: '1 1 320px' }}
+            InputProps={{ startAdornment: <InputAdornment position="start"><SearchOutlinedIcon fontSize="small" /></InputAdornment> }}
+          />
+          <Select
+            size="small"
+            value={status}
+            onChange={(event) => { setStatus(event.target.value as BranchStatus | 'all'); setPage(1); }}
+            inputProps={{ 'aria-label': 'Filter by status' }}
+            sx={{ minWidth: 150 }}
+          >
+            {BRANCH_STATUS_OPTIONS.map((option) => (
+              <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
+            ))}
+          </Select>
+          <Button variant="contained" size="small" startIcon={<AddOutlinedIcon />} onClick={openAdd} sx={{ minHeight: 40 }}>
+            Create New
+          </Button>
+        </Box>
+        {error && <Box sx={{ px: 2.5, pb: 2 }}><ErrorState message={error} onRetry={reload} /></Box>}
+        <Box sx={{ opacity: loading ? 0.55 : 1, transition: 'opacity .2s' }}>
+          <DataTable rows={rows} columns={columns} getRowId={(branch) => branch.id} emptyMessage={loading ? 'Loading branch records…' : 'No branches match your search.'} />
+        </Box>
+        <Box sx={{ p: 2.5, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, borderTop: 1, borderColor: 'divider' }}>
+          <Typography variant="body2" color="text.secondary">Showing {from}–{to} of {total} branches</Typography>
+          <Stack direction="row" spacing={1}>
+            <Button variant="outlined" color="inherit" size="small" disabled={page <= 1} onClick={() => setPage((value) => value - 1)}>Previous</Button>
+            <Button variant="outlined" color="inherit" size="small" disabled={to >= total} onClick={() => setPage((value) => value + 1)}>Next</Button>
+          </Stack>
+        </Box>
+      </Paper>
 
-      <Box sx={{
-        display: 'grid', gap: 2.5, alignItems: 'start',
-        //  gridTemplateColumns: { xs: '1fr', lg: 'minmax(0, 2fr) minmax(0, 1fr)' }
-        gridTemplateColumns: {
-          xs: '1fr',
-          lg: formOpen
-            ? 'minmax(0, 2fr) minmax(320px, 1fr)'
-            : 'minmax(0, 1fr)',
-        }
-      }}>
-        <Paper variant="outlined" className="app-card" sx={{ borderRadius: 3, overflow: 'hidden' }}>
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5, p: 2.5 }}>
-            <TextField
-              size="small"
-              placeholder="Search by branch name, code or city"
-              value={search}
-              onChange={(e) => {
-                setSearch(e.target.value);
-                setPage(1);
-              }}
-              sx={{ flex: '1 1 260px' }}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchOutlinedIcon fontSize="small" />
-                  </InputAdornment>
-                ),
-              }}
-            />
-            <Select
-              size="small"
-              value={status}
-              onChange={(e) => {
-                setStatus(e.target.value as BranchStatus | 'all');
-                setPage(1);
-              }}
-              inputProps={{ 'aria-label': 'Filter by status' }}
-              sx={{ minWidth: 140, fontWeight: 600 }}
-            >
-              <MenuItem value="all">All status</MenuItem>
-              <MenuItem value="active">Active</MenuItem>
-              <MenuItem value="inactive">Inactive</MenuItem>
-            </Select>
-          </Box>
-
-          {error && (
-            <Box sx={{ px: 2.5, pb: 2 }}>
-              <ErrorState message={error} onRetry={reload} />
-            </Box>
-          )}
-
-          <TableContainer sx={{ opacity: loading ? 0.55 : 1, transition: 'opacity .2s' }}>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Branch</TableCell>
-                  <TableCell>Code</TableCell>
-                  <TableCell>City</TableCell>
-                  <TableCell>Customers</TableCell>
-                  <TableCell>Status</TableCell>
-                  <TableCell />
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {data?.items.map((branch) => (
-                  <TableRow key={branch.id} hover>
-                    <TableCell sx={{ fontWeight: 700 }}>{branch.name}</TableCell>
-                    <TableCell>{branch.code}</TableCell>
-                    <TableCell>{branch.city}</TableCell>
-                    <TableCell>{formatNumber(branch.customers)}</TableCell>
-                    <TableCell>
-                      <StatusChip status={branch.status} />
-                    </TableCell>
-                    <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>
-                      <Button
-                        size="small"
-                        sx={{ fontWeight: 700, minWidth: 0 }}
-                        onClick={() => {
-                          setEditing(branch);
-                          setFormOpen(true);
-                        }}
-                      >
-                        Edit
-                      </Button>
-                      <Box component="span" sx={{ color: 'text.secondary' }}>
-                        ·
-                      </Box>
-                      <Button size="small" sx={{ fontWeight: 700, minWidth: 0 }} onClick={() => setViewing(branch)}>
-                        View
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {data && data.items.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={6} align="center" sx={{ py: 5, color: 'text.secondary' }}>
-                      No branches match your search.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </TableContainer>
-
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, p: 2.5, borderTop: 1, borderColor: 'divider' }}>
-            <Typography variant="body2" color="text.secondary">
-              Showing {from}–{to} of {total} branches
-            </Typography>
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              <Button variant="outlined" color="inherit" size="small" disabled={page <= 1} onClick={() => setPage((p) => p - 1)} sx={{ borderColor: 'divider' }}>
-                Previous
-              </Button>
-              <Button variant="outlined" color="inherit" size="small" disabled={to >= total} onClick={() => setPage((p) => p + 1)} sx={{ borderColor: 'divider' }}>
-                Next
-              </Button>
-            </Box>
-          </Box>
-        </Paper>
-
-        {formOpen && (
+      <Dialog open={formOpen} onClose={closeForm} fullWidth maxWidth="sm" scroll="paper">
+        <DialogTitle sx={{ fontWeight: 800 }}>{editing ? 'Edit Branch' : 'Create Branch'}</DialogTitle>
+        <DialogContent dividers>
           <BranchForm
             editing={editing}
             focusSignal={focusSignal}
-            onCancel={() => {
-              setFormOpen(false);
-              setEditing(null);
-            }}
+            onCancel={closeForm}
             onSaved={(branch, mode) => {
-              setFormOpen(false);
-              setEditing(null);
+              closeForm();
               setToast(`Branch "${branch.name}" ${mode}.`);
               reload();
             }}
           />
-        )}
-      </Box>
+        </DialogContent>
+      </Dialog>
 
-      <Dialog open={Boolean(viewing)} onClose={() => setViewing(null)} fullWidth maxWidth="xs">
+      <Dialog open={Boolean(viewing)} onClose={() => setViewing(null)} fullWidth maxWidth="sm">
         {viewing && (
           <>
-            <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-              {viewing.name}
-              <StatusChip status={viewing.status} />
-            </DialogTitle>
+            <DialogTitle sx={{ fontWeight: 800 }}>{viewing.name}</DialogTitle>
             <DialogContent dividers>
-              <Box sx={{ display: 'grid', gridTemplateColumns: 'auto 1fr', columnGap: 3, rowGap: 1.25 }}>
-                {(
-                  [
-                    ['Code', viewing.code],
-                    ['IFSC', viewing.ifsc],
-                    ['Address', viewing.address],
-                    ['City', viewing.city],
-                    ['Pincode', viewing.pincode],
-                    ['Phone', viewing.phone],
-                    ['Customers', formatNumber(viewing.customers)],
-                  ] as const
-                ).map(([label, value]) => (
-                  <Box key={label} sx={{ display: 'contents' }}>
-                    <Typography variant="body2" color="text.secondary">
-                      {label}
-                    </Typography>
-                    <Typography variant="body2" fontWeight={600}>
-                      {value}
-                    </Typography>
+              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
+                {([
+                  ['Branch Code', viewing.code], ['IFSC Code', viewing.ifsc], ['Address', viewing.address],
+                  ['City', viewing.city], ['Pincode', viewing.pincode], ['Branch Phone', viewing.phone],
+                  ['Customers', formatNumber(viewing.customers)], ['Status', viewing.status],
+                ] as const).map(([label, value]) => (
+                  <Box key={label}>
+                    <Typography variant="caption" color="text.secondary">{label}</Typography>
+                    <Typography variant="body2" fontWeight={600}>{value || '—'}</Typography>
                   </Box>
                 ))}
               </Box>
             </DialogContent>
-            <DialogActions>
-              <Button onClick={() => setViewing(null)}>Close</Button>
-            </DialogActions>
+            <DialogActions><Button size="small" onClick={() => setViewing(null)}>Close</Button><Button size="small" variant="contained" onClick={() => { const row = viewing; setViewing(null); openEdit(row); }}>Edit Branch</Button></DialogActions>
           </>
         )}
       </Dialog>
-
       <Snackbar open={Boolean(toast)} autoHideDuration={3500} onClose={() => setToast(null)} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
-        <Alert severity="success" variant="filled" onClose={() => setToast(null)}>
-          {toast}
-        </Alert>
+        <Alert severity="success" variant="filled" onClose={() => setToast(null)}>{toast}</Alert>
       </Snackbar>
     </Box>
   );
 }
-
-
-
-
-
-
-
-
-

@@ -67,11 +67,14 @@ export default function BankPage() {
   ], [banks]);
 
   return <Box>
-    <PageHeader title="Bank Management" subtitle="Create, view and maintain bank master details" actions={<Button variant="contained" startIcon={<AddOutlinedIcon />} onClick={openAdd}>Add Bank</Button>} />
+    <PageHeader title="Bank Management" subtitle="Create, view and maintain bank master details" />
     <Paper variant="outlined" className="app-card" sx={{ borderRadius: 3, overflow: 'hidden' }}>
       <Box sx={{ p: 2.5, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, flexWrap: 'wrap' }}>
         <Box><Typography variant="body2" color="text.secondary">{banks.length} bank record{banks.length === 1 ? '' : 's'} configured</Typography></Box>
-        <TextField size="small" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search bank, code, IFSC or city" sx={{ width: { xs: '100%', sm: 320 } }} InputProps={{ startAdornment: <InputAdornment position="start"><SearchOutlinedIcon fontSize="small" /></InputAdornment> }} />
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.25} alignItems={{ xs: 'stretch', sm: 'center' }} sx={{ width: { xs: '100%', sm: 'auto' } }}>
+          <TextField size="small" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search bank, code, IFSC or city" sx={{ width: { xs: '100%', sm: 320 } }} InputProps={{ startAdornment: <InputAdornment position="start"><SearchOutlinedIcon fontSize="small" /></InputAdornment> }} />
+          <Button variant="contained" startIcon={<AddOutlinedIcon />} onClick={openAdd}>Add Bank</Button>
+        </Stack>
       </Box>
       <DataTable rows={rows} columns={columns} getRowId={(bank) => bank.id} emptyMessage="No banks found. Add a bank to get started." />
       <Box sx={{ px: 2.5, py: 1.75, borderTop: 1, borderColor: 'divider' }}><Typography variant="body2" color="text.secondary">Showing {rows.length} of {banks.length} banks</Typography></Box>

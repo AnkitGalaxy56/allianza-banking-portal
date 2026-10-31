@@ -1,6 +1,7 @@
 import type { RequestModuleConfig } from '../../shared/types';
 
 export const requestsConfig: RequestModuleConfig = {
+  hideCreateButton: true,
   title: 'Stop Payment Requests',
   description: 'Review cheque stop-payment requests and reasons for hold.',
   searchPlaceholder: 'Search account, customer or cheque number',
