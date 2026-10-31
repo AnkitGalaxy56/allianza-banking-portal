@@ -11,8 +11,9 @@ import { logoutUser, selectUser } from '@/redux/slices/authSlice';
 import { selectTheme } from '@/redux/slices/themeSlice';
 import { ROLE_LABELS } from '@/config/roles';
 import Sidebar from './Sidebar';
+import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
 
-const DRAWER_WIDTH = 280;
+const DRAWER_WIDTH = 230;
 const COLLAPSED_WIDTH = 76;
 
 /** Signed-in shell. Brand stays in the sidebar; the top bar belongs to the content area. */
@@ -115,7 +116,7 @@ export default function DashboardLayout() {
             <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0, sm: 1 } }}>
               <ProfilePopover />
               <NotificationsPopover />
-              <Tooltip title="Logout"><IconButton aria-label="Logout" onClick={() => void dispatch(logoutUser())}><MenuOpenOutlinedIcon sx={{ transform: 'rotate(180deg)' }} /></IconButton></Tooltip>
+              <Tooltip title="Logout"><IconButton aria-label="Logout" onClick={() => void dispatch(logoutUser())}><LogoutOutlinedIcon sx={{ transform: 'rotate(180deg)' }} /></IconButton></Tooltip>
             </Box>
           </Toolbar>
         </AppBar>

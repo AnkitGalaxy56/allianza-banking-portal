@@ -64,7 +64,7 @@ const BUILT_PAGES: Record<string, ReactElement> = {
   //------Setting START-----
   [PATHS.SETTINGS.ROLES_ACCESS_CONTROL]: <RolesAccessControlPage />,
   [PATHS.SETTINGS.PROFILE]: <ProfilePage />,
-  // [PATHS.SETTINGS.CHANGE_PASSWORD]: <ChangePasswordPage />,
+  [PATHS.SETTINGS.CHANGE_PASSWORD]: <ChangePasswordPage />,
   //------Setting END-----
 
 

@@ -263,7 +263,7 @@ export default function Sidebar({
         {items.map((item) => renderNavItem(item))}
       </List>
       {/* Logged-in user */}
-      {!collapsed && <Box
+      {/* {!collapsed && <Box
         sx={{
           display: 'flex',
           alignItems: 'center',
@@ -302,7 +302,7 @@ export default function Sidebar({
             {user.email}
           </Typography>
         </Box>
-      </Box>}
+      </Box>} */}
 
       {/* Logout */}
       <Tooltip title={collapsed ? 'Logout' : ''} placement="right" arrow>

@@ -410,19 +410,19 @@ export const NAV_ITEMS: NavItem[] = [
   // EXISTING MENUS — retained below the new menus
   // --------------------------------------------------
 
-  {
-    label: 'Bank Management',
-    path: PATHS.banks,
-    icon: AccountBalanceOutlinedIcon,
-    roles: [SUPER_ADMIN],
-  },
+  // {
+  //   label: 'Bank Management',
+  //   path: PATHS.banks,
+  //   icon: AccountBalanceOutlinedIcon,
+  //   roles: [SUPER_ADMIN],
+  // },
 
-  {
-    label: 'Branches',
-    path: PATHS.branches,
-    icon: AccountBalanceOutlinedIcon,
-    roles: [BANK_ADMIN],
-  },
+  // {
+  //   label: 'Branches',
+  //   path: PATHS.branches,
+  //   icon: AccountBalanceOutlinedIcon,
+  //   roles: [BANK_ADMIN],
+  // },
 
   {
     label: 'Customers',
@@ -452,12 +452,12 @@ export const NAV_ITEMS: NavItem[] = [
     roles: [BANK_ADMIN],
   },
 
-  {
-    label: 'Upload Image',
-    path: PATHS.uploadImages,
-    icon: ImageOutlinedIcon,
-    roles: [SUPER_ADMIN],
-  },
+  // {
+  //   label: 'Upload Image',
+  //   path: PATHS.uploadImages,
+  //   icon: ImageOutlinedIcon,
+  //   roles: [SUPER_ADMIN],
+  // },
 ];
 
 const filterItemsForRole = (items: NavItem[], role: Role): NavItem[] =>
