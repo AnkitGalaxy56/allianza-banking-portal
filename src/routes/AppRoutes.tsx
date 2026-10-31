@@ -53,7 +53,7 @@ const BUILT_PAGES: Record<string, ReactElement> = {
   //-------User managenet start---
   [PATHS.USER_MANAGEMENT.ROOT]: <UserManagement />,
   [PATHS.USER_MANAGEMENT.USER_MASTER]: <UserManagement />,
-  [PATHS.USER_MANAGEMENT.ASSIGN_PASSWORD]: <UserManagement />,
+  // [PATHS.USER_MANAGEMENT.ASSIGN_PASSWORD]: <UserManagement />,
   //---------User managenet END---
 
   //------Masters START-------

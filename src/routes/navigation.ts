@@ -353,19 +353,19 @@ export const NAV_ITEMS: NavItem[] = [
     children: [
       {
         label: 'Requests',
-        path: '/reports/requests',
+        path: PATHS.REPORTS.REQUESTS,
         icon: DescriptionOutlinedIcon,
         roles: ALL_BANK_ROLES,
       },
       {
         label: 'User Master',
-        path: '/reports/user-master',
+        path: PATHS.REPORTS.USER_MASTER,
         icon: ManageAccountsOutlinedIcon,
         roles: ALL_BANK_ROLES,
       },
       {
         label: 'Notification',
-        path: '/reports/notification',
+        path: PATHS.REPORTS.NOTIFICATION,
         icon: NotificationsNoneOutlinedIcon,
         roles: ALL_BANK_ROLES,
       },

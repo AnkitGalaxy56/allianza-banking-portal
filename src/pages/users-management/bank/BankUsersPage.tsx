@@ -287,7 +287,7 @@ export default function BankUsersPage() {
       /> */}
       <PageHeader
         title="User Management"
-        subtitle="Manage users, system roles and access permissions"
+        subtitle="Manage users, system roles."
       // actions={
       //   <>
       //     <Button
@@ -323,34 +323,7 @@ export default function BankUsersPage() {
       />
       <Paper variant="outlined" sx={{ borderRadius: 3, overflow: 'hidden', minWidth: 0 }}>
         <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', p: 2.5 }}>
-          <Button
-            variant="outlined"
-            color="inherit"
-            size="small"
-            startIcon={<VisibilityOutlinedIcon />}
-            onClick={() => { setAuthorizationFilter('all'); setPage(1); }}
-          >
-            View
-          </Button>
 
-          <Button
-            variant="contained"
-            startIcon={<AddOutlinedIcon />}
-            size="small"
-            onClick={openAddForm}
-          >
-            Create New
-          </Button>
-
-          <Button
-            variant="outlined"
-            color="inherit"
-            size="small"
-            startIcon={<PendingActionsOutlinedIcon />}
-            onClick={() => { setAuthorizationFilter('Pending'); setPage(1); }}
-          >
-            Pending for Authorisation
-          </Button>
           <TextField
             size="small"
             placeholder="Search by Emp ID, name, username, email or mobile"
@@ -364,7 +337,7 @@ export default function BankUsersPage() {
               startAdornment: <SearchOutlinedIcon sx={{ mr: 1, color: 'text.secondary' }} fontSize="small" />,
             }}
           />
-          {/* <TextField
+          <TextField
             select
             size="small"
             label="Branch filter"
@@ -394,8 +367,38 @@ export default function BankUsersPage() {
             <MenuItem value="all">All user roles</MenuItem>
             <MenuItem value="Bank User">Bank User</MenuItem>
             <MenuItem value="Admin User">Admin User</MenuItem>
-          </TextField> */}
+          </TextField>
         </Box>
+        <Stack direction={{ xs: 'column', md: 'row' }} spacing={1.5} sx={{ p: 2 }}>
+          <Button
+            variant="outlined"
+            color="inherit"
+            size="small"
+            startIcon={<VisibilityOutlinedIcon />}
+            onClick={() => { setAuthorizationFilter('all'); setPage(1); }}
+          >
+            View
+          </Button>
+
+          <Button
+            variant="contained"
+            startIcon={<AddOutlinedIcon />}
+            size="small"
+            onClick={openAddForm}
+          >
+            Create New
+          </Button>
+
+          <Button
+            variant="outlined"
+            color="inherit"
+            size="small"
+            startIcon={<PendingActionsOutlinedIcon />}
+            onClick={() => { setAuthorizationFilter('Pending'); setPage(1); }}
+          >
+            Pending for Authorisation
+          </Button>
+        </Stack>
 
         {error && <Box sx={{ px: 2.5, pb: 2 }}><ErrorState message={error} onRetry={reload} /></Box>}
         <Box sx={{ opacity: loading ? 0.55 : 1, transition: 'opacity .2s' }}>

@@ -38,7 +38,7 @@ const ADMIN_ACTIONS: QuickAction[] = [
   { label: 'Send push notification', to: PATHS.pushNotifications, icon: NotificationsNoneOutlinedIcon },
   { label: 'Upload banner', to: PATHS.banners, icon: ImageOutlinedIcon },
   { label: 'Reset customer device', to: PATHS.deviceReset, icon: SmartphoneOutlinedIcon },
-  { label: 'Add branch user', to: PATHS.branchUsers, icon: AddOutlinedIcon },
+  { label: 'Add branch user', to: PATHS.MASTERS.BRANCH_MASTER, icon: AddOutlinedIcon },
 ];
 
 const USER_ACTIONS: QuickAction[] = [
