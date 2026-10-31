@@ -3,7 +3,7 @@ import type { RequestModuleConfig } from './types';
 export type RequestFieldErrors = Record<string, string>;
 
 /** Validates required values and common banking field formats before create/edit submission. */
-export function validateRequestForm(fields: Record<string, unknown>, required: string[]): RequestFieldErrors {
+export function validateRequestForm(fields: Record<string, unknown>, required: readonly string[]): RequestFieldErrors {
   const errors: RequestFieldErrors = {};
   for (const key of required) {
     if (!String(fields[key] ?? '').trim()) errors[key] = 'This field is required.';
@@ -20,7 +20,7 @@ export function validateRequestForm(fields: Record<string, unknown>, required: s
   return errors;
 }
 
-export function validateRequestFields(fields: Record<string, string>, required: string[]): boolean {
+export function validateRequestFields(fields: Record<string, string>, required: readonly string[]): boolean {
   return Object.keys(validateRequestForm(fields, required)).length === 0;
 }
 export function assertModuleConfig(config: RequestModuleConfig): RequestModuleConfig { return config; }

@@ -54,7 +54,7 @@ export default function FormMultiLookupField<T extends FieldValues>({
       control={control}
       render={({ field, fieldState }) => {
         const selectedValues: string[] = Array.isArray(field.value)
-          ? field.value.filter((value): value is string => typeof value === 'string')
+          ? field.value.filter((value: unknown): value is string => typeof value === 'string')
           : [];
         const selectedOptions = options.filter((option) =>
           selectedValues.includes(option.value),

@@ -90,7 +90,7 @@ export default function GenericRequestModule() {
     <Typography variant="body2" color="text.secondary">Pending: {rows.filter((record) => record.requestStatus === 'Pending').length}</Typography>
    </Stack>
   </Paper>
-  <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth="md" scroll="paper" slotProps={{ paper: { sx: { maxHeight: 'calc(100% - 32px)', m: 2, width: '100%' } } }}>
+  <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth="md" scroll="paper" PaperProps={{ sx: { maxHeight: 'calc(100% - 32px)', m: 2, width: '100%' } }}>
    <DialogTitle sx={{ pr: 7, lineHeight: 1.35, overflowWrap: 'anywhere', fontWeight: 800 }}>{editing ? `Edit ${config.formTitle}` : config.formTitle}</DialogTitle>
    <DialogContent dividers sx={{ overflowY: 'auto', minWidth: 0 }}>
     <Stack spacing={2} sx={{ pt: 1, minWidth: 0 }}>

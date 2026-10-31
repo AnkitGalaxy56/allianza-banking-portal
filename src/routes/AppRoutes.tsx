@@ -17,7 +17,7 @@ const LeadEnquiriesPage = lazy(() => import('@/pages/lead-enquiries/LeadEnquirie
 const PushNotificationsPage = lazy(() => import('@/pages/push-notifications/PushNotificationsPage'));
 const DeviceResetPage = lazy(() => import('@/pages/device-reset/DeviceResetPage'));
 const BannersPage = lazy(() => import('@/pages/banners-content/BannersPage'));
-const ReportsPage = lazy(() => import('@/pages/reports/ReportsPage'));
+// const ReportsPage = lazy(() => import('@/pages/reports/ReportsPage'));
 const ProfilePage = lazy(() => import('@/pages/profile'));
 const ChangePasswordPage = lazy(() => import('@/pages/change-password'));
 const RolesAccessControlPage = lazy(() => import('@/pages/settings/roles-access-control'));
@@ -64,33 +64,38 @@ const BUILT_PAGES: Record<string, ReactElement> = {
   //------Setting START-----
   [PATHS.SETTINGS.ROLES_ACCESS_CONTROL]: <RolesAccessControlPage />,
   [PATHS.SETTINGS.PROFILE]: <ProfilePage />,
-  // [PATHS.SETTINGS.CHANGE_PASSWORD]: <ChangePasswordPage />,
+  [PATHS.SETTINGS.CHANGE_PASSWORD]: <ChangePasswordPage />,
   //------Setting END-----
 
 
   [PATHS.customers]: <CustomersPage />,
   [PATHS.customerOnboarding]: <CustomerOnboardingPage />,
-  [PATHS.uploadImages]: <UploadImagesPage />,
   [PATHS.serviceRequests]: <ServiceRequestsPage />,
   [PATHS.leadEnquiries]: <LeadEnquiriesPage />,
-  [PATHS.reports]: <ReportsPage />,
+  // [PATHS.reports]: <ReportsPage />,
   [PATHS.pushNotifications]: <PushNotificationsPage />,
   [PATHS.deviceReset]: <DeviceResetPage />,
   [PATHS.banners]: <BannersPage />,
+
+   //-----Request mobile utilities start-------
+  [PATHS.MOBILE_UTILITIES.IMAGE_UPLOADING]: <UploadImagesPage />,
+  [PATHS.MOBILE_UTILITIES.PUSH_NOTIFICATION]: <PushNotificationsPage />,
+  [PATHS.MOBILE_UTILITIES.DEVICE_RESET]: <DeviceResetPage />,
+  //-----Request mobile utilities end-------
+
 
   //-----Request handling start-------
   [PATHS.requestValidation]: <RequestValidationIndex />,
   [PATHS.REQUEST_HANDLING.PAYMENTS]: <PaymentsPage />,
   [PATHS.requestValidationOpeningAccounts]: <OpeningAccountsPage />,
-  [PATHS.requestValidationClosingAccounts]: <ClosingAccountsPage />,
-  [PATHS.requestValidationStandingInstructions]: <StandingInstructionsPage />,
-  [PATHS.requestValidationStopPayment]: <StopPaymentPage />,
-  [PATHS.requestValidationLeadManagement]: <RequestLeadManagementPage />,
+  [PATHS.REQUEST_HANDLING.FD_RD_CLOSING]: <ClosingAccountsPage />,
+  [PATHS.REQUEST_HANDLING.STANDING_INSTRUCTIONS]: <StandingInstructionsPage />,
+  [PATHS.REQUEST_HANDLING.STOP_PAYMENT]: <StopPaymentPage />,
+  [PATHS.REQUEST_HANDLING.LEAD_MANAGEMENT]: <RequestLeadManagementPage />,
   [PATHS.REQUEST_HANDLING.CHEQUE_BOOK]: <ChequeBookPage />,
   [PATHS.REQUEST_HANDLING.FD_OPENING]: <FDOpeningPage />,
   [PATHS.REQUEST_HANDLING.RD_OPENING]: <RDOpeningPage />,
   [PATHS.REQUEST_HANDLING.LOCKER_APPLICATION]: <LockerApplicationPage />,
-  [PATHS.REQUEST_HANDLING.STANDING_INSTRUCTIONS]: <StandingInstructionsRequestPage />,
   [PATHS.REQUEST_HANDLING.FRESH_LOAN_APPLICATION]: <FreshLoanApplicationPage />,
   [PATHS.REQUEST_HANDLING.LOAN_EMI_PAYMENT]: <LoanEMIPaymentPage />,
   //---------Request Handling end-----------------------------
