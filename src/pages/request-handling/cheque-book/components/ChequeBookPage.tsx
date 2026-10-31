@@ -6,7 +6,8 @@ import ConfirmDialog from '@/components/common/ConfirmDialog';
 import { ACCOUNT_STATUS_OPTIONS } from '@/constants/accountStatus';
 
 type RecordItem = { id: string; requestStatus: 'Pending' | 'Authorised' | 'Rejected'; accountNumber: string; customerName: string; chequeBookType: string; deliveryMethod: string; deliveryAddress: string; primary: boolean; default: boolean; statusCode: string };
-const empty: Omit<RecordItem, 'id'> = { accountNumber: '', customerName: '', chequeBookType: '25 pages', deliveryMethod: 'Collect from branch', deliveryAddress: '', primary: false, default: false, statusCode: '001' };
+type FormData = Omit<RecordItem, 'id' | 'requestStatus'>;
+const empty: FormData = { accountNumber: '', customerName: '', chequeBookType: '25 pages', deliveryMethod: 'Collect from branch', deliveryAddress: '', primary: false, default: false, statusCode: '001' };
 
 export default function ChequeBookPage() {
  const [rows, setRows] = useState<RecordItem[]>([
@@ -18,7 +19,7 @@ export default function ChequeBookPage() {
  const [open, setOpen] = useState(false);
  const [confirm, setConfirm] = useState(false);
  const [editing, setEditing] = useState<RecordItem | null>(null);
- const [form, setForm] = useState(empty);
+ const [form, setForm] = useState<FormData>(empty);
  const [message, setMessage] = useState('');
  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
  const filtered = useMemo(() => rows.filter((record) => `${record.id} ${record.accountNumber} ${record.customerName}`.toLowerCase().includes(search.toLowerCase()) && (tab === 'view' || record.requestStatus === 'Pending')), [rows, search, tab]);

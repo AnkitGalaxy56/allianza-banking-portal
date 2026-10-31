@@ -33,7 +33,7 @@ const USERS: BranchUser[] = Array.from({ length: 96 }, (_, i) => {
   const fallback = i < sampleNames.length
     ? person
     : { title: (i % 2 === 0 ? 'Mr' : 'Ms') as const, firstName: 'User', middleName: '', lastName: `name ${i + 1}` };
-  const role: BranchUser['role'] = i % 3 === 0 ? 'Manager' : 'Officer';
+  const role: BranchUser['role'] = i % 3 === 0 ? 'Admin User' : 'Bank User';
   const status = STATUSES[i % STATUSES.length];
 
   return {
@@ -49,7 +49,7 @@ const USERS: BranchUser[] = Array.from({ length: 96 }, (_, i) => {
     userName: i === 0 ? 'amit.sharma' : i === 1 ? 'priya.patil' : `user${i + 1}`,
     displayName: name,
     role,
-    systemRole: role === 'Manager' ? 'Branch Manager' : 'Branch Officer',
+    systemRole: role === 'Admin User' ? 'Branch Manager' : 'Branch Officer',
     branchId: branch.id,
     branchName: branch.name,
     multiBranchAccess: i % 4 === 0 ? [branch.id, MOCK_BRANCHES[(i + 1) % MOCK_BRANCHES.length].id] : [branch.id],
@@ -58,17 +58,17 @@ const USERS: BranchUser[] = Array.from({ length: 96 }, (_, i) => {
     dateOfBirth: i % 4 === 0 ? '1992-05-14' : '',
     twoFactorDesignation: i % 2 === 0 ? 'Primary' : 'Secondary',
     idleTimeoutSeconds: 300,
-    badLoginCount: status === 'Locked' ? 5 : 0,
+    badLoginCount: status === 'Password Blocked' ? 5 : 0,
     loginTime: LOGIN_TIMES[i % LOGIN_TIMES.length],
     logoutTime: LOGOUT_TIMES[i % LOGOUT_TIMES.length],
     inoperativeDate: '',
     twoFactorLogin: i % 2 === 0,
     authenticationType: i % 2 === 0 ? 'Password + OTP' : 'Password',
     accessLevel: {
-      create: role === 'Manager',
-      modify: role === 'Manager',
+      create: role === 'Admin User',
+      modify: role === 'Admin User',
       view: true,
-      authorise: role === 'Manager',
+      authorise: role === 'Admin User',
     },
     lastLogin: ['Today, 10:42', 'Today, 09:15', 'Yesterday', 'Never', '3 days ago'][i % 5],
   };
