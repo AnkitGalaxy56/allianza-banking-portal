@@ -17,7 +17,7 @@ const LeadEnquiriesPage = lazy(() => import('@/pages/lead-enquiries/LeadEnquirie
 const PushNotificationsPage = lazy(() => import('@/pages/push-notifications/PushNotificationsPage'));
 const DeviceResetPage = lazy(() => import('@/pages/device-reset/DeviceResetPage'));
 const BannersPage = lazy(() => import('@/pages/banners-content/BannersPage'));
-const ReportsPage = lazy(() => import('@/pages/reports/ReportsPage'));
+// const ReportsPage = lazy(() => import('@/pages/reports/ReportsPage'));
 const ProfilePage = lazy(() => import('@/pages/profile'));
 const ChangePasswordPage = lazy(() => import('@/pages/change-password'));
 const RolesAccessControlPage = lazy(() => import('@/pages/settings/roles-access-control'));
@@ -72,7 +72,7 @@ const BUILT_PAGES: Record<string, ReactElement> = {
   [PATHS.customerOnboarding]: <CustomerOnboardingPage />,
   [PATHS.serviceRequests]: <ServiceRequestsPage />,
   [PATHS.leadEnquiries]: <LeadEnquiriesPage />,
-  [PATHS.reports]: <ReportsPage />,
+  // [PATHS.reports]: <ReportsPage />,
   [PATHS.pushNotifications]: <PushNotificationsPage />,
   [PATHS.deviceReset]: <DeviceResetPage />,
   [PATHS.banners]: <BannersPage />,

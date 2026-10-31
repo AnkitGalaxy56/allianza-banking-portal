@@ -32,7 +32,7 @@ const USERS: BranchUser[] = Array.from({ length: 96 }, (_, i) => {
   const name = i < sampleNames.length ? buildName(person.firstName, person.middleName, person.lastName) : `User name ${i + 1}`;
   const fallback = i < sampleNames.length
     ? person
-    : { title: (i % 2 === 0 ? 'Mr' : 'Ms') as const, firstName: 'User', middleName: '', lastName: `name ${i + 1}` };
+    : { title: i % 2 === 0 ? 'Mr' as const : 'Ms' as const, firstName: 'User', middleName: '', lastName: `name ${i + 1}` };
   const role: BranchUser['role'] = i % 3 === 0 ? 'Admin User' : 'Bank User';
   const status = STATUSES[i % STATUSES.length];
 

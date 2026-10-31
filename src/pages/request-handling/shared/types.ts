@@ -37,4 +37,6 @@ export interface ValidationModuleConfig {
   columns: RequestField[];
   detailFields: RequestField[];
   initialRecords: ValidationRecord[];
+  approveLabel?: string;
+  rejectLabel?: string;
 }
