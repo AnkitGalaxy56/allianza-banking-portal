@@ -29,6 +29,8 @@ export interface DataTableProps<T> {
   emptyMessage?: string;
   /** Compact is the default to keep tables information-dense across the portal. */
   cellPadding?: 'compact' | 'comfortable';
+  /** Extra-dense rows for request queues that should fit more records in the viewport. */
+  dense?: boolean;
   stickyHeader?: boolean;
   maxHeight?: number | string;
   tableLayout?: 'auto' | 'fixed';
@@ -42,6 +44,7 @@ export default function DataTable<T>({
   onRowClick,
   emptyMessage = 'No records found.',
   cellPadding = 'compact',
+  dense = false,
   stickyHeader = false,
   maxHeight,
   tableLayout = 'auto',
@@ -50,9 +53,9 @@ export default function DataTable<T>({
   const compact = cellPadding === 'compact';
   const cellSx = {
     px: compact ? 1.25 : 2,
-    py: compact ? 0.75 : 1.5,
-    fontSize: compact ? 12.5 : 13,
-    lineHeight: 1.4,
+    py: dense ? 0.35 : compact ? 0.75 : 1.5,
+    fontSize: dense ? 11.75 : compact ? 12.5 : 13,
+    lineHeight: dense ? 1.2 : 1.4,
     borderColor: 'divider',
   } as const;
 
@@ -76,6 +79,11 @@ export default function DataTable<T>({
           width: '100%',
           tableLayout,
           '& .MuiTableCell-root': { boxSizing: 'border-box' },
+          ...(dense ? {
+            '& .MuiButton-root': { minHeight: 24, py: 0.15, px: 0.75, fontSize: 11 },
+            '& .MuiChip-root': { height: 20, fontSize: 10.5 },
+            '& .MuiChip-label': { px: 0.75 },
+          } : {}),
         }}
       >
         <TableHead>

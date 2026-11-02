@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Alert, Box, Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle, MenuItem, Paper, Stack, TextField } from '@mui/material';
+import { Alert, Box, Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle, MenuItem, Paper, Stack, TextField, Typography } from '@mui/material';
 import PageHeader from '@/components/common/PageHeader';
 import DataTable, { type DataTableColumn } from '@/components/common/DataTable';
 import ConfirmDialog from '@/components/common/ConfirmDialog';
@@ -17,6 +17,7 @@ export default function ChequeBookPage() {
  const [search, setSearch] = useState('');
  const [tab, setTab] = useState<'view' | 'pending'>('view');
  const [open, setOpen] = useState(false);
+ const [selected, setSelected] = useState<RecordItem | null>(null);
  const [confirm, setConfirm] = useState(false);
  const [editing, setEditing] = useState<RecordItem | null>(null);
  const [form, setForm] = useState<FormData>(empty);
@@ -25,21 +26,22 @@ export default function ChequeBookPage() {
  const filtered = useMemo(() => rows.filter((record) => `${record.id} ${record.accountNumber} ${record.customerName}`.toLowerCase().includes(search.toLowerCase()) && (tab === 'view' || record.requestStatus === 'Pending')), [rows, search, tab]);
  const field = (key: keyof typeof empty, value: string | boolean) => setForm((old) => ({ ...old, [key]: value }));
  const startNew = () => { setEditing(null); setForm(empty); setFieldErrors({}); setOpen(true); };
- const startEdit = (record: RecordItem) => { setEditing(record); setForm({ accountNumber: record.accountNumber, customerName: record.customerName, chequeBookType: record.chequeBookType, deliveryMethod: record.deliveryMethod, deliveryAddress: record.deliveryAddress, primary: record.primary, default: record.default, statusCode: record.statusCode }); setFieldErrors({}); setOpen(true); };
+ const startEdit = (record: RecordItem) => { if (record.requestStatus !== 'Authorised') return; setEditing(record); setForm({ accountNumber: record.accountNumber, customerName: record.customerName, chequeBookType: record.chequeBookType, deliveryMethod: record.deliveryMethod, deliveryAddress: record.deliveryAddress, primary: record.primary, default: record.default, statusCode: record.statusCode }); setFieldErrors({}); setOpen(true); };
+ const verify = (decision: 'Authorised' | 'Rejected') => { if (!selected) return; setRows((old) => old.map((r) => r.id === selected.id ? { ...r, requestStatus: decision } : r)); setMessage(`${selected.id} ${decision === 'Authorised' ? 'verified' : 'rejected'} successfully.`); setSelected(null); };
  const save = () => { const next: Record<string, string> = {}; if (!form.accountNumber.trim()) next.accountNumber = 'Account number is required.'; else if (!/^[A-Za-z0-9 Xx-]{4,24}$/.test(form.accountNumber.trim())) next.accountNumber = 'Enter a valid account number.'; if (!form.customerName.trim()) next.customerName = 'Customer name is required.'; else if (form.customerName.trim().length < 2) next.customerName = 'Enter at least 2 characters.'; if (form.deliveryMethod === 'Delivery address' && !form.deliveryAddress.trim()) next.deliveryAddress = 'Delivery address is required for delivery.'; setFieldErrors(next); if (Object.keys(next).length) return; setConfirm(true); };
  const commit = () => { if (editing) setRows((old) => old.map((record) => record.id === editing.id ? { ...form, id: editing.id, requestStatus: record.requestStatus } : record)); else setRows((old) => [{ ...form, id: `CHQ-${Date.now().toString().slice(-6)}`, requestStatus: 'Pending' }, ...old]); setConfirm(false); setOpen(false); setMessage(editing ? 'Cheque book request updated.' : 'Cheque book request created.'); };
 
  const columns: DataTableColumn<RecordItem>[] = [
-  { key: 'id', label: 'Request ID', minWidth: 120, nowrap: true, render: (record) => <Box component="span" sx={{ fontWeight: 700, fontSize: 13 }}>{record.id}</Box> },
-  { key: 'accountNumber', label: 'Account Number', minWidth: 130, nowrap: true, render: (record) => record.accountNumber },
-  { key: 'customerName', label: 'Customer Name', minWidth: 160, render: (record) => record.customerName },
-  { key: 'chequeBookType', label: 'Cheque Book Type', minWidth: 130, render: (record) => record.chequeBookType },
-  { key: 'deliveryMethod', label: 'Delivery', minWidth: 150, render: (record) => record.deliveryMethod },
-  { key: 'primary', label: 'Primary', minWidth: 80, render: (record) => record.primary ? 'Yes' : 'No' },
-  { key: 'default', label: 'Default', minWidth: 80, render: (record) => record.default ? 'Yes' : 'No' },
-  { key: 'statusCode', label: 'Account Status', minWidth: 150, render: (record) => ACCOUNT_STATUS_OPTIONS.find((status) => status.value === record.statusCode)?.label ?? record.statusCode },
-  { key: 'requestStatus', label: 'Request Status', minWidth: 130, render: (record) => <Chip size="small" label={record.requestStatus} color={record.requestStatus === 'Pending' ? 'warning' : record.requestStatus === 'Authorised' ? 'success' : 'error'} variant="outlined" /> },
-  { key: 'actions', label: 'Actions', minWidth: 100, nowrap: true, render: (record) => <Button size="small" onClick={() => startEdit(record)}>Edit</Button> },
+  { key: 'id', label: 'Request ID', minWidth: 50, nowrap: true, render: (record) => <Box component="span" sx={{ fontWeight: 700, fontSize: 13 }}>{record.id}</Box> },
+  { key: 'accountNumber', label: 'Account Number', minWidth: 25, render: (record) => record.accountNumber },
+  { key: 'customerName', label: 'Customer Name', minWidth: 25, render: (record) => record.customerName },
+  { key: 'chequeBookType', label: 'Cheque Book Type', minWidth: 25, render: (record) => record.chequeBookType },
+  { key: 'deliveryMethod', label: 'Delivery', minWidth: 25, render: (record) => record.deliveryMethod },
+  { key: 'primary', label: 'Primary', minWidth: 25, render: (record) => record.primary ? 'Yes' : 'No' },
+  { key: 'default', label: 'Default', minWidth: 25, render: (record) => record.default ? 'Yes' : 'No' },
+  { key: 'statusCode', label: 'Account Status', minWidth: 25, render: (record) => ACCOUNT_STATUS_OPTIONS.find((status) => status.value === record.statusCode)?.label ?? record.statusCode },
+  { key: 'requestStatus', label: 'Status', minWidth: 25, nowrap: true, render: (record) => <Chip size="small" label={record.requestStatus === 'Pending' ? 'Pending for Authorisation' : record.requestStatus} color={record.requestStatus === 'Pending' ? 'warning' : record.requestStatus === 'Authorised' ? 'success' : 'error'} variant="outlined" /> },
+  { key: 'actions', label: 'Actions', minWidth: 220, nowrap: true, render: (record) => record.requestStatus === 'Pending' ? <Button size="small" color="success" variant="contained" onClick={() => setSelected(record)}>Verify</Button> : <Stack direction="row" spacing={0.25}><Button size="small" disabled={record.requestStatus !== 'Authorised'} onClick={() => setSelected(record)}>View</Button><Button size="small" disabled={record.requestStatus !== 'Authorised'} onClick={() => startEdit(record)}>Edit</Button></Stack> },
  ];
 
  return <Box>
@@ -49,12 +51,17 @@ export default function ChequeBookPage() {
    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ p: 2.5 }}>
     <TextField size="small" fullWidth placeholder="Search account or customer" value={search} onChange={(event) => setSearch(event.target.value)} />
     <Button size="small" variant={tab === 'view' ? 'contained' : 'outlined'} onClick={() => setTab('view')}>View</Button>
-    <Button size="small" variant={tab === 'pending' ? 'contained' : 'outlined'} onClick={() => setTab('pending')}>Request for Pending ({rows.filter((record) => record.requestStatus === 'Pending').length})</Button>
+    <Button size="small" variant={tab === 'pending' ? 'contained' : 'outlined'} onClick={() => setTab('pending')}>Pending for Authorisation ({rows.filter((record) => record.requestStatus === 'Pending').length})</Button>
    </Stack>
    <DataTable rows={filtered} columns={columns} getRowId={(record) => record.id} emptyMessage="No cheque book requests found." />
    <Box sx={{ p: 2.5, borderTop: 1, borderColor: 'divider' }}><TypographyCaption count={filtered.length} total={rows.length} /></Box>
   </Paper>
 
+  <Dialog open={!!selected} onClose={() => setSelected(null)} fullWidth maxWidth="md">
+   <DialogTitle>{selected?.requestStatus === 'Pending' ? 'Verify Cheque Book Request' : 'View Cheque Book Request'} {selected?.id}</DialogTitle>
+   <DialogContent dividers>{selected && <Box sx={{display:'grid',gridTemplateColumns:{xs:'1fr',sm:'1fr 1fr'},gap:2}}>{Object.entries(selected).filter(([key])=>key!=='id').map(([key,value])=><Box key={key}><Typography variant="caption" color="text.secondary">{key}</Typography><Typography>{String(value)}</Typography></Box>)}</Box>}</DialogContent>
+   <DialogActions><Button onClick={()=>setSelected(null)}>Close</Button>{selected?.requestStatus === 'Pending' && <><Button color="error" onClick={()=>verify('Rejected')}>Reject</Button><Button color="success" variant="contained" onClick={()=>verify('Authorised')}>Verify</Button></>}</DialogActions>
+  </Dialog>
   <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth="md">
    <DialogTitle sx={{ fontWeight: 800 }}>{editing ? 'Edit Cheque Book Request' : 'Create Cheque Book Request'}</DialogTitle>
    <DialogContent dividers>

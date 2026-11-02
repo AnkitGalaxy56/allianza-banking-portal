@@ -54,20 +54,22 @@ export default function GenericRequestModule() {
    try { window.localStorage.setItem(`${STORAGE_PREFIX}${location.pathname}`, JSON.stringify(rowsState.rows)); } catch { /* Storage may be unavailable; sample rows still render. */ }
   }
  }, [location.pathname, rowsState]);
- const [search,setSearch]=useState(''); const [tab,setTab]=useState<'view'|'pending'>('view'); const [open,setOpen]=useState(false); const [editing,setEditing]=useState<RequestRecord|null>(null); const [form,setForm]=useState<Record<string,string>>(empty); const [confirm,setConfirm]=useState(false); const [message,setMessage]=useState(''); const [error,setError]=useState(''); const [fieldErrors,setFieldErrors]=useState<Record<string,string>>({});
+ const [search,setSearch]=useState(''); const [tab,setTab]=useState<'view'|'pending'>('view'); const [selected,setSelected]=useState<RequestRecord|null>(null); const [open,setOpen]=useState(false); const [editing,setEditing]=useState<RequestRecord|null>(null); const [form,setForm]=useState<Record<string,string>>(empty); const [confirm,setConfirm]=useState(false); const [message,setMessage]=useState(''); const [error,setError]=useState(''); const [fieldErrors,setFieldErrors]=useState<Record<string,string>>({});
  const filtered=useMemo(()=>rows.filter(r=>JSON.stringify(r).toLowerCase().includes(search.toLowerCase())&&(tab==='view'||r.requestStatus==='Pending')),[rows,search,tab]);
  const startNew=()=>{setEditing(null);setForm({...empty});setError('');setFieldErrors({});setOpen(true)};
- const startEdit=(r:RequestRecord)=>{setEditing(r);setForm(Object.fromEntries(config.fields.map((f:any)=>[f.key,String(r[f.key]??'')])));setError('');setFieldErrors({});setOpen(true)};
+ const startEdit=(r:RequestRecord)=>{if(r.requestStatus!=='Authorised')return;setSelected(null);setEditing(r);setForm(Object.fromEntries(config.fields.map((f:any)=>[f.key,String(r[f.key]??'')])));setError('');setFieldErrors({});setOpen(true)};
  const change=(key:string,value:string)=>{setForm(old=>{const next={...old,[key]:value}; if(config.eligibility){const income=Number(next.totalIncome||0),expense=Number(next.totalExpense||0);next.eligibility=String(Math.max(0,(income-expense)*12*3));}return next;});};
+ const verify=(status:'Authorised'|'Rejected')=>{if(!selected)return;setRows(old=>old.map(r=>r.id===selected.id?{...r,requestStatus:status}:r));setMessage(`${selected.id} ${status==='Authorised'?'verified':'rejected'} successfully.`);setSelected(null);};
  const save=()=>{const validation=validateRequestForm(form,requiredFields);setFieldErrors(validation);if(Object.keys(validation).length){setError('Please correct the highlighted fields before submitting.');return;}if(location.pathname.endsWith('loan-emi-payment')&&Number(form.debitAmount)>Number(form.currentBalance)){setError('Dear Customer, Your request has been rejected due to insufficient funds in your account. Kindly maintain sufficient balance and generate the request.');return;}setError('');setConfirm(true)};
  const commit=()=>{if(editing)setRows(old=>old.map(r=>r.id===editing.id?{...r,...form}:r));else setRows(old=>[{id:`REQ-${Date.now().toString().slice(-6)}`,requestStatus:'Pending',...form},...old]);setConfirm(false);setOpen(false);setMessage(editing?'Request updated successfully.':'Request created and sent for authorisation.');};
  const columns: DataTableColumn<RequestRecord>[] = [
+  { key: 'requestId', label: 'Request ID', minWidth: 50, nowrap: true, render: (record: RequestRecord) => record.id },
   ...config.columns.map((column: string, index: number) => ({
-   key: `field-${index}`, label: column, minWidth: 130, nowrap: true,
+   key: `field-${index}`, label: column, minWidth: 25,
    render: (record: RequestRecord) => String(record[config.columnKeys[index]] ?? (column === 'Status' ? '002 - Operative' : '—')),
   })),
-  { key: 'requestStatus', label: 'Request Status', minWidth: 130, render: (record) => <Chip size="small" label={record.requestStatus} color={record.requestStatus === 'Pending' ? 'warning' : record.requestStatus === 'Authorised' ? 'success' : 'error'} variant="outlined" /> },
-  { key: 'actions', label: 'Actions', minWidth: 130, nowrap: true, render: (record) => <Button size="small" onClick={() => startEdit(record)}>View / Edit</Button> },
+  { key: 'requestStatus', label: 'Status', minWidth: 25, nowrap: true, render: (record) => <Chip size="small" label={record.requestStatus === 'Pending' ? 'Pending for Authorisation' : record.requestStatus} color={record.requestStatus === 'Pending' ? 'warning' : record.requestStatus === 'Authorised' ? 'success' : 'error'} variant="outlined" /> },
+  { key: 'actions', label: 'Actions', minWidth: 220, nowrap: true, render: (record) => record.requestStatus === 'Pending' ? <Button size="small" color="success" variant="contained" onClick={() => setSelected(record)}>Verify</Button> : <Stack direction="row" spacing={0.25}><Button size="small" disabled={record.requestStatus !== 'Authorised'} onClick={() => setSelected(record)}>View</Button><Button size="small" disabled={record.requestStatus !== 'Authorised'} onClick={() => startEdit(record)}>Edit</Button></Stack> },
  ];
  return <Box>
   <PageHeader
@@ -81,7 +83,7 @@ export default function GenericRequestModule() {
     <TextField size="small" fullWidth placeholder="Search requests" value={search} onChange={(event) => setSearch(event.target.value)} />
     <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ mt: 1.5 }}>
      <Button size="small" variant={tab === 'view' ? 'contained' : 'outlined'} onClick={() => setTab('view')}>View</Button>
-     {config.tabs.includes('Pending for Authorisation') && <Button size="small" variant={tab === 'pending' ? 'contained' : 'outlined'} onClick={() => setTab('pending')}>Request for Pending ({rows.filter((record) => record.requestStatus === 'Pending').length})</Button>}
+     {config.tabs.includes('Pending for Authorisation') && <Button size="small" variant={tab === 'pending' ? 'contained' : 'outlined'} onClick={() => setTab('pending')}>Pending for Authorisation ({rows.filter((record) => record.requestStatus === 'Pending').length})</Button>}
     </Stack>
    </Box>
    <DataTable rows={filtered} columns={columns} getRowId={(record) => record.id} emptyMessage="No requests found." />
@@ -90,6 +92,11 @@ export default function GenericRequestModule() {
     <Typography variant="body2" color="text.secondary">Pending: {rows.filter((record) => record.requestStatus === 'Pending').length}</Typography>
    </Stack>
   </Paper>
+  <Dialog open={!!selected} onClose={() => setSelected(null)} fullWidth maxWidth="md">
+   <DialogTitle sx={{fontWeight:800}}>{selected?.requestStatus === 'Pending' ? 'Verify Request' : 'View Request'} {selected?.id}</DialogTitle>
+   <DialogContent dividers>{selected && <><Alert severity={selected.requestStatus === 'Pending' ? 'warning' : 'success'} sx={{mb:2}}>Status: {selected.requestStatus === 'Pending' ? 'Pending for Authorisation' : selected.requestStatus}</Alert><Box sx={{display:'grid',gridTemplateColumns:{xs:'1fr',sm:'1fr 1fr'},gap:2}}>{config.fields.map((f:any)=><Box key={f.key}><Typography variant="caption" color="text.secondary">{f.label}</Typography><Typography>{selected[f.key] || '—'}</Typography></Box>)}</Box></>}</DialogContent>
+   <DialogActions><Button size="small" onClick={()=>setSelected(null)}>Close</Button>{selected?.requestStatus === 'Pending' && <><Button size="small" color="error" onClick={()=>verify('Rejected')}>Reject</Button><Button size="small" color="success" variant="contained" onClick={()=>verify('Authorised')}>Verify</Button></>}</DialogActions>
+  </Dialog>
   <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth="md" scroll="paper" PaperProps={{ sx: { maxHeight: 'calc(100% - 32px)', m: 2, width: '100%' } }}>
    <DialogTitle sx={{ pr: 7, lineHeight: 1.35, overflowWrap: 'anywhere', fontWeight: 800 }}>{editing ? `Edit ${config.formTitle}` : config.formTitle}</DialogTitle>
    <DialogContent dividers sx={{ overflowY: 'auto', minWidth: 0 }}>
