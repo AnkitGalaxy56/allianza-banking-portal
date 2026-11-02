@@ -17,8 +17,17 @@ const LeadEnquiriesPage = lazy(() => import('@/pages/lead-enquiries/LeadEnquirie
 const PushNotificationsPage = lazy(() => import('@/pages/push-notifications/PushNotificationsPage'));
 const DeviceResetPage = lazy(() => import('@/pages/device-reset/DeviceResetPage'));
 const BannersPage = lazy(() => import('@/pages/banners-content/BannersPage'));
-// const ReportsPage = lazy(() => import('@/pages/reports/ReportsPage'));
-const ProfilePage = lazy(() => import('@/pages/profile'));
+const RequestsReportPage = lazy(
+  () => import('@/pages/reports/requests')
+);
+
+const UserMasterReportPage = lazy(
+  () => import('@/pages/reports/user-master')
+);
+
+const NotificationReportPage = lazy(
+  () => import('@/pages/reports/notification')
+); const ProfilePage = lazy(() => import('@/pages/profile'));
 const ChangePasswordPage = lazy(() => import('@/pages/change-password'));
 const RolesAccessControlPage = lazy(() => import('@/pages/settings/roles-access-control'));
 
@@ -67,6 +76,9 @@ const BUILT_PAGES: Record<string, ReactElement> = {
   [PATHS.SETTINGS.CHANGE_PASSWORD]: <ChangePasswordPage />,
   //------Setting END-----
 
+  [PATHS.REPORTS.REQUESTS]: <RequestsReportPage />,
+  [PATHS.REPORTS.USER_MASTER]: <UserMasterReportPage />,
+  [PATHS.REPORTS.NOTIFICATION]: <NotificationReportPage />,
 
 
   [PATHS.customers]: <CustomersPage />,
@@ -78,7 +90,7 @@ const BUILT_PAGES: Record<string, ReactElement> = {
   [PATHS.deviceReset]: <DeviceResetPage />,
   [PATHS.banners]: <BannersPage />,
 
-   //-----Request mobile utilities start-------
+  //-----Request mobile utilities start-------
   [PATHS.MOBILE_UTILITIES.IMAGE_UPLOADING]: <UploadImagesPage />,
   [PATHS.MOBILE_UTILITIES.PUSH_NOTIFICATION]: <PushNotificationsPage />,
   [PATHS.MOBILE_UTILITIES.DEVICE_RESET]: <DeviceResetPage />,
