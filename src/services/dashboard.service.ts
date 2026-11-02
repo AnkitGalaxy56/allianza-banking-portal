@@ -5,7 +5,7 @@ import { ENDPOINTS } from './api/endpoints';
 
 export const dashboardService = {
   async getSuperAdminDashboard(): Promise<SuperAdminDashboardData> {
-    if (import.meta.env.DEV && env.useMockApi) {
+    if (env.useMockApi) {
       const { mockSuperAdminDashboard } = await import('./mock/mockDashboard');
       return mockSuperAdminDashboard();
     }
@@ -15,7 +15,7 @@ export const dashboardService = {
 
   /** `branch` = branch name/id to filter by; empty = all branches. */
   async getBankDashboard(branch?: string): Promise<BankDashboardData> {
-    if (import.meta.env.DEV && env.useMockApi) {
+    if (env.useMockApi) {
       const { mockBankDashboard } = await import('./mock/mockDashboard');
       return mockBankDashboard(branch);
     }

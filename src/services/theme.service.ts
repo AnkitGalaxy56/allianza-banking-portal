@@ -5,7 +5,7 @@ import { ENDPOINTS } from './api/endpoints';
 
 export const themeService = {
   async getBankTheme(bankCode: string): Promise<BankTheme> {
-    if (import.meta.env.DEV && env.useMockApi) {
+    if (env.useMockApi) {
       const { mockGetBankTheme } = await import('./mock/mockThemes');
       return mockGetBankTheme(bankCode);
     }

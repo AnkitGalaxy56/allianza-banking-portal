@@ -6,7 +6,7 @@ import { ENDPOINTS } from './api/endpoints';
 
 export const customerService = {
   async list(query: CustomerQuery): Promise<Paginated<Customer>> {
-    if (import.meta.env.DEV && env.useMockApi) {
+    if (env.useMockApi) {
       const { mockListCustomers } = await import('./mock/mockCustomers');
       return mockListCustomers(query);
     }
@@ -14,14 +14,14 @@ export const customerService = {
     return data;
   },
   async updateStatus(id: string, status: CustomerStatus): Promise<void> {
-    if (import.meta.env.DEV && env.useMockApi) {
+    if (env.useMockApi) {
       const { mockUpdateCustomerStatus } = await import('./mock/mockCustomers');
       return mockUpdateCustomerStatus(id, status);
     }
     await api.patch(ENDPOINTS.customers.byId(id), { status });
   },
   async resetDevice(id: string): Promise<void> {
-    if (import.meta.env.DEV && env.useMockApi) {
+    if (env.useMockApi) {
       await new Promise((resolve) => setTimeout(resolve, 250));
       return;
     }
