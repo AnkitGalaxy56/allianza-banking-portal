@@ -11,6 +11,7 @@ export interface RequestRecord {
 export interface RequestField {
   key: string;
   label: string;
+  options?: string[];
 }
 
 export interface RequestModuleConfig {

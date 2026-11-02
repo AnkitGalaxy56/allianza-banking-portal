@@ -13,7 +13,7 @@ export const requestsConfig: RequestModuleConfig = {
   detailFields: [
     { key: 'account', label: 'Account No.' }, { key: 'customer', label: 'Account Name' },
     { key: 'accountStatus', label: 'Account Status Code' }, { key: 'currentBalance', label: 'Current Balance' },
-    { key: 'mode', label: 'Payment Mode' }, { key: 'beneficiaryAccount', label: 'Beneficiary Account No.' },
+    { key: 'mode', label: 'Payment Mode', options: ['NEFT', 'RTGS', 'IMPS'] }, { key: 'beneficiaryAccount', label: 'Beneficiary Account No.' },
     { key: 'beneficiary', label: 'Beneficiary Name' }, { key: 'bank', label: 'Bank Name' },
     { key: 'ifsc', label: 'IFSC Code' }, { key: 'mobile', label: 'Mobile No.' },
     { key: 'amount', label: 'Amount (Rs.)' }, { key: 'remarks', label: 'Remarks' },

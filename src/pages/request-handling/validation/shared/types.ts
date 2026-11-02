@@ -9,8 +9,8 @@ export interface ValidationModuleConfig {
   title: string;
   description: string;
   searchPlaceholder: string;
-  columns: Array<{ key: string; label: string }>;
-  detailFields: Array<{ key: string; label: string }>;
+  columns: Array<{ key: string; label: string; options?: string[] }>;
+  detailFields: Array<{ key: string; label: string; options?: string[] }>;
   initialRecords: ValidationRecord[];
   approveLabel?: string;
   rejectLabel?: string;

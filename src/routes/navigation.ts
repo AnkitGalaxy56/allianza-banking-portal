@@ -263,12 +263,12 @@ export const NAV_ITEMS: NavItem[] = [
       //   icon: PersonAddAlt1OutlinedIcon,
       //   roles: ALL_BANK_ROLES,
       // },
-      {
-        label: 'Lead Management',
-        path: PATHS.REQUEST_HANDLING.LEAD_MANAGEMENT,
-        icon: TrendingUpOutlinedIcon,
-        roles: ALL_BANK_ROLES,
-      },
+      // {
+      //   label: 'Lead Management',
+      //   path: PATHS.REQUEST_HANDLING.LEAD_MANAGEMENT,
+      //   icon: TrendingUpOutlinedIcon,
+      //   roles: ALL_BANK_ROLES,
+      // },
     ],
   },
 
