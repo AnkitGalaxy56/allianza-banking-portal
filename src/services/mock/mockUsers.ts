@@ -2,9 +2,8 @@ import { ROLES, type Role } from '@/config/roles';
 import type { User } from '@/types/auth';
 
 /**
- * TEMPORARY DEVELOPMENT LOGINS - used only when VITE_USE_MOCK_API=true in `npm run dev`.
- * Never shipped in production builds (this file is only loaded through dynamic imports
- * guarded by `import.meta.env.DEV`).
+ * TEMPORARY DEVELOPMENT LOGINS - used only when VITE_USE_MOCK_API=true.
+ * Loaded dynamically only when mock mode is explicitly enabled.
  */
 interface MockAccount {
   loginId: string;

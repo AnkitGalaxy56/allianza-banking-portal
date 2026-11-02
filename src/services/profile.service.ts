@@ -41,7 +41,7 @@ function defaultProfile(user: User): UserProfile {
 
 export const profileService = {
   async getCurrent(user: User): Promise<UserProfile> {
-    if (import.meta.env.DEV && env.useMockApi) {
+    if (env.useMockApi) {
       const saved = window.localStorage.getItem(profileKey(user.id));
       return { ...defaultProfile(user), ...(saved ? JSON.parse(saved) as Partial<UserProfile> : {}) };
     }
@@ -50,7 +50,7 @@ export const profileService = {
   },
 
   async updateCurrent(user: User, changes: EditableProfileFields): Promise<UserProfile> {
-    if (import.meta.env.DEV && env.useMockApi) {
+    if (env.useMockApi) {
       const current = await this.getCurrent(user);
       const updated = { ...current, email: changes.email.trim(), mobile: changes.mobile.trim() };
       window.localStorage.setItem(profileKey(user.id), JSON.stringify(updated));

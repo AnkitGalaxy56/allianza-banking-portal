@@ -5,8 +5,8 @@ import { ENDPOINTS } from './api/endpoints';
 
 export const authService = {
   async login(payload: LoginRequest): Promise<LoginResponse> {
-    // `import.meta.env.DEV &&` lets the bundler remove the mock code from production builds.
-    if (import.meta.env.DEV && env.useMockApi) {
+    // Mock mode can also be enabled for a Vercel demo through VITE_USE_MOCK_API=true.
+    if (env.useMockApi) {
       const { mockLogin } = await import('./mock/mockAuth');
       return mockLogin(payload);
     }
@@ -15,7 +15,7 @@ export const authService = {
   },
 
   async logout(): Promise<void> {
-    if (import.meta.env.DEV && env.useMockApi) return;
+    if (env.useMockApi) return;
     await api.post(ENDPOINTS.auth.logout);
   },
 };

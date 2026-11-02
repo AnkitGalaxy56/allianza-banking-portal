@@ -18,7 +18,7 @@ export default function DevCredentialsHint({ role, bankCode, onUse }: Props) {
   const [credentials, setCredentials] = useState<DevCredential[]>([]);
 
   useEffect(() => {
-    if (import.meta.env.DEV && env.useMockApi) {
+    if (env.useMockApi) {
       void import('@/services/mock/mockUsers').then((m) => {
         setCredentials(m.getDevCredentials(role, bankCode));
       });

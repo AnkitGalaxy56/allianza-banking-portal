@@ -6,7 +6,7 @@ import { ENDPOINTS } from './api/endpoints';
 
 export const branchService = {
   async list(query: BranchQuery): Promise<Paginated<Branch>> {
-    if (import.meta.env.DEV && env.useMockApi) {
+    if (env.useMockApi) {
       const { mockListBranches } = await import('./mock/mockBranches');
       return mockListBranches(query);
     }
@@ -22,7 +22,7 @@ export const branchService = {
   },
 
   async create(input: BranchInput): Promise<Branch> {
-    if (import.meta.env.DEV && env.useMockApi) {
+    if (env.useMockApi) {
       const { mockCreateBranch } = await import('./mock/mockBranches');
       return mockCreateBranch(input);
     }
@@ -31,7 +31,7 @@ export const branchService = {
   },
 
   async update(id: string, input: BranchInput): Promise<Branch> {
-    if (import.meta.env.DEV && env.useMockApi) {
+    if (env.useMockApi) {
       const { mockUpdateBranch } = await import('./mock/mockBranches');
       return mockUpdateBranch(id, input);
     }
