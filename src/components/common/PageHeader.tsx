@@ -20,7 +20,7 @@ export default function PageHeader({ title, subtitle, actions }: Props) {
       }}
     >
       <Box>
-        <Typography variant="h4" component="h1" className="app-page-title">
+        <Typography variant="h6" component="h1" className="app-page-title">
           {title}
         </Typography>
         {subtitle && (
