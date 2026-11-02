@@ -68,6 +68,7 @@ const BUILT_PAGES: Record<string, ReactElement> = {
   //------Setting END-----
 
 
+
   [PATHS.customers]: <CustomersPage />,
   [PATHS.customerOnboarding]: <CustomerOnboardingPage />,
   [PATHS.serviceRequests]: <ServiceRequestsPage />,
