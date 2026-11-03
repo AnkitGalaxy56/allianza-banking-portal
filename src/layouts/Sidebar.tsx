@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 
 import {
@@ -10,7 +9,6 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  Typography,
 } from '@mui/material';
 
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
@@ -21,24 +19,28 @@ import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
 
 import { NavLink, useLocation } from 'react-router-dom';
 
-import BrandLogo from '@/components/common/BrandLogo';
-import { ROLE_LABELS, ROLES } from '@/config/roles';
 import { useAppSelector } from '@/redux/hooks';
 import { selectUser } from '@/redux/slices/authSlice';
-import { selectTheme } from '@/redux/slices/themeSlice';
 import { getNavForRole, type NavItem } from '@/routes/navigation';
 
 interface SidebarProps {
   onNavigate?: () => void;
-  onToggleSidebar?: () => void;
+  // onToggleSidebar?: () => void;
   onLogoutClick?: () => void;
   collapsed?: boolean;
+
 }
 
-const isPathActive = (pathname: string, path: string): boolean =>
+const isPathActive = (
+  pathname: string,
+  path: string,
+): boolean =>
   pathname === path || pathname.startsWith(`${path}/`);
 
-const hasActiveChild = (item: NavItem, pathname: string): boolean =>
+const hasActiveChild = (
+  item: NavItem,
+  pathname: string,
+): boolean =>
   Boolean(
     item.children?.some(
       (child) =>
@@ -49,13 +51,11 @@ const hasActiveChild = (item: NavItem, pathname: string): boolean =>
 
 export default function Sidebar({
   onNavigate,
-  onToggleSidebar,
+  // onToggleSidebar,
   onLogoutClick,
   collapsed = false,
 }: SidebarProps) {
   const user = useAppSelector(selectUser);
-  const brand = useAppSelector(selectTheme);
-
   const { pathname } = useLocation();
 
   const [expandedMenus, setExpandedMenus] = useState<
@@ -64,30 +64,36 @@ export default function Sidebar({
 
   if (!user) return null;
 
-  const orgName =
-    user.role === ROLES.SUPER_ADMIN ? 'Allianza' : brand.name;
-
   const items = getNavForRole(user.role);
 
-  const toggleMenu = (path: string, defaultExpanded: boolean) => {
+  const toggleMenu = (
+    path: string,
+    defaultExpanded: boolean,
+  ) => {
     setExpandedMenus((current) => ({
       ...current,
       [path]: !(current[path] ?? defaultExpanded),
     }));
   };
 
-  const renderNavItem = (item: NavItem, nested = false) => {
+  const renderNavItem = (
+    item: NavItem,
+    nested = false,
+  ) => {
     const Icon = item.icon;
 
     const hasChildren = Boolean(item.children?.length);
+
     const childIsActive = hasActiveChild(item, pathname);
 
     const selected =
       isPathActive(pathname, item.path) || childIsActive;
 
-    const expanded = expandedMenus[item.path] ?? childIsActive;
+    const expanded =
+      expandedMenus[item.path] ?? childIsActive;
 
-    const submenuId = `submenu-${item.path.replace(/\//g, '-')}`;
+    const submenuId =
+      `submenu-${item.path.replace(/\//g, '-')}`;
 
     const buttonContent = (
       <>
@@ -126,7 +132,9 @@ export default function Sidebar({
       width: '100%',
       textAlign: 'left' as const,
       pl: collapsed ? 0 : nested ? 4 : 1.5,
-      justifyContent: collapsed ? 'center' : 'flex-start',
+      justifyContent: collapsed
+        ? 'center'
+        : 'flex-start',
       minHeight: 44,
       color: 'text.primary',
 
@@ -148,7 +156,9 @@ export default function Sidebar({
               component="button"
               type="button"
               selected={selected}
-              onClick={() => toggleMenu(item.path, childIsActive)}
+              onClick={() =>
+                toggleMenu(item.path, childIsActive)
+              }
               aria-expanded={expanded}
               aria-controls={submenuId}
               className="app-nav-item"
@@ -177,6 +187,7 @@ export default function Sidebar({
         )}
 
         {/* Submenu */}
+
         {hasChildren && expanded && !collapsed && (
           <List
             id={submenuId}
@@ -212,16 +223,17 @@ export default function Sidebar({
         overflow: 'hidden',
       }}
     >
-      {/* Sidebar Header */}
-      <Box
+      {/* Collapse / Expand Button */}
+
+      {/* <Box
         sx={{
           display: 'flex',
           alignItems: 'center',
-          gap: 1,
-          px: collapsed ? 0 : 0.5,
-          pb: 2.5,
-          justifyContent: collapsed ? 'center' : 'flex-start',
-          minWidth: 0,
+          justifyContent: collapsed
+            ? 'center'
+            : 'flex-end',
+          minHeight: 40,
+          pb: 2,
         }}
       >
         {onToggleSidebar && (
@@ -230,7 +242,9 @@ export default function Sidebar({
             aria-label="Toggle sidebar"
             title="Toggle sidebar"
             onClick={onToggleSidebar}
-            sx={{ flexShrink: 0 }}
+            sx={{
+              flexShrink: 0,
+            }}
           >
             {collapsed ? (
               <ChevronRightIcon />
@@ -239,28 +253,10 @@ export default function Sidebar({
             )}
           </IconButton>
         )}
-
-        <BrandLogo theme={brand} size={40} />
-
-        {!collapsed && (
-          <Box sx={{ minWidth: 0, flex: 1 }}>
-            <Typography
-              variant="subtitle2"
-              fontWeight={800}
-              noWrap
-              sx={{ lineHeight: 1.2 }}
-            >
-              {orgName}
-            </Typography>
-
-            <Typography variant="caption" color="text.secondary" noWrap>
-              {ROLE_LABELS[user.role]}
-            </Typography>
-          </Box>
-        )}
-      </Box>
+      </Box> */}
 
       {/* Role-based Navigation */}
+
       <List
         disablePadding
         sx={{
@@ -269,7 +265,8 @@ export default function Sidebar({
           overflowX: 'hidden',
 
           scrollbarWidth: 'thin',
-          scrollbarColor: 'rgba(120, 130, 150, 0.5) transparent',
+          scrollbarColor:
+            'rgba(120, 130, 150, 0.5) transparent',
 
           '&::-webkit-scrollbar': {
             width: '4px',
@@ -280,12 +277,14 @@ export default function Sidebar({
           },
 
           '&::-webkit-scrollbar-thumb': {
-            backgroundColor: 'rgba(120, 130, 150, 0.5)',
+            backgroundColor:
+              'rgba(120, 130, 150, 0.5)',
             borderRadius: '8px',
           },
 
           '&::-webkit-scrollbar-thumb:hover': {
-            backgroundColor: 'rgba(120, 130, 150, 0.8)',
+            backgroundColor:
+              'rgba(120, 130, 150, 0.8)',
           },
         }}
       >
@@ -293,6 +292,7 @@ export default function Sidebar({
       </List>
 
       {/* Bottom Logout */}
+
       <Tooltip
         title={collapsed ? 'Logout' : ''}
         placement="right"
@@ -303,7 +303,9 @@ export default function Sidebar({
           startIcon={<LogoutOutlinedIcon />}
           onClick={onLogoutClick}
           sx={{
-            justifyContent: collapsed ? 'center' : 'flex-start',
+            justifyContent: collapsed
+              ? 'center'
+              : 'flex-start',
             minWidth: 0,
             mt: 1,
             fontWeight: 600,
