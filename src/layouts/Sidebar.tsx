@@ -1,36 +1,29 @@
-
-import { useState } from 'react';
+import { useState, type MouseEvent } from 'react';
 
 import {
   Box,
   Tooltip,
   Button,
-  IconButton,
   List,
   ListItemButton,
   ListItemIcon,
   ListItemText,
+  Popover,
   Typography,
 } from '@mui/material';
 
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
 
 import { NavLink, useLocation } from 'react-router-dom';
 
-import BrandLogo from '@/components/common/BrandLogo';
-import { ROLE_LABELS, ROLES } from '@/config/roles';
 import { useAppSelector } from '@/redux/hooks';
 import { selectUser } from '@/redux/slices/authSlice';
-import { selectTheme } from '@/redux/slices/themeSlice';
 import { getNavForRole, type NavItem } from '@/routes/navigation';
 
 interface SidebarProps {
   onNavigate?: () => void;
-  onToggleSidebar?: () => void;
   onLogoutClick?: () => void;
   collapsed?: boolean;
 }
@@ -49,45 +42,59 @@ const hasActiveChild = (item: NavItem, pathname: string): boolean =>
 
 export default function Sidebar({
   onNavigate,
-  onToggleSidebar,
   onLogoutClick,
   collapsed = false,
 }: SidebarProps) {
   const user = useAppSelector(selectUser);
-  const brand = useAppSelector(selectTheme);
-
   const { pathname } = useLocation();
 
-  const [expandedMenus, setExpandedMenus] = useState<
-    Record<string, boolean>
-  >({});
+  const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({});
+  const [submenuAnchor, setSubmenuAnchor] = useState<HTMLElement | null>(null);
+  const [activeSubmenu, setActiveSubmenu] = useState<NavItem | null>(null);
 
   if (!user) return null;
 
-  const orgName =
-    user.role === ROLES.SUPER_ADMIN ? 'Allianza' : brand.name;
-
   const items = getNavForRole(user.role);
 
-  const toggleMenu = (path: string, defaultExpanded: boolean) => {
+  const closeCollapsedSubmenu = () => {
+    setSubmenuAnchor(null);
+    setActiveSubmenu(null);
+  };
+
+  const handleParentClick = (
+    item: NavItem,
+    event: MouseEvent<HTMLElement>,
+    defaultExpanded: boolean,
+  ) => {
+    if (collapsed) {
+      // In collapsed mode, show the children in a popover beside the icon.
+      if (activeSubmenu?.path === item.path && submenuAnchor) {
+        closeCollapsedSubmenu();
+      } else {
+        setSubmenuAnchor(event.currentTarget);
+        setActiveSubmenu(item);
+      }
+      return;
+    }
+
     setExpandedMenus((current) => ({
       ...current,
-      [path]: !(current[path] ?? defaultExpanded),
+      [item.path]: !(current[item.path] ?? defaultExpanded),
     }));
+  };
+
+  const handleSubmenuNavigation = () => {
+    closeCollapsedSubmenu();
+    onNavigate?.();
   };
 
   const renderNavItem = (item: NavItem, nested = false) => {
     const Icon = item.icon;
-
     const hasChildren = Boolean(item.children?.length);
     const childIsActive = hasActiveChild(item, pathname);
-
-    const selected =
-      isPathActive(pathname, item.path) || childIsActive;
-
+    const selected = isPathActive(pathname, item.path) || childIsActive;
     const expanded = expandedMenus[item.path] ?? childIsActive;
-
-    const submenuId = `submenu-${item.path.replace(/\//g, '-')}`;
+    const submenuId = `submenu-${item.path.replace(/[^a-zA-Z0-9_-]/g, '-')}`;
 
     const buttonContent = (
       <>
@@ -124,12 +131,12 @@ export default function Sidebar({
     const buttonSx = {
       mb: 0.5,
       width: '100%',
+      minHeight: 44,
       textAlign: 'left' as const,
       pl: collapsed ? 0 : nested ? 4 : 1.5,
       justifyContent: collapsed ? 'center' : 'flex-start',
-      minHeight: 44,
       color: 'text.primary',
-
+      borderRadius: 2,
       '&.Mui-selected, &.Mui-selected:hover': {
         bgcolor: 'primary.light',
         color: 'primary.dark',
@@ -148,8 +155,10 @@ export default function Sidebar({
               component="button"
               type="button"
               selected={selected}
-              onClick={() => toggleMenu(item.path, childIsActive)}
-              aria-expanded={expanded}
+              onClick={(event) =>
+                handleParentClick(item, event, childIsActive)
+              }
+              aria-expanded={collapsed ? activeSubmenu?.path === item.path : expanded}
               aria-controls={submenuId}
               className="app-nav-item"
               sx={buttonSx}
@@ -176,7 +185,7 @@ export default function Sidebar({
           </Tooltip>
         )}
 
-        {/* Submenu */}
+        {/* Expanded sidebar: render nested links inline. */}
         {hasChildren && expanded && !collapsed && (
           <List
             id={submenuId}
@@ -184,14 +193,12 @@ export default function Sidebar({
             sx={{
               pl: 0,
               mb: 0.5,
+              ml: 2.5,
               borderLeft: 1,
               borderColor: 'divider',
-              ml: 2.5,
             }}
           >
-            {item.children!.map((child) =>
-              renderNavItem(child, true),
-            )}
+            {item.children!.map((child) => renderNavItem(child, true))}
           </List>
         )}
       </Box>
@@ -205,6 +212,7 @@ export default function Sidebar({
         display: 'flex',
         flexDirection: 'column',
         height: '100%',
+        minHeight: 0,
         width: '100%',
         boxSizing: 'border-box',
         p: collapsed ? 1 : 2,
@@ -212,78 +220,26 @@ export default function Sidebar({
         overflow: 'hidden',
       }}
     >
-      {/* Sidebar Header */}
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 1,
-          px: collapsed ? 0 : 0.5,
-          pb: 2.5,
-          justifyContent: collapsed ? 'center' : 'flex-start',
-          minWidth: 0,
-        }}
-      >
-        {onToggleSidebar && (
-          <IconButton
-            size="small"
-            aria-label="Toggle sidebar"
-            title="Toggle sidebar"
-            onClick={onToggleSidebar}
-            sx={{ flexShrink: 0 }}
-          >
-            {collapsed ? (
-              <ChevronRightIcon />
-            ) : (
-              <ChevronLeftIcon />
-            )}
-          </IconButton>
-        )}
-
-        <BrandLogo theme={brand} size={40} />
-
-        {!collapsed && (
-          <Box sx={{ minWidth: 0, flex: 1 }}>
-            <Typography
-              variant="subtitle2"
-              fontWeight={800}
-              noWrap
-              sx={{ lineHeight: 1.2 }}
-            >
-              {orgName}
-            </Typography>
-
-            <Typography variant="caption" color="text.secondary" noWrap>
-              {ROLE_LABELS[user.role]}
-            </Typography>
-          </Box>
-        )}
-      </Box>
-
-      {/* Role-based Navigation */}
+      {/* Navigation has its own scrollbar; logout stays at the bottom. */}
       <List
         disablePadding
         sx={{
-          flexGrow: 1,
+          flex: 1,
+          minHeight: 0,
           overflowY: 'auto',
           overflowX: 'hidden',
-
           scrollbarWidth: 'thin',
           scrollbarColor: 'rgba(120, 130, 150, 0.5) transparent',
-
           '&::-webkit-scrollbar': {
             width: '4px',
           },
-
           '&::-webkit-scrollbar-track': {
             background: 'transparent',
           },
-
           '&::-webkit-scrollbar-thumb': {
             backgroundColor: 'rgba(120, 130, 150, 0.5)',
             borderRadius: '8px',
           },
-
           '&::-webkit-scrollbar-thumb:hover': {
             backgroundColor: 'rgba(120, 130, 150, 0.8)',
           },
@@ -292,27 +248,22 @@ export default function Sidebar({
         {items.map((item) => renderNavItem(item))}
       </List>
 
-      {/* Bottom Logout */}
-      <Tooltip
-        title={collapsed ? 'Logout' : ''}
-        placement="right"
-        arrow
-      >
+      {/* Bottom logout action */}
+      <Tooltip title={collapsed ? 'Logout' : ''} placement="right" arrow>
         <Button
           color="inherit"
           startIcon={<LogoutOutlinedIcon />}
           onClick={onLogoutClick}
           sx={{
+            flexShrink: 0,
             justifyContent: collapsed ? 'center' : 'flex-start',
             minWidth: 0,
             mt: 1,
             fontWeight: 600,
             px: collapsed ? 0 : 2,
-
             '& .MuiButton-startIcon': {
               mr: collapsed ? 0 : 1,
             },
-
             '&:hover': {
               bgcolor: 'action.hover',
               color: 'error.main',
@@ -322,6 +273,90 @@ export default function Sidebar({
           {!collapsed && 'Logout'}
         </Button>
       </Tooltip>
+
+      {/* Collapsed sidebar submenu popup */}
+      <Popover
+        open={collapsed && Boolean(submenuAnchor) && Boolean(activeSubmenu)}
+        anchorEl={submenuAnchor}
+        onClose={closeCollapsedSubmenu}
+        anchorOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'left',
+        }}
+        PaperProps={{
+          sx: {
+            minWidth: 220,
+            maxWidth: 280,
+            ml: 0.75,
+            py: 1,
+            border: 1,
+            borderColor: 'divider',
+            borderRadius: 2,
+            boxShadow: 4,
+          },
+        }}
+      >
+        {activeSubmenu && (
+          <Box>
+            <Typography
+              sx={{
+                px: 2,
+                py: 1,
+                fontSize: 13,
+                fontWeight: 700,
+                color: 'text.secondary',
+              }}
+            >
+              {activeSubmenu.label}
+            </Typography>
+
+            <List disablePadding>
+              {activeSubmenu.children?.map((child) => {
+                const ChildIcon = child.icon;
+                const childSelected = isPathActive(pathname, child.path);
+
+                return (
+                  <ListItemButton
+                    key={child.path}
+                    component={NavLink}
+                    to={child.path}
+                    selected={childSelected}
+                    onClick={handleSubmenuNavigation}
+                    sx={{
+                      minHeight: 42,
+                      px: 2,
+                      '&.Mui-selected, &.Mui-selected:hover': {
+                        bgcolor: 'primary.light',
+                        color: 'primary.dark',
+                      },
+                    }}
+                  >
+                    <ListItemIcon
+                      sx={{
+                        minWidth: 34,
+                        color: 'inherit',
+                      }}
+                    >
+                      <ChildIcon fontSize="small" />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={child.label}
+                      primaryTypographyProps={{
+                        fontSize: 13,
+                        fontWeight: childSelected ? 700 : 500,
+                      }}
+                    />
+                  </ListItemButton>
+                );
+              })}
+            </List>
+          </Box>
+        )}
+      </Popover>
     </Box>
   );
 }

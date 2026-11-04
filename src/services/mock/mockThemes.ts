@@ -64,34 +64,7 @@ const BANK_THEMES: Record<string, BankTheme> = {
       border: '#E3CDD3',
     },
   },
-  // 'pune-urban': {
-  //   code: 'pune-urban',
-  //   name: 'Pune Urban Co-op Bank',
-  //   shortName: 'Sample Urban',
-  //   tagline: 'Banking made simple-Pune',
-  //   // colors: {
-  //   //   primary: '#0D6E67',
-  //   //   primaryDark: '#08403E',
-  //   //   primaryTint: '#DAEFEA',
-  //   //   authPanel: '#08403E',
-  //   //   background: '#F2F5F6',
-  //   //   surface: '#FFFFFF',
-  //   //   textPrimary: '#0F1B2D',
-  //   //   textSecondary: '#5B6B7F',
-  //   //   border: '#C9D6D8',
-  //   // },
-  //   colors: {
-  //     primary: '#F57C00',       // Orange
-  //     primaryDark: '#E65100',   // Dark orange
-  //     primaryTint: '#FFF3E0',   // Light orange
-  //     authPanel: '#E65100',     // Login panel
-  //     background: '#FFF8F1',    // Warm background
-  //     surface: '#FFFFFF',       // White cards
-  //     textPrimary: '#0F1B2D',   // Dark text
-  //     textSecondary: '#5B6B7F', // Secondary text
-  //     border: '#FFD7B0',        // Light orange border
-  //   },
-  // },
+  
   'pune-urban': {
     code: 'pune-urban',
     name: 'Pune Urban Co-operative Bank',

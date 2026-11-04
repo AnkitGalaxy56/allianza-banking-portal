@@ -51,6 +51,7 @@ const LoanEMIPaymentPage = lazy(() => import('@/pages/request-handling/loan-emi-
 const DashboardPage = lazy(() => import('@/pages/dashboard/DashboardPage'));
 const BranchesPage = lazy(() => import('@/pages/branches/BranchesPage'));
 const UserManagement = lazy(() => import('@/pages/users-management/index'));
+const AssignPasswordPage = lazy(() => import('@/pages/users-management/assign-password'));
 const CustomersPage = lazy(() => import('@/pages/customers/CustomersPage'));
 const CustomerOnboardingPage = lazy(() => import('@/pages/customer-onboarding/CustomerOnboardingPage'));
 const UploadImagesPage = lazy(() => import('@/pages/upload-images/UploadImagesPage'));
@@ -62,6 +63,7 @@ const BUILT_PAGES: Record<string, ReactElement> = {
   //-------User managenet start---
   [PATHS.USER_MANAGEMENT.ROOT]: <UserManagement />,
   [PATHS.USER_MANAGEMENT.USER_MASTER]: <UserManagement />,
+  [PATHS.USER_MANAGEMENT.ASSIGN_PASSWORD]: <AssignPasswordPage />,
   // [PATHS.USER_MANAGEMENT.ASSIGN_PASSWORD]: <UserManagement />,
   //---------User managenet END---
 

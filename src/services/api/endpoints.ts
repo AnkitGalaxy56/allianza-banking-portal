@@ -23,6 +23,7 @@ export const ENDPOINTS = {
   branchUsers: {
     base: '/user-management',
     byId: (id: string) => `/user-management/${encodeURIComponent(id)}`,
+    assignPassword: (id: string) => `/user-management/${encodeURIComponent(id)}/assign-password`,
   },
   customers: {
     base: '/customers',
