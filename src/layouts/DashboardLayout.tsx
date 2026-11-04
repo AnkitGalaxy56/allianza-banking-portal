@@ -68,8 +68,9 @@ export default function DashboardLayout() {
       sx={{
         display: 'flex',
         flexDirection: 'column',
-        minHeight: '100vh',
+        height: '100dvh',
         width: '100%',
+        overflow: 'hidden',
         bgcolor: 'background.default',
       }}
     >
@@ -78,12 +79,14 @@ export default function DashboardLayout() {
       ========================================= */}
 
       <AppBar
-        position="sticky"
+        position="static"
         color="inherit"
         elevation={0}
         sx={{
           bgcolor: 'background.paper',
           width: '100%',
+          position: 'relative',
+          flexShrink: 0,
           borderBottom: 1,
           borderColor: 'divider',
           zIndex: (theme) => theme.zIndex.drawer + 1,
@@ -435,6 +438,7 @@ export default function DashboardLayout() {
           minHeight: 0,
           width: '100%',
           alignItems: 'stretch',
+          overflow: 'hidden',
         }}
       >
         {/* SIDEBAR CONTAINER */}
@@ -448,11 +452,10 @@ export default function DashboardLayout() {
               md: sidebarWidth,
             },
             flexShrink: 0,
-            transition: 'width 180ms ease',
-            height: {
-              xs: 'auto',
-              md: `calc(100vh - ${HEADER_HEIGHT}px)`,
-            },
+            minHeight: 0,
+            height: '100%',
+            overflow: 'hidden',
+            transition: 'width 180ms ease', 
           }}
         >
           {/* MOBILE SIDEBAR */}
@@ -469,9 +472,12 @@ export default function DashboardLayout() {
                 xs: 'block',
                 md: 'none',
               },
+              height: '100%',
               '& .MuiDrawer-paper': {
                 width: DRAWER_WIDTH,
+                height: '100%',
                 boxSizing: 'border-box',
+                overflowY: 'auto',
               },
             }}
           >
@@ -491,6 +497,7 @@ export default function DashboardLayout() {
                 xs: 'none',
                 md: 'block',
               },
+              height: '100%',
               '& .MuiDrawer-paper': {
                 width: sidebarWidth,
                 height: '100%',
@@ -500,15 +507,13 @@ export default function DashboardLayout() {
                 borderRight: 1,
                 borderColor: 'divider',
                 overflowX: 'hidden',
+                overflowY: 'hidden',
                 transition: 'width 180ms ease',
               },
             }}
           >
             <Sidebar
               collapsed={sidebarCollapsed}
-              // onToggleSidebar={() =>
-              //   setSidebarCollapsed((value) => !value)
-              // }
               onLogoutClick={handleLogoutClick}
             />
           </Drawer>
@@ -520,15 +525,22 @@ export default function DashboardLayout() {
           sx={{
             flex: 1,
             minWidth: 0,
+            minHeight: 0,
+            height: '100%',
             display: 'flex',
             flexDirection: 'column',
+            overflow: 'hidden',
           }}
         >
           <Box
             component="main"
             sx={{
-              flexGrow: 1,
+              flex: 1,
               minWidth: 0,
+              minHeight: 0,
+              height: '100%',
+              overflowY: 'auto',
+              overflowX: 'hidden',
               p: {
                 xs: 2,
                 sm: 3,
