@@ -22,6 +22,7 @@ import Sidebar from './Sidebar';
 
 import ConfirmDialog from '@/components/common/ConfirmDialog';
 import BrandLogo from '@/components/common/BrandLogo';
+import SidebarMenuSearch from '@/components/common/SidebarMenuSearch';
 
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { logoutUser, selectUser } from '@/redux/slices/authSlice';
@@ -291,6 +292,15 @@ export default function DashboardLayout() {
               </Typography>
             </Box>
           </Box>
+
+          {/* MENU SEARCH - before date and logged-in user */}
+          <SidebarMenuSearch
+            sx={{
+              width: { xs: 180, sm: 210, md: 230, lg: 250 },
+              minWidth: 150,
+              flexShrink: 1,
+            }}
+          />
 
           {/* DATE AND USER INFORMATION */}
 
