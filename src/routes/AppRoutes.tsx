@@ -30,6 +30,7 @@ const NotificationReportPage = lazy(
 ); const ProfilePage = lazy(() => import('@/pages/profile'));
 const ChangePasswordPage = lazy(() => import('@/pages/change-password'));
 const RolesAccessControlPage = lazy(() => import('@/pages/settings/roles-access-control'));
+const ChangeColourThemePage = lazy(() => import('@/pages/settings/change-colour-theme'));
 
 const RequestValidationIndex = lazy(() => import('@/pages/request-handling/index'));
 const PaymentsPage = lazy(() => import('@/pages/request-handling/rtgs-neft-imps'));
@@ -74,6 +75,7 @@ const BUILT_PAGES: Record<string, ReactElement> = {
 
   //------Setting START-----
   [PATHS.SETTINGS.ROLES_ACCESS_CONTROL]: <RolesAccessControlPage />,
+  [PATHS.SETTINGS.CHANGE_COLOUR_THEME]: <ChangeColourThemePage />,
   [PATHS.SETTINGS.PROFILE]: <ProfilePage />,
   [PATHS.SETTINGS.CHANGE_PASSWORD]: <ChangePasswordPage />,
   //------Setting END-----

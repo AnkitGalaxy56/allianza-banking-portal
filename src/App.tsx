@@ -3,7 +3,7 @@ import FullPageLoader from '@/components/common/FullPageLoader';
 import { ROLES } from '@/config/roles';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { selectUser } from '@/redux/slices/authSlice';
-import { loadBankTheme, setPlatformTheme } from '@/redux/slices/themeSlice';
+import { loadBankTheme, loadPlatformTheme } from '@/redux/slices/themeSlice';
 import AppRoutes from '@/routes/AppRoutes';
 import BankThemeProvider from '@/theme/BankThemeProvider';
 
@@ -16,19 +16,19 @@ export default function App() {
   useEffect(() => {
     if (!user) return;
     if (user.role === ROLES.SUPER_ADMIN || !user.bankCode) {
-      dispatch(setPlatformTheme());
+      void dispatch(loadPlatformTheme());
     } else {
       void dispatch(loadBankTheme(user.bankCode));
     }
   }, [user, dispatch]);
 
   // Avoid a flash of the wrong colours: wait for the bank theme before showing the portal.
+  const isPlatformUser = !!user && (user.role === ROLES.SUPER_ADMIN || !user.bankCode);
   const themeReady =
     !user ||
-    user.role === ROLES.SUPER_ADMIN ||
-    !user.bankCode ||
     themeState.status === 'failed' ||
-    (themeState.status === 'succeeded' && themeState.bankCode === user.bankCode);
+    (isPlatformUser && themeState.status === 'succeeded' && themeState.bankCode === 'allianza') ||
+    (!!user && !isPlatformUser && themeState.status === 'succeeded' && themeState.bankCode === user.bankCode);
 
   return <BankThemeProvider>{themeReady ? <AppRoutes /> : <FullPageLoader />}</BankThemeProvider>;
 }

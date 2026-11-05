@@ -24,7 +24,10 @@ export interface BankTheme {
   logoUrl?: string;
   fontFamily?: string;
   borderRadius?: number;
+  /** Theme used by the web banking portal. */
   colors: BankThemeColors;
+  /** Optional theme used by the React Native mobile banking app. */
+  mobileColors?: BankThemeColors;
   /** Optional extra CSS for this bank. Injected at runtime (see docs/THEMING.md). */
   customCss?: string;
 }

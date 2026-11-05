@@ -11,6 +11,9 @@ export const ENDPOINTS = {
   themes: {
     /** Must be PUBLIC (no token) - the login page needs it before anyone is signed in. */
     byBankCode: (code: string) => `/banks/${encodeURIComponent(code)}/theme`,
+    adminList: '/themes',
+    create: '/themes',
+    byCode: (code: string) => `/themes/${encodeURIComponent(code)}`,
   },
   dashboard: {
     superAdmin: '/dashboard/super-admin',

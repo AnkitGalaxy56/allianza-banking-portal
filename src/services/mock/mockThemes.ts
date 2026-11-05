@@ -1,11 +1,13 @@
 import type { BankTheme } from '@/types/theme';
+import { ALLIANZA_THEME } from '@/theme/platformTheme';
 import { delay } from '@/utils/delay';
 
 /**
  * Sample bank themes for development. In production these come from the backend
  * (GET /banks/:code/theme) and are managed by Allianza admins.
  */
-const BANK_THEMES: Record<string, BankTheme> = {
+export const BANK_THEMES: Record<string, BankTheme> = {
+  allianza: ALLIANZA_THEME,
   'sample-urban': {
     code: 'sample-urban',
     name: 'Sample Urban Co-op Bank',
@@ -84,9 +86,28 @@ const BANK_THEMES: Record<string, BankTheme> = {
   },
 };
 
+const STORAGE_KEY = 'allianza.bankThemes.v1';
+
+export function getMockBankThemes(): BankTheme[] {
+  if (typeof window !== 'undefined') {
+    try {
+      const saved = window.localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved) as BankTheme[];
+        if (Array.isArray(parsed) && parsed.length) return parsed;
+      }
+    } catch { /* Ignore invalid local development cache and use defaults. */ }
+  }
+  return Object.values(BANK_THEMES);
+}
+
+export function saveMockBankThemes(themes: BankTheme[]): void {
+  if (typeof window !== 'undefined') window.localStorage.setItem(STORAGE_KEY, JSON.stringify(themes));
+}
+
 export async function mockGetBankTheme(bankCode: string): Promise<BankTheme> {
   await delay(150);
-  const theme = BANK_THEMES[bankCode];
+  const theme = getMockBankThemes().find((item) => item.code === bankCode) ?? BANK_THEMES[bankCode];
   if (!theme) throw new Error(`Unknown bank code "${bankCode}"`);
   return theme;
 }

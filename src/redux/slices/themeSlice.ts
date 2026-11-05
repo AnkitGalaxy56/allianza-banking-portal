@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { getErrorMessage } from '@/services/api/apiError';
 import { themeService } from '@/services/theme.service';
+import { themeManagementService } from '@/services/themeManagement.service';
 import { ALLIANZA_THEME } from '@/theme/platformTheme';
 import type { BankTheme } from '@/types/theme';
 
@@ -20,6 +21,15 @@ const initialState: ThemeState = {
 };
 
 type WithTheme = { theme: ThemeState };
+
+
+export const loadPlatformTheme = createAsyncThunk<BankTheme, void, { rejectValue: string }>(
+  'theme/loadPlatformTheme',
+  async (_, { rejectWithValue }) => {
+    try { return await themeManagementService.getByCode(ALLIANZA_THEME.code); }
+    catch (error) { return rejectWithValue(getErrorMessage(error, 'Unable to load the Allianza platform theme.')); }
+  },
+);
 
 export const loadBankTheme = createAsyncThunk<BankTheme, string, { rejectValue: string }>(
   'theme/loadBankTheme',
@@ -50,9 +60,30 @@ const themeSlice = createSlice({
       state.status = 'succeeded';
       state.error = null;
     },
+    setActiveTheme: (state, action: { payload: BankTheme }) => {
+      state.bankCode = action.payload.code;
+      state.theme = action.payload;
+      state.status = 'succeeded';
+      state.error = null;
+    },
   },
   extraReducers: (builder) => {
     builder
+      .addCase(loadPlatformTheme.pending, (state) => {
+        state.status = 'loading';
+        state.error = null;
+      })
+      .addCase(loadPlatformTheme.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        state.bankCode = action.payload.code;
+        state.theme = action.payload;
+      })
+      .addCase(loadPlatformTheme.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.payload ?? 'Unable to load the Allianza platform theme.';
+        state.bankCode = ALLIANZA_THEME.code;
+        state.theme = ALLIANZA_THEME;
+      })
       .addCase(loadBankTheme.pending, (state) => {
         state.status = 'loading';
         state.error = null;
@@ -72,7 +103,7 @@ const themeSlice = createSlice({
   },
 });
 
-export const { setPlatformTheme } = themeSlice.actions;
+export const { setPlatformTheme, setActiveTheme } = themeSlice.actions;
 export default themeSlice.reducer;
 
 export const selectTheme = (state: WithTheme) => state.theme.theme;

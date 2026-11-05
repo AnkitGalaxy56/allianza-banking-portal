@@ -29,5 +29,9 @@ colors: {
   textSecondary: '#5B6B63',
   border: '#D8E1DA',
 },
-
+  mobileColors: {
+    primary: '#0B453B', primaryDark: '#08352D', primaryTint: '#E5F0EB',
+    authPanel: '#08352D', background: '#F5F6F2', surface: '#FFFFFF',
+    textPrimary: '#15352D', textSecondary: '#5B6B63', border: '#D8E1DA',
+  },
 };

@@ -30,12 +30,12 @@ import { dashboardService } from '@/services/dashboard.service';
 import { formatNumber } from '@/utils/format';
 
 const ACTIONS: QuickAction[] = [
-  { label: 'Bank management', to: PATHS.banks, icon: AccountBalanceOutlinedIcon },
-  { label: 'User management', to: PATHS.users, icon: ManageAccountsOutlinedIcon },
-  { label: 'Push notification', to: PATHS.pushNotifications, icon: NotificationsNoneOutlinedIcon },
-  { label: 'Device reset', to: PATHS.deviceReset, icon: SmartphoneOutlinedIcon },
-  { label: 'Upload image', to: PATHS.uploadImages, icon: ImageOutlinedIcon },
-  { label: 'Reports', to: PATHS.reports, icon: BarChartOutlinedIcon },
+  { label: 'Bank management', to: PATHS.MASTERS.BANK_MASTER, icon: AccountBalanceOutlinedIcon },
+  { label: 'User management', to: PATHS.USER_MANAGEMENT.USER_MASTER, icon: ManageAccountsOutlinedIcon },
+  { label: 'Push notification', to: PATHS.MOBILE_UTILITIES.PUSH_NOTIFICATION, icon: NotificationsNoneOutlinedIcon },
+  { label: 'Device reset', to: PATHS.MOBILE_UTILITIES.DEVICE_RESET, icon: SmartphoneOutlinedIcon },
+  { label: 'Upload image', to: PATHS.MOBILE_UTILITIES.IMAGE_UPLOADING, icon: ImageOutlinedIcon },
+  { label: 'Reports', to: PATHS.REPORTS.REQUESTS, icon: BarChartOutlinedIcon },
 ];
 
 /** Allianza (super admin) dashboard - follows slide 14 of the project document. */
