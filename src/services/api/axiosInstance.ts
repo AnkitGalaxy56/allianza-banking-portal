@@ -33,6 +33,15 @@ export const api = axios.create({
 
 type RetriableConfig = InternalAxiosRequestConfig & { _retry?: boolean };
 
+/** Public GET routes used to load branding before/after sign-in. */
+function isPublicThemeRequest(config: Pick<InternalAxiosRequestConfig, 'url' | 'method'>): boolean {
+  if (config.method?.toLowerCase() !== 'get') return false;
+
+  const path = (config.url ?? '').split('?')[0];
+  return /^\/themes(?:\/|$)/.test(path)
+    || /^\/banks\/[^/]+\/theme$/.test(path);
+}
+
 let refreshPromise: Promise<string | null> | null = null;
 
 async function refreshAccessToken(): Promise<string | null> {
@@ -54,6 +63,13 @@ async function refreshAccessToken(): Promise<string | null> {
 }
 
 api.interceptors.request.use((config) => {
+  // Theme bootstrap endpoints are public. Do not attach an old access token:
+  // the backend must be able to serve branding even if a prior session expired.
+  if (isPublicThemeRequest(config)) {
+    config.headers.delete('Authorization');
+    return config;
+  }
+
   const session = loadSession();
   if (session?.accessToken) {
     config.headers.set('Authorization', `Bearer ${session.accessToken}`);
@@ -66,9 +82,12 @@ api.interceptors.response.use(
   async (error: AxiosError) => {
     const original = error.config as RetriableConfig | undefined;
     const url = original?.url ?? '';
-    const isAuthCall = url.includes(ENDPOINTS.auth.login) || url.includes(ENDPOINTS.auth.refresh);
+    const isAuthCall = url.includes(ENDPOINTS.auth.login)
+      || url.includes(ENDPOINTS.auth.verifyOtp)
+      || url.includes(ENDPOINTS.auth.refresh);
+    const isPublicThemeCall = original ? isPublicThemeRequest(original) : false;
 
-    if (error.response?.status === 401 && original && !original._retry && !isAuthCall) {
+    if (error.response?.status === 401 && original && !original._retry && !isAuthCall && !isPublicThemeCall) {
       original._retry = true;
       if (!refreshPromise) {
         refreshPromise = refreshAccessToken().finally(() => {

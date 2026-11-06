@@ -6,6 +6,9 @@ export interface RequestRecord {
   status: RequestStatus;
   submittedOn: string;
   fields: Record<string, string>;
+  displayId?: string;
+  canVerify?: boolean;
+  canEdit?: boolean;
 }
 
 export interface RequestField {
@@ -16,6 +19,12 @@ export interface RequestField {
 
 export interface RequestModuleConfig {
   hideCreateButton?: boolean;
+  /** Form keys that must be filled before submitting (defaults to the first two fields). */
+  requiredKeys?: string[];
+  /** Form keys the server fills in (customer name, status...): shown but not editable. */
+  readOnlyKeys?: string[];
+  /** Form keys that cannot change once a request exists (the account number). */
+  lockedOnEdit?: string[];
   title: string;
   description: string;
   searchPlaceholder: string;
@@ -29,6 +38,9 @@ export interface ValidationRecord {
   status: RequestDecision;
   submittedOn: string;
   fields: Record<string, string>;
+  displayId?: string;
+  canVerify?: boolean;
+  canEdit?: boolean;
 }
 
 export interface ValidationModuleConfig {

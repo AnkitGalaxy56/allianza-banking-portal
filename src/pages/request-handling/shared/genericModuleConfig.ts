@@ -11,3 +11,5 @@ export function getSample(path:string): any { if(path.endsWith('/locker-applicat
 export function getRequiredFields(path:string): readonly string[] { if(path.endsWith('/locker-application')) return lockerRequired; if(path.endsWith('/standing-instructions')) return standingRequired; if(path.endsWith('/fresh-loan-application')) return loanRequired; return emiRequired; }
 
 export function getSampleRows(path:string): any[] { if(path.endsWith('/locker-application')) return lockerSamples; if(path.endsWith('/standing-instructions')) return standingSamples; if(path.endsWith('/fresh-loan-application')) return loanSamples; return emiSamples; }
+
+export function getModuleKey(path:string): 'locker-application'|'standing-instructions'|'fresh-loan-application'|'loan-emi-payment' { if(path.endsWith('/locker-application')) return 'locker-application'; if(path.endsWith('/standing-instructions')) return 'standing-instructions'; if(path.endsWith('/fresh-loan-application')) return 'fresh-loan-application'; return 'loan-emi-payment'; }

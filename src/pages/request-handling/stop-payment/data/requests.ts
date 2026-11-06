@@ -1,7 +1,9 @@
 import type { RequestModuleConfig } from '../../shared/types';
 
 export const requestsConfig: RequestModuleConfig = {
-  hideCreateButton: true,
+  requiredKeys: ['debitAccount', 'cheque', 'reason'],
+  readOnlyKeys: ['accountStatus', 'customer'],
+  lockedOnEdit: ['debitAccount'],
   title: 'Stop Payment Requests',
   description: 'Review cheque stop-payment requests and reasons for hold.',
   searchPlaceholder: 'Search account, customer or cheque number',

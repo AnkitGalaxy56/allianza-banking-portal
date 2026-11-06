@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import { getErrorMessage } from '@/services/api/apiError';
 import { authService } from '@/services/auth.service';
-import type { LoginRequest, LoginResponse, RefreshResponse, User } from '@/types/auth';
+import type { LoginRequest, LoginResponse, PendingLoginResponse, RefreshResponse, User } from '@/types/auth';
 import { clearSession, loadSession, saveSession } from '@/utils/authStorage';
 import { isTokenExpired } from '@/utils/jwt';
 
@@ -14,8 +14,9 @@ export interface AuthState {
   status: RequestState;
   error: string | null;
   otpPending: boolean;
-  pendingAuth: LoginResponse | null;
+  pendingAuth: PendingLoginResponse | null;
   rememberPending: boolean;
+  pendingBankCode: string | null;
 }
 
 function getInitialState(): AuthState {
@@ -28,6 +29,7 @@ function getInitialState(): AuthState {
     otpPending: false,
     pendingAuth: null,
     rememberPending: false,
+    pendingBankCode: null,
   };
 
   const session = loadSession();
@@ -51,7 +53,7 @@ function getInitialState(): AuthState {
 export type LoginArgs = LoginRequest & { remember: boolean };
 
 export const login = createAsyncThunk<
-  LoginResponse,
+  PendingLoginResponse,
   LoginArgs,
   { rejectValue: string }
 >(
@@ -68,32 +70,41 @@ export const login = createAsyncThunk<
   },
 );
 
-export const verifyMockOtp = createAsyncThunk<
+export const verifyLoginOtp = createAsyncThunk<
   LoginResponse,
   { otp: string },
   { state: { auth: AuthState }; rejectValue: string }
 >(
-  'auth/verifyMockOtp',
+  'auth/verifyLoginOtp',
   async ({ otp }, { getState, rejectWithValue }) => {
-    const { pendingAuth, rememberPending } = getState().auth;
+    const { pendingAuth, rememberPending, pendingBankCode } = getState().auth;
 
     if (!pendingAuth) {
       return rejectWithValue('Please sign in again.');
     }
 
-    // Development/demo only. Replace with backend OTP verification in production.
-    if (otp !== '123456') {
-      return rejectWithValue('Invalid OTP. Please try again.');
+    try {
+      const authenticated = await authService.verifyOtp({ challengeId: pendingAuth.challengeId, otp });
+      // The portal API identifies the user's role, while the bank code is selected
+      // from the bank portal URL/configuration during login.
+      const apiRole = String(authenticated.user.userRole ?? authenticated.user.role ?? '').toUpperCase();
+      const normalizedUser = {
+        ...authenticated.user,
+        role: apiRole === 'SUPER_ADMIN' ? 'SUPER_ADMIN' as const
+          : apiRole.includes('ADMIN') ? 'BANK_ADMIN' as const : 'BANK_USER' as const,
+        bankCode: authenticated.user.bankCode ?? pendingBankCode ?? undefined,
+      };
+      const result = { ...authenticated, user: normalizedUser };
+      saveSession({
+        user: normalizedUser,
+        accessToken: authenticated.accessToken,
+        refreshToken: authenticated.refreshToken,
+        remember: rememberPending,
+      });
+      return result;
+    } catch (error) {
+      return rejectWithValue(getErrorMessage(error, 'OTP verification failed.'));
     }
-
-    saveSession({
-      user: pendingAuth.user,
-      accessToken: pendingAuth.accessToken,
-      refreshToken: pendingAuth.refreshToken,
-      remember: rememberPending,
-    });
-
-    return pendingAuth;
   },
 );
 
@@ -124,6 +135,7 @@ const authSlice = createSlice({
       otpPending: false,
       pendingAuth: null,
       rememberPending: false,
+      pendingBankCode: null,
     }),
 
     sessionExpired: () => ({
@@ -135,6 +147,7 @@ const authSlice = createSlice({
       otpPending: false,
       pendingAuth: null,
       rememberPending: false,
+      pendingBankCode: null,
     }),
 
     tokensRefreshed: (state, action: PayloadAction<RefreshResponse>) => {
@@ -157,6 +170,7 @@ const authSlice = createSlice({
         state.otpPending = false;
         state.pendingAuth = null;
         state.rememberPending = false;
+        state.pendingBankCode = null;
       })
       .addCase(login.fulfilled, (state, action) => {
         state.status = 'idle';
@@ -164,6 +178,7 @@ const authSlice = createSlice({
         state.otpPending = true;
         state.pendingAuth = action.payload;
         state.rememberPending = action.meta.arg.remember;
+        state.pendingBankCode = action.meta.arg.bankCode ?? null;
 
         // Do not set user/accessToken until OTP is verified.
         state.user = null;
@@ -176,12 +191,13 @@ const authSlice = createSlice({
         state.otpPending = false;
         state.pendingAuth = null;
         state.rememberPending = false;
+        state.pendingBankCode = null;
       })
-      .addCase(verifyMockOtp.pending, (state) => {
+      .addCase(verifyLoginOtp.pending, (state) => {
         state.status = 'loading';
         state.error = null;
       })
-      .addCase(verifyMockOtp.fulfilled, (state, action) => {
+      .addCase(verifyLoginOtp.fulfilled, (state, action) => {
         state.status = 'idle';
         state.error = null;
         state.user = action.payload.user;
@@ -190,8 +206,9 @@ const authSlice = createSlice({
         state.otpPending = false;
         state.pendingAuth = null;
         state.rememberPending = false;
+        state.pendingBankCode = null;
       })
-      .addCase(verifyMockOtp.rejected, (state, action) => {
+      .addCase(verifyLoginOtp.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.payload ?? 'OTP verification failed.';
       });

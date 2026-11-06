@@ -1,6 +1,9 @@
 import type { RequestModuleConfig } from '../../shared/types';
 
 export const requestsConfig: RequestModuleConfig = {
+  requiredKeys: ['account', 'mode', 'beneficiaryAccount', 'beneficiary', 'ifsc', 'amount'],
+  readOnlyKeys: ['customer', 'accountStatus', 'currentBalance', 'mobile'],
+  lockedOnEdit: ['account'],
   title: 'RTGS / NEFT / IMPS Requests',
   description: 'Review payment transfer requests and beneficiary details.',
   searchPlaceholder: 'Search account, customer, beneficiary or request',

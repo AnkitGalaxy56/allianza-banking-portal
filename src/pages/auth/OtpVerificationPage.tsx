@@ -12,7 +12,7 @@
 // import {
 //   clearAuthError,
 //   selectAuth,
-//   verifyMockOtp,
+//   verifyLoginOtp,
 // } from '@/redux/slices/authSlice';
 // import { PATHS } from '@/routes/paths';
 
@@ -30,7 +30,7 @@
 
 //   const handleVerify = async () => {
 //     try {
-//       await dispatch(verifyMockOtp({ otp })).unwrap();
+//       await dispatch(verifyLoginOtp({ otp })).unwrap();
 //       navigate(PATHS.dashboard, { replace: true });
 //     } catch {
 //       // Error is displayed from Redux.
@@ -114,7 +114,7 @@
 //           disabled={status === 'loading'}
 //           onClick={() => {
 //             setOtp('');
-//             setNotice('For mock testing, enter OTP 123456.');
+//             setNotice('Request a new OTP or enter the OTP configured by your administrator.');
 //             dispatch(clearAuthError());
 //           }}
 //         >
@@ -153,7 +153,7 @@ import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import {
   clearAuthError,
   selectAuth,
-  verifyMockOtp,
+  verifyLoginOtp,
 } from '@/redux/slices/authSlice';
 import { PATHS } from '@/routes/paths';
 
@@ -173,7 +173,7 @@ export default function OtpVerificationPage() {
 
   const handleVerify = async () => {
     try {
-      await dispatch(verifyMockOtp({ otp })).unwrap();
+      await dispatch(verifyLoginOtp({ otp })).unwrap();
       navigate(PATHS.dashboard, { replace: true });
     } catch {
       // Error is displayed from Redux.
@@ -187,7 +187,7 @@ export default function OtpVerificationPage() {
 
   const handleResendOtp = () => {
     setOtp('');
-    setNotice('For mock testing, enter OTP 123456.');
+    setNotice('Request a new OTP or enter the OTP configured by your administrator.');
     dispatch(clearAuthError());
   };
 

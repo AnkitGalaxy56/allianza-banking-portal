@@ -8,6 +8,9 @@ export interface User {
   /** Not set for SUPER_ADMIN */
   bankCode?: string;
   bankName?: string;
+  userRole?: string;
+  branch?: string;
+  idleTimeoutMinutes?: number;
 }
 
 export interface LoginRequest {
@@ -16,6 +19,12 @@ export interface LoginRequest {
   role: Role;
   /** Required for bank roles - which bank the person is signing in to */
   bankCode?: string;
+}
+
+export interface PendingLoginResponse {
+  otpRequired: boolean;
+  challengeId: string;
+  message?: string;
 }
 
 export interface LoginResponse {

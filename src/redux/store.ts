@@ -3,6 +3,9 @@ import { registerAuthHandlers } from '@/services/api/axiosInstance';
 import { clearSession } from '@/utils/authStorage';
 import authReducer, { sessionExpired, tokensRefreshed } from './slices/authSlice';
 import themeReducer from './slices/themeSlice';
+import requestHandlingReducer from './slices/requestHandlingSlice';
+import mastersReducer from './slices/mastersSlice';
+import mobileUtilitiesReducer from './slices/mobileUtilitiesSlice';
 import userManagementReducer from './slices/userManagementSlice';
 import settingsReducer from './slices/settingsSlice';
 
@@ -10,6 +13,9 @@ export const store = configureStore({
   reducer: {
     auth: authReducer,
     theme: themeReducer,
+    requestHandling: requestHandlingReducer,
+    masters: mastersReducer,
+    mobileUtilities: mobileUtilitiesReducer,
     userManagement: userManagementReducer,
     settings: settingsReducer,
   },
