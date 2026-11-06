@@ -56,4 +56,32 @@ banners: {
     byId: (id: string) => `/customers/${encodeURIComponent(id)}`,
     resetDevice: (id: string) => `/customers/${encodeURIComponent(id)}/reset-device`,
   },
+  banks: {
+    base: '/banks',
+    byId: (id: string) => `/banks/${encodeURIComponent(id)}`,
+  },
+  mobileUtilities: {
+    images: {
+      base: '/mobile-utilities/images',
+      byId: (id: string) => `/mobile-utilities/images/${encodeURIComponent(id)}`,
+    },
+    notifications: {
+      base: '/mobile-utilities/notifications',
+      byId: (id: string) => `/mobile-utilities/notifications/${encodeURIComponent(id)}`,
+      send: (id: string) => `/mobile-utilities/notifications/${encodeURIComponent(id)}/send`,
+    },
+    deviceReset: {
+      base: '/mobile-utilities/device-resets',
+      byId: (id: string) => `/mobile-utilities/device-resets/${encodeURIComponent(id)}`,
+      lookup: '/mobile-utilities/device-resets/lookup',
+      reset: '/mobile-utilities/device-resets',
+    },
+  },
+  /** Request-handling APIs. Override these paths here to match the backend contract. */
+  requestHandling: {
+    base: (module: string) => `/request-handling/${module}`,
+    byId: (module: string, id: string) => `/request-handling/${module}/${encodeURIComponent(id)}`,
+    decision: (module: string, id: string) => `/request-handling/${module}/${encodeURIComponent(id)}/decision`,
+    remove: (module: string, id: string) => `/request-handling/${module}/${encodeURIComponent(id)}`,
+  },
 } as const;
