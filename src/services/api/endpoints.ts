@@ -28,6 +28,29 @@ export const ENDPOINTS = {
     byId: (id: string) => `/user-management/${encodeURIComponent(id)}`,
     assignPassword: (id: string) => `/user-management/${encodeURIComponent(id)}/assign-password`,
   },
+  /** Real API routes reserved for the User Management Redux/service layer. */
+  userManagement: {
+    users: '/user-management',
+    userById: (id: string) => `/user-management/${encodeURIComponent(id)}`,
+    authorizeUser: (id: string) => `/user-management/${encodeURIComponent(id)}/authorize`,
+    status: (id: string) => `/user-management/${encodeURIComponent(id)}/status`,
+    assignPassword: (id: string) => `/user-management/${encodeURIComponent(id)}/assign-password`,
+  },
+  // Settings
+  settings: {
+    profile: '/auth/profile',
+    changePasswordRequestOtp: '/auth/change-password/request-otp',
+    changePasswordVerifyOtp: '/auth/change-password/verify-otp',
+    roles: '/settings/roles',
+    roleById: (id: string) => `/settings/roles/${encodeURIComponent(id)}`,
+    themes: '/settings/themes',
+    themeByCode: (code: string) => `/settings/themes/${encodeURIComponent(code)}`,
+  },
+banners: {
+    base: '/banners',
+    byId: (id: string) => `/banners/${encodeURIComponent(id)}`,
+    upload: '/banners/upload',
+  },
   customers: {
     base: '/customers',
     byId: (id: string) => `/customers/${encodeURIComponent(id)}`,

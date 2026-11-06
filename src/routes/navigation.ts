@@ -406,39 +406,7 @@ export const NAV_ITEMS: NavItem[] = [
     ],
   },
 
-  // --------------------------------------------------
-  // EXISTING MENUS — retained below the new menus
-  // --------------------------------------------------
-
-
-
-  // {
-  //   label: 'Branches',
-  //   path: PATHS.branches,
-  //   icon: AccountBalanceOutlinedIcon,
-  //   roles: [BANK_ADMIN],
-  // },
-
-  // {
-  //   label: 'Customers',
-  //   path: PATHS.customers,
-  //   icon: PeopleAltOutlinedIcon,
-  //   roles: [BANK_ADMIN, BANK_USER],
-  // },
-
-  // {
-  //   label: 'Service Requests',
-  //   path: PATHS.serviceRequests,
-  //   icon: DescriptionOutlinedIcon,
-  //   roles: [BANK_ADMIN, BANK_USER],
-  // },
-
-  // {
-  //   label: 'Lead Enquiries',
-  //   path: PATHS.leadEnquiries,
-  //   icon: AttachMoneyOutlinedIcon,
-  //   roles: [BANK_ADMIN, BANK_USER],
-  // },
+  
 
   {
     label: 'Banners & Content',

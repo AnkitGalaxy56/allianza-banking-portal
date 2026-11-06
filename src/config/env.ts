@@ -8,4 +8,6 @@ export const env = {
   apiTimeoutMs: Number(import.meta.env.VITE_API_TIMEOUT_MS ?? 20000),
   defaultBankCode: import.meta.env.VITE_DEFAULT_BANK_CODE ?? 'sample-urban',
   useMockApi: import.meta.env.VITE_USE_MOCK_API === 'true',
+  // Real API only. Mock/demo data is intentionally disabled for this integration build.
+  //useMockApi: false,
 } as const;

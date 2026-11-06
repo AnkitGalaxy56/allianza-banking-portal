@@ -145,14 +145,7 @@ export default function LoginPage() {
             gap: 1.5,
           }}
         >
-          {/* <Typography
-            variant="body2"
-            sx={{ opacity: 0.85 }}
-          >
-            Developed by
-          </Typography> */}
 
-          {/* <BrandLogo theme={brand} size={48} inverted /> */}
 
 
           {/* Developed by footer */}
