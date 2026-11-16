@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Alert, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle,
   IconButton, InputAdornment, Paper, Snackbar, Stack, TextField, Typography,
@@ -10,7 +10,10 @@ import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 import AccountBalanceOutlinedIcon from '@mui/icons-material/AccountBalanceOutlined';
 import PageHeader from '@/components/common/PageHeader';
 import DataTable, { type DataTableColumn } from '@/components/common/DataTable';
-import { demoBanks, emptyForm } from './data/banksDemo';
+import axios from 'axios';
+import { getErrorMessage } from '@/services/api/apiError';
+import { mastersService } from '@/services/masters.service';
+import { emptyForm } from './data/banksDemo';
 import { bankFieldRows as fieldRows } from './components/BankFormFields';
 import { bankSchema } from './schemas/bankSchema';
 
@@ -20,7 +23,22 @@ import type { Bank, BankForm } from './types/bank';
 
 
 export default function BankPage() {
-  const [banks, setBanks] = useState<Bank[]>(demoBanks);
+  const [banks, setBanks] = useState<Bank[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [loadError, setLoadError] = useState('');
+  const loadBanks = async () => {
+    try {
+      const result = await mastersService.listBanks({ page: 1, pageSize: 200 });
+      setBanks(result.items);
+      setLoadError('');
+    } catch (e) {
+      setLoadError(getErrorMessage(e, 'Unable to load banks.'));
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => { void loadBanks(); }, []);
   const [search, setSearch] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Bank | null>(null);
@@ -42,21 +60,31 @@ export default function BankPage() {
   };
   const closeDialog = () => { setDialogOpen(false); setEditing(null); setError(''); setFieldErrors({}); };
   const updateField = (key: keyof BankForm, value: string) => setForm((current) => ({ ...current, [key]: value }));
-  const saveBank = () => {
+  const saveBank = async () => {
     const parsed = bankSchema.safeParse(form);
     if (!parsed.success) { setFieldErrors(Object.fromEntries(parsed.error.issues.map((issue) => [String(issue.path[0]), issue.message]))); setError('Please correct the highlighted fields before saving.'); return; }
-    if (banks.some((bank) => bank.code.toLowerCase() === form.code.trim().toLowerCase() && bank.id !== editing?.id)) {
-      setFieldErrors({ code: 'A bank with this code already exists.' }); setError('Please correct the highlighted fields before saving.'); return;
-    }
     setFieldErrors({});
-    if (editing) {
-      setBanks((current) => current.map((bank) => bank.id === editing.id ? { ...form, id: editing.id } : bank));
-      setMessage('Bank updated successfully.');
-    } else {
-      setBanks((current) => [...current, { ...form, id: `bank-${Date.now()}` }]);
-      setMessage('Bank added successfully.');
+    setError('');
+    setSaving(true);
+    try {
+      if (editing) {
+        await mastersService.updateBank(editing.id, form);
+        setMessage('Bank updated successfully.');
+      } else {
+        await mastersService.createBank(form);
+        setMessage('Bank added successfully.');
+      }
+      closeDialog();
+      await loadBanks();
+    } catch (e) {
+      if (axios.isAxiosError(e)) {
+        const errors = (e.response?.data as { errors?: Record<string, string> } | undefined)?.errors;
+        if (errors) setFieldErrors(errors);
+      }
+      setError(getErrorMessage(e, 'Unable to save the bank.'));
+    } finally {
+      setSaving(false);
     }
-    closeDialog();
   };
 
   const columns = useMemo<DataTableColumn<Bank>[]>(() => [
@@ -71,6 +99,7 @@ export default function BankPage() {
 
   return <Box>
     <PageHeader title="Bank Management" subtitle="Create, view and maintain bank master details" />
+    {loadError && <Alert severity="error" sx={{ mb: 2 }} action={<Button color="inherit" size="small" onClick={() => void loadBanks()}>Retry</Button>}>{loadError}</Alert>}
     <Paper variant="outlined" className="app-card" sx={{ borderRadius: 3, overflow: 'hidden' }}>
       <Box sx={{ p: 2.5, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, flexWrap: 'wrap' }}>
         <Box><Typography variant="body2" color="text.secondary">{banks.length} bank record{banks.length === 1 ? '' : 's'} configured</Typography></Box>
@@ -79,7 +108,7 @@ export default function BankPage() {
           <Button variant="contained" startIcon={<AddOutlinedIcon />} onClick={openAdd}>Add Bank</Button>
         </Stack>
       </Box>
-      <DataTable rows={rows} columns={columns} getRowId={(bank) => bank.id} emptyMessage="No banks found. Add a bank to get started." />
+      <DataTable rows={rows} columns={columns} getRowId={(bank) => bank.id} emptyMessage={loading ? 'Loading banks…' : 'No banks found. Add a bank to get started.'} />
       <Box sx={{ px: 2.5, py: 1.75, borderTop: 1, borderColor: 'divider' }}><Typography variant="body2" color="text.secondary">Showing {rows.length} of {banks.length} banks</Typography></Box>
     </Paper>
 
@@ -91,14 +120,14 @@ export default function BankPage() {
       <DialogContent dividers>
         {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
         <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, minmax(0, 1fr))' }, gap: 2, pt: 0.5 }}>
-          {fieldRows.map((field) => <TextField key={field.name} label={field.label} size="small" value={form[field.name]} error={Boolean(fieldErrors[field.name])} helperText={fieldErrors[field.name] || ' '} onChange={(event) => { updateField(field.name, event.target.value); setFieldErrors((old) => ({ ...old, [field.name]: '' })); }} required={field.name === 'code' || field.name === 'name'} sx={{ gridColumn: { xs: 'auto', sm: field.span === 2 ? 'span 2' : 'span 1' } }} />)}
+          {fieldRows.map((field) => <TextField key={field.name} label={field.label} size="small" value={form[field.name]} error={Boolean(fieldErrors[field.name])} helperText={fieldErrors[field.name] || ' '} onChange={(event) => { updateField(field.name, event.target.value); setFieldErrors((old) => ({ ...old, [field.name]: '' })); }} required={field.name === 'code' || field.name === 'name'} disabled={(Boolean(editing) && field.name === 'code') || field.name === 'branches'} sx={{ gridColumn: { xs: 'auto', sm: field.span === 2 ? 'span 2' : 'span 1' } }} />)}
           <Box sx={{ gridColumn: { xs: 'auto', sm: 'span 2' }, display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
             <TextField label="Working Timings From" size="small" type="time" value={form.workingFrom} error={Boolean(fieldErrors.workingFrom)} helperText={fieldErrors.workingFrom || ' '} onChange={(event) => updateField('workingFrom', event.target.value)} InputLabelProps={{ shrink: true }} />
             <TextField label="Working Timings To" size="small" type="time" value={form.workingTo} error={Boolean(fieldErrors.workingTo)} helperText={fieldErrors.workingTo || ' '} onChange={(event) => { updateField('workingTo', event.target.value); setFieldErrors((old) => ({ ...old, workingTo: '' })); }} InputLabelProps={{ shrink: true }} />
           </Box>
         </Box>
       </DialogContent>
-      <DialogActions sx={{ p: 2.5 }}><Button onClick={closeDialog} color="inherit" variant="outlined">Cancel</Button><Button onClick={saveBank} variant="contained">{editing ? 'Save Changes' : 'Submit'}</Button></DialogActions>
+      <DialogActions sx={{ p: 2.5 }}><Button onClick={closeDialog} color="inherit" variant="outlined">Cancel</Button><Button onClick={() => void saveBank()} variant="contained" disabled={saving}>{saving ? 'Saving…' : editing ? 'Save Changes' : 'Submit'}</Button></DialogActions>
     </Dialog>
     <Snackbar open={Boolean(message)} autoHideDuration={3500} onClose={() => setMessage('')} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}><Alert severity="success" variant="filled" onClose={() => setMessage('')}>{message}</Alert></Snackbar>
   </Box>;

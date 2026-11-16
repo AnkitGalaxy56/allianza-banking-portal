@@ -13,6 +13,7 @@ import ConfirmDialog from '@/components/common/ConfirmDialog';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { setActiveTheme } from '@/redux/slices/themeSlice';
 import { themeManagementService } from '@/services/themeManagement.service';
+import { getErrorMessage } from '@/services/api/apiError';
 import type { BankTheme } from '@/types/theme';
 import ThemeFormDialog from './components/ThemeFormDialog';
 
@@ -34,7 +35,7 @@ export default function ChangeColourThemePage() {
   const loadThemes = async () => {
     setLoading(true);
     try { setThemes(await themeManagementService.list()); }
-    catch (error) { setFeedback({ type: 'error', message: error instanceof Error ? error.message : 'Unable to load colour themes.' }); }
+    catch (error) { setFeedback({ type: 'error', message: getErrorMessage(error, 'Unable to load colour themes.') }); }
     finally { setLoading(false); }
   };
 
@@ -53,9 +54,13 @@ export default function ChangeColourThemePage() {
 
   const deleteTheme = async () => {
     if (!deleting) return;
-    await themeManagementService.remove(deleting.code);
-    setThemes((old) => old.filter((item) => item.code !== deleting.code));
-    setFeedback({ type: 'success', message: `${deleting.name} theme deleted successfully.` });
+    try {
+      await themeManagementService.remove(deleting.code);
+      setThemes((old) => old.filter((item) => item.code !== deleting.code));
+      setFeedback({ type: 'success', message: `${deleting.name} theme deleted successfully.` });
+    } catch (error) {
+      setFeedback({ type: 'error', message: getErrorMessage(error, 'Unable to delete this theme.') });
+    }
     setDeleting(null);
   };
 

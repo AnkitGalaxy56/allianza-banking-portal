@@ -11,9 +11,12 @@ export interface Branch {
   phone: string;
   customers: number;
   status: BranchStatus;
+  /** Bank the branch belongs to (MB002002.bank_code). */
+  bankCode?: string;
+  bankName?: string;
 }
 
-export type BranchInput = Omit<Branch, 'id' | 'customers' | 'status'>;
+export type BranchInput = Omit<Branch, 'id' | 'customers' | 'status' | 'bankName'>;
 
 export interface BranchQuery {
   page: number;

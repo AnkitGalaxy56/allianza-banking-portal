@@ -9,7 +9,7 @@ export type MobileImage = {
   format: string; dimensions: string; altText: string; platform: string;
   status: string; updatedAt: string; previewUrl?: string;
 };
-export type MobileImageInput = Omit<MobileImage, 'id' | 'updatedAt'> & { file?: File | Blob };
+export type MobileImageInput = Omit<MobileImage, 'id' | 'updatedAt'> & { file?: File | Blob; /** small preview as a data URL, sent with a new file */ thumbnail?: string };
 export interface MobileUtilityQuery { page?: number; pageSize?: number; search?: string; status?: string; [key: string]: unknown; }
 export interface DeviceLookupInput { customerNumber: string; mobile: string; }
 export interface DeviceLookupResult { customerNumber: string; branch: string; mobile: string; device: string; registeredOn: string; }

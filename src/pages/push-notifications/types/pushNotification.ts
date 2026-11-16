@@ -7,4 +7,5 @@ export interface PushNotification {
   sentOn: string;
   status: NotificationStatus;
   message: string;
+  recipients?: number;
 }

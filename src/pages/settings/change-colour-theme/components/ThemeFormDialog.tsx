@@ -3,6 +3,7 @@ import {
   Alert, Box, Button, Divider, Grid, Stack, TextField, Typography,
 } from '@mui/material';
 import FormDialog from '@/components/form/FormDialog';
+import { getErrorMessage } from '@/services/api/apiError';
 import type { BankTheme, BankThemeColors } from '@/types/theme';
 import { COLOR_FIELDS, DEFAULT_COLORS } from '../data/themePalettes';
 import { isValidThemePalette } from '../schema/theme.schema';
@@ -39,7 +40,7 @@ export default function ThemeFormDialog({ open, theme, onClose, onSave }: ThemeF
     setSaving(true); setError('');
     try {
       await onSave({ code: code.trim().toLowerCase(), name: name.trim(), shortName: shortName.trim(), tagline: tagline.trim(), colors: webColors, mobileColors, borderRadius: theme?.borderRadius ?? 12, logoUrl: theme?.logoUrl }, isNew);
-    } catch (e) { setError(e instanceof Error ? e.message : 'Unable to save theme.'); }
+    } catch (e) { setError(getErrorMessage(e, 'Unable to save theme.')); }
     finally { setSaving(false); }
   };
 

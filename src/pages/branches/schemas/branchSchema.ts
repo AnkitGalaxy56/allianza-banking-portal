@@ -12,6 +12,7 @@ export const branchSchema = z.object({
   city: z.string().trim().min(2, 'Enter the city'),
   pincode: z.string().trim().regex(/^\d{6}$/, 'Enter a 6-digit pincode'),
   phone: z.string().trim().regex(/^[0-9+\-\s]{7,15}$/, 'Enter a valid phone number'),
+  bankCode: z.string().trim().optional(),
 });
 
 export type BranchFormValues = z.infer<typeof branchSchema>;
@@ -24,6 +25,7 @@ export const EMPTY_BRANCH: BranchFormValues = {
   city: '',
   pincode: '',
   phone: '',
+  bankCode: '',
 };
 
 export const branchToFormValues = (b: Branch): BranchFormValues => ({
@@ -34,4 +36,5 @@ export const branchToFormValues = (b: Branch): BranchFormValues => ({
   city: b.city,
   pincode: b.pincode,
   phone: b.phone,
+  bankCode: b.bankCode ?? '',
 });

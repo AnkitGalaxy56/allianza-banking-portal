@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Alert, Box, Button } from '@mui/material';
+import { Alert, Box, Button, MenuItem, TextField } from '@mui/material';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import FormTextField from '@/components/form/FormTextField';
 import { getErrorMessage } from '@/services/api/apiError';
 import { branchService } from '@/services/branch.service';
+import { mastersService } from '@/services/masters.service';
+import type { Bank } from '@/pages/banks-management/types/bank';
 import type { Branch } from '../types/branch';
 import { branchSchema, branchToFormValues, EMPTY_BRANCH, type BranchFormValues } from '../schemas/branchSchema';
 
@@ -17,6 +19,7 @@ interface Props {
 
 export default function BranchForm({ editing, focusSignal, onSaved, onCancel }: Props) {
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [banks, setBanks] = useState<Bank[]>([]);
   const { control, handleSubmit, reset, setFocus, formState } = useForm<BranchFormValues>({
     resolver: zodResolver(branchSchema),
     defaultValues: EMPTY_BRANCH,
@@ -26,6 +29,11 @@ export default function BranchForm({ editing, focusSignal, onSaved, onCancel }: 
     reset(editing ? branchToFormValues(editing) : EMPTY_BRANCH);
     setSubmitError(null);
   }, [editing, reset]);
+
+  useEffect(() => {
+    // Only needed when there is more than one bank; with a single bank the server picks it.
+    mastersService.listBanks({ page: 1, pageSize: 200 }).then((result) => setBanks(result.items)).catch(() => setBanks([]));
+  }, []);
 
   useEffect(() => {
     if (focusSignal > 0) setFocus('name');
@@ -48,9 +56,16 @@ export default function BranchForm({ editing, focusSignal, onSaved, onCancel }: 
   return (
     <Box component="form" noValidate onSubmit={handleSubmit(onSubmit)} sx={{ display: 'grid', gap: 2, pt: 1 }}>
       {submitError && <Alert severity="error">{submitError}</Alert>}
+      {banks.length > 1 && (
+        <Controller name="bankCode" control={control} render={({ field }) => (
+          <TextField select size="small" label="Bank" value={field.value ?? ''} onChange={field.onChange} disabled={busy || Boolean(editing)}>
+            {banks.map((bank) => <MenuItem key={bank.code} value={bank.code}>{bank.name} ({bank.code})</MenuItem>)}
+          </TextField>
+        )} />
+      )}
       <FormTextField<BranchFormValues> name="name" control={control} label="Branch name" placeholder="Enter branch name" disabled={busy} />
       <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' } }}>
-        <FormTextField<BranchFormValues> name="code" control={control} label="Branch code" placeholder="Unique branch code" disabled={busy} />
+        <FormTextField<BranchFormValues> name="code" control={control} label="Branch code" placeholder="Unique branch code" disabled={busy || Boolean(editing)} />
         <FormTextField<BranchFormValues> name="ifsc" control={control} label="IFSC code" placeholder="11-character IFSC" disabled={busy} />
       </Box>
       <FormTextField<BranchFormValues> name="address" control={control} label="Address" placeholder="Street, area" disabled={busy} />

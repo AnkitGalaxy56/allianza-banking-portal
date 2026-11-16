@@ -1,21 +1,35 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Alert, Box, Button, IconButton, Stack, Typography } from '@mui/material';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
+import SendOutlinedIcon from '@mui/icons-material/SendOutlined';
 import PageHeader from '@/components/common/PageHeader';
 import StatusChip from '@/components/common/StatusChip';
 import ConfirmDialog from '@/components/common/ConfirmDialog';
 import DataTable, { type DataTableColumn } from '@/components/common/DataTable';
 import FormDialog from '@/components/form/FormDialog';
 import NotificationForm from './components/NotificationForm';
-import { pushNotificationsDemo } from './data/pushNotificationsDemo';
+import { getErrorMessage } from '@/services/api/apiError';
+import { mobileUtilitiesService } from '@/services/mobile-utilities.service';
 import type { PushNotification } from './types/pushNotification';
 import type { PushNotificationFormValues } from './schemas/pushNotificationSchema';
 
 type PendingAction = { values: PushNotificationFormValues; action: 'send' | 'draft' } | null;
 
 export default function PushNotificationsPage() {
-  const [rows, setRows] = useState(pushNotificationsDemo);
+  const [rows, setRows] = useState<PushNotification[]>([]);
+  const [loading, setLoading] = useState(true);
+  const loadRows = async () => {
+    try {
+      const result = await mobileUtilitiesService.listNotifications({ page: 1, pageSize: 200 });
+      setRows(result.items);
+    } catch (e) {
+      setError(getErrorMessage(e, 'Unable to load notifications.'));
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => { void loadRows(); }, []);
   const [pending, setPending] = useState<PendingAction>(null);
   const [editing, setEditing] = useState<PushNotification | null>(null);
   const [viewing, setViewing] = useState<PushNotification | null>(null);
@@ -28,34 +42,50 @@ export default function PushNotificationsPage() {
     setSaving(true); setError('');
     try {
       const isDraft = pending.action === 'draft';
-      const row: PushNotification = {
-        id: `PN-${Date.now()}`,
+      const saved = await mobileUtilitiesService.createNotification({
         title: pending.values.title.trim(),
         branch: pending.values.branch,
         audience: pending.values.audience,
-        sentOn: isDraft ? '—' : pending.values.schedule === 'scheduled' ? new Date(pending.values.dateTime ?? '').toLocaleString() : new Date().toLocaleString(),
-        status: isDraft ? 'Draft' : pending.values.schedule === 'scheduled' ? 'Scheduled' : 'Sent',
         message: pending.values.message.trim(),
-      };
-      setRows(old => [row, ...old]);
-      setFeedback(isDraft ? 'Notification saved as draft.' : row.status === 'Scheduled' ? 'Notification scheduled.' : 'Notification queued in demo mode.');
+        action: pending.action,
+        schedule: pending.values.schedule,
+        dateTime: pending.values.dateTime,
+      });
+      await loadRows();
+      setFeedback(isDraft ? 'Notification saved as draft.' : saved.status === 'Scheduled' ? 'Notification scheduled.' : `Notification sent to ${saved.recipients ?? 0} customers.`);
       setPending(null);
-    } catch {
-      setError('Unable to save this notification. Please try again.');
+    } catch (e) {
+      setPending(null);
+      setError(getErrorMessage(e, 'Unable to save this notification. Please try again.'));
     } finally { setSaving(false); }
   };
 
-  const updateNotification = (values: PushNotificationFormValues) => {
+  const sendNow = async (row: PushNotification) => {
+    setError('');
+    try {
+      const sent = await mobileUtilitiesService.sendNotification(row.id);
+      await loadRows();
+      setFeedback(`“${row.title}” sent to ${sent.recipients ?? 0} customers.`);
+    } catch (e) {
+      setError(getErrorMessage(e, 'Unable to send this notification.'));
+    }
+  };
+
+  const updateNotification = async (values: PushNotificationFormValues) => {
     if (!editing) return;
-    setRows(old => old.map(row => row.id === editing.id ? {
-      ...row,
-      title: values.title.trim(),
-      branch: values.branch,
-      audience: values.audience,
-      message: values.message.trim(),
-    } : row));
-    setEditing(null);
-    setFeedback('Notification updated successfully.');
+    try {
+      await mobileUtilitiesService.updateNotification(editing.id, {
+        title: values.title.trim(),
+        branch: values.branch,
+        audience: values.audience,
+        message: values.message.trim(),
+      });
+      await loadRows();
+      setEditing(null);
+      setFeedback('Notification updated successfully.');
+    } catch (e) {
+      setError(getErrorMessage(e, 'Unable to update this notification.'));
+    }
   };
 
   const columns: DataTableColumn<PushNotification>[] = [
@@ -67,6 +97,7 @@ export default function PushNotificationsPage() {
     { key: 'actions', label: 'Actions', minWidth: 130, nowrap: true, render: row => (
       <Stack direction="row" spacing={0.5}>
         <IconButton size="small" aria-label={`View ${row.title}`} title="View notification" onClick={() => setViewing(row)}><VisibilityOutlinedIcon fontSize="small" /></IconButton>
+        {!['sent', 'send'].includes(row.status.trim().toLowerCase()) && <IconButton size="small" aria-label={`Send ${row.title} now`} title="Send now" onClick={() => void sendNow(row)}><SendOutlinedIcon fontSize="small" /></IconButton>}
         {!['sent', 'send'].includes(row.status.trim().toLowerCase()) && <IconButton size="small" aria-label={`Edit ${row.title}`} title="Edit notification" onClick={() => setEditing(row)}><EditOutlinedIcon fontSize="small" /></IconButton>}
       </Stack>
     ) },
@@ -90,13 +121,13 @@ export default function PushNotificationsPage() {
       <Box sx={{ p: 2.5, pb: 2 }}>
         <Typography variant="h6" fontWeight={750}>Sent notifications</Typography>
       </Box>
-      <DataTable rows={rows} columns={columns} getRowId={row => row.id} emptyMessage="No notifications found." />
+      <DataTable rows={rows} columns={columns} getRowId={row => row.id} emptyMessage={loading ? 'Loading notifications…' : 'No notifications found.'} />
     </Box>
 
     <FormDialog open={!!editing} title="Edit notification" description="Update the notification details." onClose={() => setEditing(null)} maxWidth="sm"
       actions={<><Button onClick={() => setEditing(null)} color="inherit">Cancel</Button><Button variant="contained" form="notification-edit-form" type="submit">Save changes</Button></>}>
       {editing && <NotificationForm compact formId="notification-edit-form" submitLabel="Save changes" initialValues={editInitialValues}
-        onSubmit={values => updateNotification(values)} />}
+        onSubmit={values => void updateNotification(values)} />}
     </FormDialog>
 
     <FormDialog open={!!viewing} title="Notification details" description="Review the notification content and delivery information." onClose={() => setViewing(null)} maxWidth="sm"

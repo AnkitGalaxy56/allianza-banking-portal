@@ -1,10 +1,10 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Box, Button, Grid, MenuItem, Paper, Stack, TextField, Typography } from '@mui/material';
 import { pushNotificationSchema, type PushNotificationFormValues } from '../schemas/pushNotificationSchema';
+import { branchService } from '@/services/branch.service';
 
-const branches = ['All branches', 'Main branch', 'Branch 2', 'Branch 4', 'Branch 7'];
 const audiences = ['All customers', 'Customers with pending MPIN', 'Customers with active loans'];
 interface Props {
   onSubmit: (values: PushNotificationFormValues, action: 'send' | 'draft') => void;
@@ -19,6 +19,12 @@ export default function NotificationForm({ onSubmit, initialValues, compact = fa
     defaultValues: { branch: 'All branches', audience: 'All customers', title: '', message: '', schedule: 'now', dateTime: '', ...initialValues },
   });
   useEffect(() => { reset({ branch: 'All branches', audience: 'All customers', title: '', message: '', schedule: 'now', dateTime: '', ...initialValues }); }, [initialValues, reset]);
+  const [branches, setBranches] = useState<string[]>(['All branches']);
+  useEffect(() => {
+    branchService.list({ page: 1, pageSize: 200, status: 'all' })
+      .then((result) => setBranches(['All branches', ...result.items.map((branch) => branch.name)]))
+      .catch(() => setBranches(['All branches']));
+  }, []);
   const title = watch('title');
   const message = watch('message');
   const schedule = watch('schedule');

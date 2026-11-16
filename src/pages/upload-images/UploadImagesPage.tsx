@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert, Avatar, Box, Button, Chip, Dialog, DialogActions, DialogContent,
   DialogTitle, IconButton, InputAdornment, MenuItem, Paper, Snackbar, Stack,
@@ -14,6 +14,8 @@ import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined
 import DataTable, { type DataTableColumn } from '@/components/common/DataTable';
 import PageHeader from '@/components/common/PageHeader';
 import { imageSchema } from './schemas/imageSchema';
+import { getErrorMessage } from '@/services/api/apiError';
+import { mobileUtilitiesService } from '@/services/mobile-utilities.service';
 
 type ImageType = 'Banner' | 'App Logo' | 'Icon' | 'Onboarding' | 'Promotion' | 'Other';
 type ImageStatus = 'Active' | 'Inactive';
@@ -25,17 +27,38 @@ type AppImage = {
 };
 type ImageForm = Omit<AppImage, 'id' | 'updatedAt'>;
 const emptyForm: ImageForm = { name: '', type: 'Banner', path: '', size: 0, format: '', dimensions: '', altText: '', platform: 'Both', status: 'Active', previewUrl: '' };
-const initialImages: AppImage[] = [
-  { id: 'img-001', name: 'Home Dashboard Banner', type: 'Banner', path: '/assets/mobile/home-dashboard-banner.png', size: 248 * 1024, format: 'PNG', dimensions: '1200 × 480', altText: 'Mobile banking dashboard promotional banner', platform: 'Both', status: 'Active', updatedAt: '2026-10-12', previewUrl: '' },
-  { id: 'img-002', name: 'Allianza App Logo', type: 'App Logo', path: '/assets/mobile/allianza-logo.png', size: 42 * 1024, format: 'PNG', dimensions: '512 × 512', altText: 'Allianza mobile application logo', platform: 'Both', status: 'Active', updatedAt: '2026-10-08', previewUrl: '' },
-  { id: 'img-003', name: 'Quick Transfer Icon', type: 'Icon', path: '/assets/mobile/quick-transfer.svg', size: 8 * 1024, format: 'SVG', dimensions: '96 × 96', altText: 'Quick money transfer icon', platform: 'Both', status: 'Active', updatedAt: '2026-10-03', previewUrl: '' },
-  { id: 'img-004', name: 'Welcome Onboarding', type: 'Onboarding', path: '/assets/mobile/onboarding-welcome.webp', size: 316 * 1024, format: 'WEBP', dimensions: '1080 × 1440', altText: 'Welcome illustration for new mobile banking users', platform: 'Android', status: 'Inactive', updatedAt: '2026-09-28', previewUrl: '' },
-];
+const IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/gif', 'image/webp'];
+/** A small PNG preview (max 96 px) that is stored with the record so the list can show it after a reload. */
+const makeThumbnail = (image: HTMLImageElement): string => {
+  const scale = Math.min(1, 96 / Math.max(image.naturalWidth, image.naturalHeight, 1));
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+  canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+  canvas.getContext('2d')?.drawImage(image, 0, 0, canvas.width, canvas.height);
+  return canvas.toDataURL('image/png');
+};
 const formatBytes = (bytes: number) => !bytes ? '—' : bytes < 1024 * 1024 ? `${(bytes / 1024).toFixed(1)} KB` : `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 const today = () => new Date().toISOString().slice(0, 10);
 
 export default function UploadImagesPage() {
-  const [images, setImages] = useState<AppImage[]>(initialImages);
+  const [images, setImages] = useState<AppImage[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [loadError, setLoadError] = useState('');
+  const [pickedFile, setPickedFile] = useState<File | null>(null);
+  const [thumbnail, setThumbnail] = useState('');
+  const loadImages = async () => {
+    try {
+      const result = await mobileUtilitiesService.listImages({ page: 1, pageSize: 200 });
+      setImages(result.items as unknown as AppImage[]);
+      setLoadError('');
+    } catch (e) {
+      setLoadError(getErrorMessage(e, 'Unable to load images.'));
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => { void loadImages(); }, []);
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -50,17 +73,18 @@ export default function UploadImagesPage() {
     const matches = `${item.name} ${item.type} ${item.path} ${item.format} ${item.altText}`.toLowerCase().includes(search.trim().toLowerCase());
     return matches && (typeFilter === 'all' || item.type === typeFilter) && (statusFilter === 'all' || item.status === statusFilter);
   }), [images, search, typeFilter, statusFilter]);
-  const openAdd = () => { setEditing(null); setForm(emptyForm); setError(''); setDialogOpen(true); };
-  const openEdit = (item: AppImage) => { setEditing(item); const { id: _id, updatedAt: _date, ...values } = item; setForm(values); setError(''); setDialogOpen(true); };
+  const openAdd = () => { setEditing(null); setForm(emptyForm); setPickedFile(null); setThumbnail(''); setError(''); setDialogOpen(true); };
+  const openEdit = (item: AppImage) => { setEditing(item); const { id: _id, updatedAt: _date, ...values } = item; setForm(values); setPickedFile(null); setThumbnail(''); setError(''); setDialogOpen(true); };
   const closeDialog = () => { setDialogOpen(false); setEditing(null); setError(''); };
   const updateField = <K extends keyof ImageForm>(key: K, value: ImageForm[K]) => setForm((current) => ({ ...current, [key]: value }));
   const selectFile = (file?: File) => {
     if (!file) return;
-    if (!file.type.startsWith('image/')) { setError('Please choose a valid image file.'); return; }
+    if (!IMAGE_TYPES.includes(file.type)) { setError('Only PNG, JPEG, GIF or WebP images are allowed.'); return; }
     if (file.size > 10 * 1024 * 1024) { setError('Image must be 10 MB or smaller.'); return; }
     const previewUrl = URL.createObjectURL(file);
     const image = new window.Image();
-    image.onload = () => updateField('dimensions', `${image.naturalWidth} × ${image.naturalHeight}`);
+    image.onload = () => { updateField('dimensions', `${image.naturalWidth} × ${image.naturalHeight}`); setThumbnail(makeThumbnail(image)); };
+    setPickedFile(file);
     image.src = previewUrl;
     updateField('name', form.name || file.name.replace(/\.[^.]+$/, ''));
     updateField('path', `/uploads/mobile/${file.name}`);
@@ -69,18 +93,27 @@ export default function UploadImagesPage() {
     updateField('previewUrl', previewUrl);
     setError('');
   };
-  const saveImage = () => {
+  const saveImage = async () => {
     const parsed = imageSchema.safeParse(form);
     if (!parsed.success) { setError(parsed.error.issues[0]?.message ?? 'Please check the image details.'); return; }
-    if (images.some((item) => item.name.trim().toLowerCase() === parsed.data.name.trim().toLowerCase() && item.id !== editing?.id)) { setError('An image with this name already exists.'); return; }
-    if (editing) {
-      setImages((current) => current.map((item) => item.id === editing.id ? { ...parsed.data, id: editing.id, updatedAt: today() } : item));
-      setMessage('Image details updated.');
-    } else {
-      setImages((current) => [...current, { ...parsed.data, id: `img-${Date.now()}`, updatedAt: today() }]);
-      setMessage('Image added to the list.');
+    setSaving(true);
+    setError('');
+    try {
+      const payload = { ...parsed.data, file: pickedFile ?? undefined, thumbnail: pickedFile ? thumbnail : undefined };
+      if (editing) {
+        await mobileUtilitiesService.updateImage(editing.id, payload);
+        setMessage('Image details updated.');
+      } else {
+        await mobileUtilitiesService.uploadImage(payload);
+        setMessage('Image added.');
+      }
+      closeDialog();
+      await loadImages();
+    } catch (e) {
+      setError(getErrorMessage(e, 'Unable to save the image.'));
+    } finally {
+      setSaving(false);
     }
-    closeDialog();
   };
 
   const columns = useMemo<DataTableColumn<AppImage>[]>(() => [
@@ -97,6 +130,7 @@ export default function UploadImagesPage() {
 
   return <Box>
     <PageHeader title="Upload Images" subtitle="Manage images and visual assets used in the mobile application" />
+    {loadError && <Alert severity="error" sx={{ mb: 2 }} action={<Button color="inherit" size="small" onClick={() => void loadImages()}>Retry</Button>}>{loadError}</Alert>}
     <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, minmax(0, 1fr))' }, gap: 2, mb: 2.5 }}>
       {[
         { label: 'Total images', value: images.length, icon: <ImageOutlinedIcon /> },
@@ -114,7 +148,7 @@ export default function UploadImagesPage() {
           <Button variant="contained" startIcon={<AddPhotoAlternateOutlinedIcon />} onClick={openAdd} sx={{ whiteSpace: 'nowrap' }}>Add Image</Button>
         </Stack>
       </Box>
-      <DataTable rows={rows} columns={columns} getRowId={(item) => item.id} emptyMessage="No images match these filters. Add an image to get started." />
+      <DataTable rows={rows} columns={columns} getRowId={(item) => item.id} emptyMessage={loading ? 'Loading images…' : 'No images match these filters. Add an image to get started.'} />
       <Box sx={{ px: 2.5, py: 1.75, borderTop: 1, borderColor: 'divider' }}><Typography variant="body2" color="text.secondary">Showing {rows.length} of {images.length} image assets</Typography></Box>
     </Paper>
     <Dialog open={dialogOpen} onClose={closeDialog} fullWidth maxWidth="md" scroll="paper">
@@ -138,7 +172,7 @@ export default function UploadImagesPage() {
           <TextField label="Last Updated" size="small" value={editing?.updatedAt ?? today()} disabled />
         </Box>
       </DialogContent>
-      <DialogActions sx={{ p: 2.5 }}><Button onClick={closeDialog} color="inherit" variant="outlined">Cancel</Button><Button onClick={saveImage} variant="contained">{editing ? 'Save Changes' : 'Add Image'}</Button></DialogActions>
+      <DialogActions sx={{ p: 2.5 }}><Button onClick={closeDialog} color="inherit" variant="outlined">Cancel</Button><Button onClick={() => void saveImage()} variant="contained" disabled={saving}>{saving ? 'Saving…' : editing ? 'Save Changes' : 'Add Image'}</Button></DialogActions>
     </Dialog>
     <Snackbar open={Boolean(message)} autoHideDuration={3500} onClose={() => setMessage('')} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}><Alert severity="success" onClose={() => setMessage('')} variant="filled">{message}</Alert></Snackbar>
   </Box>;
