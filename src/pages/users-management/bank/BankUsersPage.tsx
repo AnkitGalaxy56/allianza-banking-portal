@@ -39,7 +39,7 @@ import {
   userToFormValues,
 } from './schemas/branchUserSchema';
 
-const PAGE_SIZE = 8;
+const PAGE_SIZE = 5000;
 
 type Feedback = { message: string; severity: 'success' | 'error' | 'info' } | null;
 

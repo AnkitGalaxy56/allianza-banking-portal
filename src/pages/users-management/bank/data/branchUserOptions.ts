@@ -18,7 +18,10 @@ export const BRANCH_OPTIONS: SelectOption[] = BRANCHES.map((branch) => ({
 
 export const TITLE_OPTIONS: SelectOption[] = [
   { value: 'Mr', label: 'Mr' },
+  { value: 'Mrs', label: 'Mrs' },
+  { value: 'Miss', label: 'Miss' },
   { value: 'Ms', label: 'Ms' },
+  { value: 'Dr', label: 'Dr' },
 ];
 
 export const USER_ROLE_OPTIONS: SelectOption[] = [

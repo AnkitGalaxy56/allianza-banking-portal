@@ -28,6 +28,11 @@ export const settingsService = {
     await api.post(ENDPOINTS.settings.changePasswordVerifyOtp, body);
   },
 
+  async getMyAccess(): Promise<{ roleName: string; permissions: AccessRole['permissions']; configured: boolean }> {
+    const { data } = await api.get<{ roleName: string; permissions: AccessRole['permissions']; configured: boolean }>('/settings/my-access');
+    return data;
+  },
+
   async listRoles(): Promise<AccessRole[]> {
     const { data } = await api.get<AccessRole[]>(ENDPOINTS.settings.roles);
     return data;

@@ -1,4 +1,4 @@
-import { useState, type MouseEvent } from 'react';
+import { useEffect, useMemo, useState, type MouseEvent } from 'react';
 
 import {
   Box,
@@ -21,6 +21,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { useAppSelector } from '@/redux/hooks';
 import { selectUser } from '@/redux/slices/authSlice';
 import { getNavForRole, type NavItem } from '@/routes/navigation';
+import { settingsService } from '@/services/settings.service';
 
 interface SidebarProps {
   onNavigate?: () => void;
@@ -51,10 +52,23 @@ export default function Sidebar({
   const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({});
   const [submenuAnchor, setSubmenuAnchor] = useState<HTMLElement | null>(null);
   const [activeSubmenu, setActiveSubmenu] = useState<NavItem | null>(null);
+  const [screenGrants, setScreenGrants] = useState<Set<string> | null>(null);
+  useEffect(() => { let active = true; if (!user) { setScreenGrants(null); return () => { active = false; }; } settingsService.getMyAccess().then(result => { if (active) setScreenGrants(result.configured ? new Set(result.permissions.filter(p => p.actions.includes('view')).map(p => p.module)) : null); }).catch(() => { if (active) setScreenGrants(new Set()); }); return () => { active = false; }; }, [user]);
+
+  const items = useMemo(() => {
+    if (!user) return [];
+    const filter = (source: NavItem[]): NavItem[] => source.flatMap(item => {
+      if (item.children?.length) {
+        const children = filter(item.children);
+        if (screenGrants && !screenGrants.has(item.label) && children.length === 0) return [];
+        return [{ ...item, children }];
+      }
+      return !screenGrants || screenGrants.has(item.label) ? [item] : [];
+    });
+    return filter(getNavForRole(user.role));
+  }, [user?.role, screenGrants]);
 
   if (!user) return null;
-
-  const items = getNavForRole(user.role);
 
   const closeCollapsedSubmenu = () => {
     setSubmenuAnchor(null);

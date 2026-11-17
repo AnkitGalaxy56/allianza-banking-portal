@@ -34,13 +34,13 @@ export const branchUserService = {
       const { mockAuthorizeBranchUser } = await import('./mock/mockBranchUsers');
       return mockAuthorizeBranchUser(id);
     }
-    await api.patch(ENDPOINTS.branchUsers.byId(id), { status: 'Operative', authorizationStatus: 'Authorized' });
+    await api.patch(ENDPOINTS.userManagement.authorizeUser(id));
   },
   async updateStatus(id: string, status: BranchUser['status']): Promise<void> {
     if (env.useMockApi) {
       const { mockUpdateBranchUserStatus } = await import('./mock/mockBranchUsers');
       return mockUpdateBranchUserStatus(id, status);
     }
-    await api.patch(ENDPOINTS.branchUsers.byId(id), { status });
+    await api.patch(ENDPOINTS.userManagement.status(id), { status });
   },
 };

@@ -142,7 +142,7 @@ export default function AppRoutes() {
                 key={item.path}
                 path={item.path}
                 element={
-                  <RoleGuard allowed={item.roles}>
+                  <RoleGuard allowed={item.roles} screenName={item.label}>
                     {BUILT_PAGES[item.path] ?? <ComingSoonPage title={item.label} />}
                   </RoleGuard>
                 }

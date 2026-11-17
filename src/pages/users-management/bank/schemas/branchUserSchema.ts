@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-const employeeTitleSchema = z.enum(['Mr', 'Ms'], {
+const employeeTitleSchema = z.enum(['Mr', 'Mrs', 'Miss', 'Ms', 'Dr'], {
   required_error: 'Select a title',
 });
 

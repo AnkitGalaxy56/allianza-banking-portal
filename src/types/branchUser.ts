@@ -1,6 +1,6 @@
 export type BranchUserStatus = 'Entered' | 'Operative' | 'In-Operative' | 'Suspended' | 'Password Blocked';
 export type BranchUserRole = 'Bank User' | 'Admin User';
-export type BranchUserTitle = 'Mr' | 'Ms';
+export type BranchUserTitle = 'Mr' | 'Mrs' | 'Miss' | 'Ms' | 'Dr';
 
 export interface MenuFunctionAccessLevel {
   create: boolean;

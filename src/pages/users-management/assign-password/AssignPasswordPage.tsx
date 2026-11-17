@@ -19,7 +19,7 @@ import type { BranchUser } from '@/types/branchUser';
 
 type Feedback = { severity: 'success' | 'error'; message: string } | null;
 
-const PAGE_SIZE = 100;
+const PAGE_SIZE = 5000;
 
 export default function AssignPasswordPage() {
   const [search, setSearch] = useState('');
@@ -39,15 +39,11 @@ export default function AssignPasswordPage() {
       page: 1,
       pageSize: PAGE_SIZE,
       search: debouncedSearch,
-      authorizationStatus: 'Authorized',
     }),
     [debouncedSearch, refreshKey],
   );
 
-  const users = useMemo(
-    () => (data?.items ?? []).filter((user) => user.status === 'Operative'),
-    [data],
-  );
+  const users = useMemo(() => data?.items ?? [], [data]);
 
   const closeDialog = () => {
     if (saving) return;
@@ -105,7 +101,7 @@ export default function AssignPasswordPage() {
     <Box>
       <PageHeader
         title="Assign Password"
-        subtitle="Set or reset login passwords for authorised and operative bank users."
+        subtitle="Set or reset login passwords for all users in the User Master."
       />
 
       {feedback && (
@@ -124,7 +120,7 @@ export default function AssignPasswordPage() {
             sx={{ flex: '1 1 320px' }}
             InputProps={{ startAdornment: <SearchOutlinedIcon sx={{ mr: 1, color: 'text.secondary' }} fontSize="small" /> }}
           />
-          <Chip label={`${users.length} eligible users`} variant="outlined" />
+          <Chip label={`${users.length} users`} variant="outlined" />
         </Box>
 
         {error && <Alert severity="error" sx={{ mx: 2, mb: 2 }}>{String(error)}</Alert>}
@@ -142,7 +138,7 @@ export default function AssignPasswordPage() {
               {!loading && users.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={7} align="center" sx={{ py: 5 }}>
-                    <Typography color="text.secondary">No authorised and operative users found.</Typography>
+                    <Typography color="text.secondary">No users found.</Typography>
                   </TableCell>
                 </TableRow>
               )}
@@ -156,7 +152,7 @@ export default function AssignPasswordPage() {
                   <TableCell>{user.userName}</TableCell>
                   <TableCell>{user.branchName}</TableCell>
                   <TableCell>{user.role}</TableCell>
-                  <TableCell><Chip size="small" color="success" variant="outlined" label="Operative" /></TableCell>
+                  <TableCell><Chip size="small" color={user.status === 'Operative' ? 'success' : 'default'} variant="outlined" label={user.status} /></TableCell>
                   <TableCell>
                     <Button size="small" variant="contained" startIcon={<KeyOutlinedIcon />} onClick={() => openDialog(user)}>
                       Assign Password
@@ -172,7 +168,7 @@ export default function AssignPasswordPage() {
         </TableContainer>
         <Box sx={{ px: 2.5, py: 1.75, borderTop: 1, borderColor: 'divider' }}>
           <Typography variant="caption" color="text.secondary">
-            Only users with Authorized status and Operative account status are eligible for password assignment.
+            Passwords are assigned to the selected user account. Existing passwords are never displayed.
           </Typography>
         </Box>
       </Paper>

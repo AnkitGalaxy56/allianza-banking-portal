@@ -12,6 +12,7 @@ export const requestsConfig: RequestModuleConfig = {
     { key: 'customer', label: 'Customer Name' }, { key: 'mode', label: 'Trf Mode' },
     { key: 'beneficiaryAccount', label: 'Beneficiary A/c No.' }, { key: 'beneficiary', label: 'Beneficiary Name' },
     { key: 'ifsc', label: 'IFSC Code' }, { key: 'mobile', label: 'Mobile' },
+    { key: 'isSys', label: 'Source' },
   ],
   detailFields: [
     { key: 'account', label: 'Account No.' }, { key: 'customer', label: 'Account Name' },

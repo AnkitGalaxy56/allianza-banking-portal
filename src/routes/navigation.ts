@@ -358,7 +358,7 @@ export const NAV_ITEMS: NavItem[] = [
         roles: ALL_BANK_ROLES,
       },
       {
-        label: 'User Master',
+        label: 'User Master Report',
         path: PATHS.REPORTS.USER_MASTER,
         icon: ManageAccountsOutlinedIcon,
         roles: ALL_BANK_ROLES,
