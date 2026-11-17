@@ -9,9 +9,15 @@ export const requestsConfig: RequestModuleConfig = {
   searchPlaceholder: 'Search account, customer or cheque number',
   columns: [
     { key: 'branch', label: 'Branch' }, { key: 'debitAccount', label: 'Debit A/c ID' },
-    { key: 'customer', label: 'Name of the Customer' }, { key: 'account', label: 'Credit A/c ID' },
-    { key: 'creditCustomer', label: 'Name of the Customer' }, { key: 'tenure', label: 'Tenure' },
-    { key: 'expiryDate', label: 'Expiry Date' },
+    { key: 'customer', label: 'Name of the Customer' },
+    // { key: 'account', label: 'Credit A/c ID' },
+    // { key: 'creditCustomer', label: 'Name of the Customer' }, { key: 'tenure', label: 'Tenure' },
+    // { key: 'expiryDate', label: 'Expiry Date' },
+    { key: 'cheque', label: 'Cheque No.' },
+    { key: 'chequeDate', label: 'Cheque Date' },
+    { key: 'amount', label: 'Cheque Amount' },
+    { key: 'issuedTo', label: 'Issued to' },
+    { key: 'reason', label: 'Remarks' },
   ],
   detailFields: [
     { key: 'cheque', label: 'Cheque No.' }, { key: 'issuedTo', label: 'Issued to' },
