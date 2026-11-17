@@ -26,16 +26,24 @@ export default function RequestQueuePage({ config, module }: Props) {
   const openDetail = async (r: ValidationRecord) => { try { setSelected(await store.getOne(r.id)); } catch (e) { setFeedback(getErrorMessage(e, 'Unable to load the request.')); } };
   const verify = async (decision: 'Authorised' | 'Rejected') => { if (!selected) return; const label = selected.displayId ?? selected.id; try { await store.decide(selected.id, decision, undefined); setFeedback(`${label} ${decision === 'Authorised' ? 'verified' : 'rejected'} successfully.`); } catch (e) { setFeedback(getErrorMessage(e, 'Unable to update the request.')); } setDecisionConfirm(null); setSelected(null); };
   const requestDecision = (decision: 'Authorised' | 'Rejected') => setDecisionConfirm(decision);
+  // Payment source comes from the API as fields.isSys ('Mobile App' / 'Control Panel').
+  // Keep support for the boolean is_sys shape as well because older API responses may use it.
+  const isMobileRequest = (record: ValidationRecord) => {
+    const source = record.fields.isSys ?? record.fields.is_sys;
+    if (typeof source === 'boolean') return source;
+    return String(source ?? '').trim().toLowerCase() === 'mobile app';
+  };
+
+  const isControlPanelRequest = (record: ValidationRecord) => !isMobileRequest(record);
+
   const startEdit = async (record: ValidationRecord) => {
-    // Only Control Panel-created Payment requests are editable.
-    // is_sys=true  -> Mobile/System request (not editable)
-    // is_sys=false -> Control Panel request (editable while Pending)
-    if (module !== 'payments' || record.status !== 'Pending' || record.fields.is_sys !== false) return;
+    // Payment: only Pending requests created from Control Panel can be edited.
+    if (module !== 'payments' || record.status !== 'Pending' || !isControlPanelRequest(record)) return;
     try {
       const d = await store.getOne(record.id);
-      if (d.fields.is_sys !== false) return;
+      if (d.status !== 'Pending' || isMobileRequest(d)) return;
       setEditing(d);
-      const { is_sys: _isSys, ...editableFields } = d.fields;
+      const { isSys: _isSys, is_sys: _isSysLegacy, ...editableFields } = d.fields;
       setEditFields(editableFields as Record<string, string>);
       setSelected(null);
     } catch (e) { setFeedback(getErrorMessage(e, 'Unable to load the request.')); }
@@ -46,7 +54,7 @@ export default function RequestQueuePage({ config, module }: Props) {
     ...config.columns.map((c) => ({ key: c.key, label: c.label, minWidth: 25, render: (r: ValidationRecord) => r.fields[c.key] || '—' })),
     { key: 'submittedOn', label: 'Submitted On', minWidth: 25, render: (r) => r.submittedOn },
     { key: 'status', label: 'Status', minWidth: 25, nowrap: true, render: (r) => <Chip size="small" label={r.status === 'Pending' ? 'Pending for Authorisation' : r.status} color={statusColor(r.status)} variant="outlined" /> },
-    { key: 'actions', label: 'Actions', minWidth: 260, nowrap: true, render: (r) => r.status === 'Pending' ? <Stack direction="row" spacing={0.25}><Button size="small" color="success" variant="contained" onClick={() => void openDetail(r)}>Verify</Button>{module === 'payments' && r.fields.is_sys === false && <Button size="small" color="primary" variant="outlined" onClick={() => void startEdit(r)}>Edit</Button>}</Stack> : <Stack direction="row" spacing={0.25}><Button size="small" disabled={r.status !== 'Authorised'} onClick={() => void openDetail(r)}>View</Button>{/* Edit is intentionally not shown after verification; only pending Payment requests are editable. */}</Stack> },
+    { key: 'actions', label: 'Actions', minWidth: 260, nowrap: true, render: (r) => r.status === 'Pending' ? <Stack direction="row" spacing={0.25}><Button size="small" color="success" variant="contained" onClick={() => void openDetail(r)}>Verify</Button>{module === 'payments' && isControlPanelRequest(r) && <Button size="small" color="primary" variant="outlined" onClick={() => void startEdit(r)}>Edit</Button>}</Stack> : <Stack direction="row" spacing={0.25}><Button size="small" onClick={() => void openDetail(r)}>View</Button></Stack> },
   ];
   return <Box>
     <PageHeader title={config.title} subtitle={config.description} />
@@ -63,7 +71,7 @@ export default function RequestQueuePage({ config, module }: Props) {
     <Dialog open={!!selected} onClose={() => setSelected(null)} fullWidth maxWidth="md">
       <DialogTitle sx={{ fontWeight: 800 }}>{selected?.status === 'Pending' ? 'Verify Request' : 'View Request'} {selected?.displayId ?? selected?.id}</DialogTitle>
       <DialogContent dividers>{selected && <><Alert severity={selected.status === 'Pending' ? 'warning' : 'success'} sx={{ mb: 2 }}>Current status: {selected.status === 'Pending' ? 'Pending for Authorisation' : selected.status}</Alert><Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}><Box><Typography variant="caption" color="text.secondary">Request ID</Typography><Typography fontWeight={700}>{selected.displayId ?? selected.id}</Typography></Box><Box><Typography variant="caption" color="text.secondary">Submitted on</Typography><Typography fontWeight={700}>{selected.submittedOn}</Typography></Box>{config.detailFields.map((f) => <Box key={f.key}><Typography variant="caption" color="text.secondary">{f.label}</Typography><Typography fontWeight={650} sx={{ overflowWrap: 'anywhere' }}>{selected.fields[f.key] || '—'}</Typography></Box>)}</Box><Divider sx={{ my: 2 }} /></>}</DialogContent>
-      <DialogActions sx={{ p: 2, gap: 1 }}><Button color="inherit" onClick={() => setSelected(null)}>Close</Button>{selected?.status === 'Pending' && selected.canVerify !== false && <><Button color="error" variant="outlined" onClick={() => requestDecision('Rejected')}>{config.rejectLabel ?? 'Reject'}</Button><Button color="success" variant="contained" onClick={() => requestDecision('Authorised')}>Verify</Button></>}</DialogActions>
+      <DialogActions sx={{ p: 2, gap: 1 }}><Button color="inherit" onClick={() => setSelected(null)}>Close</Button>{selected?.status === 'Pending' && <><Button color="error" variant="outlined" onClick={() => requestDecision('Rejected')}>{config.rejectLabel ?? 'Reject'}</Button><Button color="success" variant="contained" onClick={() => requestDecision('Authorised')}>Verify</Button></>}</DialogActions>
     </Dialog>
     <ConfirmDialog open={decisionConfirm !== null} title={decisionConfirm === 'Rejected' ? 'Confirm Rejection' : 'Confirm Verification'} message={decisionConfirm === 'Rejected' ? 'Are you sure you want to reject this request?' : 'Are you sure you want to verify this request?'} confirmText={decisionConfirm === 'Rejected' ? 'Reject' : 'Verify'} variant={decisionConfirm === 'Rejected' ? 'danger' : 'warning'} onCancel={() => setDecisionConfirm(null)} onConfirm={() => decisionConfirm && void verify(decisionConfirm)} />
     <Dialog open={!!editing} onClose={() => setEditing(null)} fullWidth maxWidth="lg" PaperProps={{ sx: { width: '100%', maxWidth: 1100, minHeight: { xs: 'auto', md: 520 } } }}><DialogTitle sx={{ fontWeight: 800 }}>{config.title.includes('RTGS / NEFT / IMPS') ? 'Edit Payment Request' : 'Edit Request'} {editing?.displayId ?? editing?.id}</DialogTitle><DialogContent dividers sx={{ px: { xs: 2, md: 3 }, py: 2.5 }}><Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, minmax(0, 1fr))', lg: 'repeat(3, minmax(0, 1fr))' }, gap: 2, pt: 1 }}>{config.detailFields.map((f) => <TextField key={f.key} fullWidth size="small" select={Boolean(f.options)} label={f.label} value={editFields[f.key] ?? ''} onChange={(e) => setEditFields((old) => ({ ...old, [f.key]: e.target.value }))}>{f.options?.map((option) => <MenuItem key={option} value={option}>{option}</MenuItem>)}</TextField>)}</Box></DialogContent><DialogActions><Button onClick={() => setEditing(null)}>Cancel</Button><Button variant="contained" onClick={saveEdit}>Save Changes</Button></DialogActions></Dialog>
