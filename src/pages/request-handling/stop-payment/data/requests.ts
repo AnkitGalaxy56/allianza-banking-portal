@@ -1,6 +1,8 @@
 import type { RequestModuleConfig } from '../../shared/types';
 
 export const requestsConfig: RequestModuleConfig = {
+  // Create is intentionally available only in the Payments menu.
+  hideCreateButton: true,
   requiredKeys: ['debitAccount', 'cheque', 'reason'],
   readOnlyKeys: ['accountStatus', 'customer'],
   lockedOnEdit: ['debitAccount'],
@@ -17,7 +19,7 @@ export const requestsConfig: RequestModuleConfig = {
     { key: 'chequeDate', label: 'Cheque Date' },
     { key: 'amount', label: 'Cheque Amount' },
     { key: 'issuedTo', label: 'Issued to' },
-    { key: 'reason', label: 'Remarks' },
+    // { key: 'reason', label: 'Remarks' },
   ],
   detailFields: [
     { key: 'cheque', label: 'Cheque No.' }, { key: 'issuedTo', label: 'Issued to' },

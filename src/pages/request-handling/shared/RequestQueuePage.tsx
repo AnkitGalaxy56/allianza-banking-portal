@@ -7,6 +7,7 @@ import type { ValidationModuleConfig, ValidationRecord, RequestDecision } from '
 import { getErrorMessage } from '@/services/api/apiError';
 import type { RequestHandlingModule } from '@/services/request-handling.service';
 import { useRequestModule } from './useRequestModule';
+import ConfirmDialog from '@/components/common/ConfirmDialog';
 
 interface Props { config: ValidationModuleConfig; module: RequestHandlingModule }
 const statusColor = (status: RequestDecision): 'warning' | 'success' | 'error' => status === 'Pending' ? 'warning' : status === 'Authorised' ? 'success' : 'error';
@@ -17,20 +18,35 @@ export default function RequestQueuePage({ config, module }: Props) {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [selected, setSelected] = useState<ValidationRecord | null>(null);
+  const [decisionConfirm, setDecisionConfirm] = useState<'Authorised' | 'Rejected' | null>(null);
   const [editing, setEditing] = useState<ValidationRecord | null>(null);
   const [editFields, setEditFields] = useState<Record<string, string>>({});
   const [feedback, setFeedback] = useState('');
   const filtered = useMemo(() => records.filter((r) => [r.id, r.status, r.submittedOn, ...Object.values(r.fields)].join(' ').toLowerCase().includes(search.toLowerCase()) && (statusFilter === 'All' || r.status === statusFilter)), [records, search, statusFilter]);
   const openDetail = async (r: ValidationRecord) => { try { setSelected(await store.getOne(r.id)); } catch (e) { setFeedback(getErrorMessage(e, 'Unable to load the request.')); } };
-  const verify = async (decision: 'Authorised' | 'Rejected') => { if (!selected) return; const label = selected.displayId ?? selected.id; try { await store.decide(selected.id, decision, undefined); setFeedback(`${label} ${decision === 'Authorised' ? 'verified' : 'rejected'} successfully.`); } catch (e) { setFeedback(getErrorMessage(e, 'Unable to update the request.')); } setSelected(null); };
-  const startEdit = async (record: ValidationRecord) => { if (record.status !== 'Authorised') return; try { const d = await store.getOne(record.id); setEditing(d); setEditFields({ ...d.fields }); setSelected(null); } catch (e) { setFeedback(getErrorMessage(e, 'Unable to load the request.')); } };
+  const verify = async (decision: 'Authorised' | 'Rejected') => { if (!selected) return; const label = selected.displayId ?? selected.id; try { await store.decide(selected.id, decision, undefined); setFeedback(`${label} ${decision === 'Authorised' ? 'verified' : 'rejected'} successfully.`); } catch (e) { setFeedback(getErrorMessage(e, 'Unable to update the request.')); } setDecisionConfirm(null); setSelected(null); };
+  const requestDecision = (decision: 'Authorised' | 'Rejected') => setDecisionConfirm(decision);
+  const startEdit = async (record: ValidationRecord) => {
+    // Only Control Panel-created Payment requests are editable.
+    // is_sys=true  -> Mobile/System request (not editable)
+    // is_sys=false -> Control Panel request (editable while Pending)
+    if (module !== 'payments' || record.status !== 'Pending' || record.fields.is_sys !== false) return;
+    try {
+      const d = await store.getOne(record.id);
+      if (d.fields.is_sys !== false) return;
+      setEditing(d);
+      const { is_sys: _isSys, ...editableFields } = d.fields;
+      setEditFields(editableFields as Record<string, string>);
+      setSelected(null);
+    } catch (e) { setFeedback(getErrorMessage(e, 'Unable to load the request.')); }
+  };
   const saveEdit = async () => { if (!editing) return; try { await store.update(editing.id, editFields); setFeedback(`${editing.displayId ?? editing.id} updated and sent for authorisation.`); setEditing(null); } catch (e) { setFeedback(getErrorMessage(e, 'Unable to save the changes.')); } };
   const columns: DataTableColumn<ValidationRecord>[] = [
     { key: 'id', label: 'Request ID', minWidth: 50, nowrap: true, render: (r) => <Typography fontWeight={750} fontSize={13}>{r.displayId ?? r.id}</Typography> },
     ...config.columns.map((c) => ({ key: c.key, label: c.label, minWidth: 25, render: (r: ValidationRecord) => r.fields[c.key] || '—' })),
     { key: 'submittedOn', label: 'Submitted On', minWidth: 25, render: (r) => r.submittedOn },
     { key: 'status', label: 'Status', minWidth: 25, nowrap: true, render: (r) => <Chip size="small" label={r.status === 'Pending' ? 'Pending for Authorisation' : r.status} color={statusColor(r.status)} variant="outlined" /> },
-    { key: 'actions', label: 'Actions', minWidth: 220, nowrap: true, render: (r) => r.status === 'Pending' ? <Button size="small" color="success" variant="contained" onClick={() => void openDetail(r)}>Verify</Button> : <Stack direction="row" spacing={0.25}><Button size="small" disabled={r.status !== 'Authorised'} onClick={() => void openDetail(r)}>View</Button><Button size="small" disabled={r.status !== 'Authorised'} onClick={() => void startEdit(r)}>Edit</Button></Stack> },
+    { key: 'actions', label: 'Actions', minWidth: 260, nowrap: true, render: (r) => r.status === 'Pending' ? <Stack direction="row" spacing={0.25}><Button size="small" color="success" variant="contained" onClick={() => void openDetail(r)}>Verify</Button>{module === 'payments' && r.fields.is_sys === false && <Button size="small" color="primary" variant="outlined" onClick={() => void startEdit(r)}>Edit</Button>}</Stack> : <Stack direction="row" spacing={0.25}><Button size="small" disabled={r.status !== 'Authorised'} onClick={() => void openDetail(r)}>View</Button>{/* Edit is intentionally not shown after verification; only pending Payment requests are editable. */}</Stack> },
   ];
   return <Box>
     <PageHeader title={config.title} subtitle={config.description} />
@@ -47,8 +63,9 @@ export default function RequestQueuePage({ config, module }: Props) {
     <Dialog open={!!selected} onClose={() => setSelected(null)} fullWidth maxWidth="md">
       <DialogTitle sx={{ fontWeight: 800 }}>{selected?.status === 'Pending' ? 'Verify Request' : 'View Request'} {selected?.displayId ?? selected?.id}</DialogTitle>
       <DialogContent dividers>{selected && <><Alert severity={selected.status === 'Pending' ? 'warning' : 'success'} sx={{ mb: 2 }}>Current status: {selected.status === 'Pending' ? 'Pending for Authorisation' : selected.status}</Alert><Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}><Box><Typography variant="caption" color="text.secondary">Request ID</Typography><Typography fontWeight={700}>{selected.displayId ?? selected.id}</Typography></Box><Box><Typography variant="caption" color="text.secondary">Submitted on</Typography><Typography fontWeight={700}>{selected.submittedOn}</Typography></Box>{config.detailFields.map((f) => <Box key={f.key}><Typography variant="caption" color="text.secondary">{f.label}</Typography><Typography fontWeight={650} sx={{ overflowWrap: 'anywhere' }}>{selected.fields[f.key] || '—'}</Typography></Box>)}</Box><Divider sx={{ my: 2 }} /></>}</DialogContent>
-      <DialogActions sx={{ p: 2, gap: 1 }}><Button color="inherit" onClick={() => setSelected(null)}>Close</Button>{selected?.status === 'Pending' && selected.canVerify !== false && <><Button color="error" variant="outlined" onClick={() => verify('Rejected')}>{config.rejectLabel ?? 'Reject'}</Button><Button color="success" variant="contained" onClick={() => verify('Authorised')}>Verify</Button></>}</DialogActions>
+      <DialogActions sx={{ p: 2, gap: 1 }}><Button color="inherit" onClick={() => setSelected(null)}>Close</Button>{selected?.status === 'Pending' && selected.canVerify !== false && <><Button color="error" variant="outlined" onClick={() => requestDecision('Rejected')}>{config.rejectLabel ?? 'Reject'}</Button><Button color="success" variant="contained" onClick={() => requestDecision('Authorised')}>Verify</Button></>}</DialogActions>
     </Dialog>
+    <ConfirmDialog open={decisionConfirm !== null} title={decisionConfirm === 'Rejected' ? 'Confirm Rejection' : 'Confirm Verification'} message={decisionConfirm === 'Rejected' ? 'Are you sure you want to reject this request?' : 'Are you sure you want to verify this request?'} confirmText={decisionConfirm === 'Rejected' ? 'Reject' : 'Verify'} variant={decisionConfirm === 'Rejected' ? 'danger' : 'warning'} onCancel={() => setDecisionConfirm(null)} onConfirm={() => decisionConfirm && void verify(decisionConfirm)} />
     <Dialog open={!!editing} onClose={() => setEditing(null)} fullWidth maxWidth="lg" PaperProps={{ sx: { width: '100%', maxWidth: 1100, minHeight: { xs: 'auto', md: 520 } } }}><DialogTitle sx={{ fontWeight: 800 }}>{config.title.includes('RTGS / NEFT / IMPS') ? 'Edit Payment Request' : 'Edit Request'} {editing?.displayId ?? editing?.id}</DialogTitle><DialogContent dividers sx={{ px: { xs: 2, md: 3 }, py: 2.5 }}><Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, minmax(0, 1fr))', lg: 'repeat(3, minmax(0, 1fr))' }, gap: 2, pt: 1 }}>{config.detailFields.map((f) => <TextField key={f.key} fullWidth size="small" select={Boolean(f.options)} label={f.label} value={editFields[f.key] ?? ''} onChange={(e) => setEditFields((old) => ({ ...old, [f.key]: e.target.value }))}>{f.options?.map((option) => <MenuItem key={option} value={option}>{option}</MenuItem>)}</TextField>)}</Box></DialogContent><DialogActions><Button onClick={() => setEditing(null)}>Cancel</Button><Button variant="contained" onClick={saveEdit}>Save Changes</Button></DialogActions></Dialog>
   </Box>;
 }

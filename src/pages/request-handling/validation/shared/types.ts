@@ -3,7 +3,7 @@ export interface ValidationRecord {
   id: string;
   status: RequestDecision;
   submittedOn: string;
-  fields: Record<string, string>;
+  fields: Record<string, string | boolean>;
 }
 export interface ValidationModuleConfig {
   title: string;

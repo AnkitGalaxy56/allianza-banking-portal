@@ -27,7 +27,8 @@ export default function ChequeBookPage() {
  const field = (key: keyof typeof empty, value: string | boolean) => setForm((old) => ({ ...old, [key]: value }));
  const startNew = () => { setEditing(null); setForm(empty); setFieldErrors({}); setOpen(true); };
  const openDetail = async (record: RecordItem) => { try { setSelected({ ...empty, ...flatten(await store.getOne(record.id)) } as unknown as RecordItem); } catch (e) { setMessage(`Please retry: ${getErrorMessage(e, 'Unable to load the request.')}`); } };
- const startEdit = async (record: RecordItem) => { if (record.requestStatus !== 'Authorised') return; try { const d = { ...empty, ...flatten(await store.getOne(record.id)) } as unknown as RecordItem; setEditing(d); setForm({ accountNumber: d.accountNumber, customerName: d.customerName, chequeBookType: d.chequeBookType, deliveryMethod: d.deliveryMethod, deliveryAddress: d.deliveryAddress, primary: d.primary, default: d.default, statusCode: d.statusCode }); setFieldErrors({}); setOpen(true); } catch (e) { setMessage(`Please retry: ${getErrorMessage(e, 'Unable to load the request.')}`); } };
+ // Edit is intentionally disabled for non-Payment Request Handling modules.
+ // const startEdit = async (record: RecordItem) => { ...existing edit implementation intentionally disabled... };
  const verify = async (decision: 'Authorised' | 'Rejected') => { if (!selected) return; const label = selected.displayId ?? selected.id; try { await store.decide(selected.id, decision); setMessage(`${label} ${decision === 'Authorised' ? 'verified' : 'rejected'} successfully.`); } catch (e) { setMessage(`Please review: ${getErrorMessage(e, 'Unable to update the request.')}`); } setSelected(null); };
  const save = () => { const next: Record<string, string> = {}; if (!form.accountNumber.trim()) next.accountNumber = 'Account number is required.'; else if (!/^[A-Za-z0-9 Xx-]{4,24}$/.test(form.accountNumber.trim())) next.accountNumber = 'Enter a valid account number.'; if (form.deliveryMethod === 'Delivery address' && !form.deliveryAddress.trim()) next.deliveryAddress = 'Delivery address is required for delivery.'; setFieldErrors(next); if (Object.keys(next).length) return; setConfirm(true); };
  const commit = async () => { try { if (editing) await store.update(editing.id, form); else await store.create(form); setConfirm(false); setOpen(false); setMessage(editing ? 'Cheque book request updated and sent for authorisation.' : 'Cheque book request created and sent for authorisation.'); } catch (e) { setConfirm(false); setFieldErrors(serverFieldErrors(e)); setMessage(`Please correct the highlighted fields. ${getErrorMessage(e, '')}`); } };
@@ -42,7 +43,7 @@ export default function ChequeBookPage() {
   { key: 'default', label: 'Default', minWidth: 25, render: (record) => record.default ? 'Yes' : 'No' },
   { key: 'statusCode', label: 'Account Status', minWidth: 25, render: (record) => ACCOUNT_STATUS_OPTIONS.find((status) => status.value === record.statusCode)?.label ?? record.statusCode },
   { key: 'requestStatus', label: 'Status', minWidth: 25, nowrap: true, render: (record) => <Chip size="small" label={record.requestStatus === 'Pending' ? 'Pending for Authorisation' : record.requestStatus} color={record.requestStatus === 'Pending' ? 'warning' : record.requestStatus === 'Authorised' ? 'success' : 'error'} variant="outlined" /> },
-  { key: 'actions', label: 'Actions', minWidth: 220, nowrap: true, render: (record) => record.requestStatus === 'Pending' ? <Button size="small" color="success" variant="contained" disabled={record.canVerify === false} title={record.canVerify === false ? 'Maker-checker: another user must verify this request' : undefined} onClick={() => void openDetail(record)}>Verify</Button> : <Stack direction="row" spacing={0.25}><Button size="small" disabled={record.requestStatus !== 'Authorised'} onClick={() => void openDetail(record)}>View</Button><Button size="small" disabled={record.requestStatus !== 'Authorised'} onClick={() => void startEdit(record)}>Edit</Button></Stack> },
+  { key: 'actions', label: 'Actions', minWidth: 220, nowrap: true, render: (record) => record.requestStatus === 'Pending' ? <Button size="small" color="success" variant="contained" disabled={record.canVerify === false} title={record.canVerify === false ? 'Maker-checker: another user must verify this request' : undefined} onClick={() => void openDetail(record)}>Verify</Button> : <Stack direction="row" spacing={0.25}><Button size="small" disabled={record.requestStatus !== 'Authorised'} onClick={() => void openDetail(record)}>View</Button>{/* Edit intentionally disabled for non-Payment modules. */}</Stack> },
  ];
 
  return <Box>
@@ -54,7 +55,8 @@ export default function ChequeBookPage() {
     <TextField size="small" fullWidth placeholder="Search account or customer" value={search} onChange={(event) => setSearch(event.target.value)} />
     <Button size="small" variant={tab === 'view' ? 'contained' : 'outlined'} onClick={() => setTab('view')}>View</Button>
     <Button size="small" variant={tab === 'pending' ? 'contained' : 'outlined'} onClick={() => setTab('pending')}>Pending for Authorisation ({rows.filter((record) => record.requestStatus === 'Pending').length})</Button>
-    <Button size="small" variant="contained" onClick={startNew}>Create</Button>
+    {/* Create is intentionally available only in the Payments menu. */}
+     {/* <Button size="small" variant="contained" onClick={startNew}>Create</Button> */}
    </Stack>
    <DataTable rows={filtered} columns={columns} getRowId={(record) => record.id} emptyMessage="No cheque book requests found." />
    <Box sx={{ p: 2.5, borderTop: 1, borderColor: 'divider' }}><TypographyCaption count={filtered.length} total={rows.length} /></Box>

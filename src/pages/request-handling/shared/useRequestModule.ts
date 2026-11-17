@@ -15,7 +15,7 @@ export interface ApiRequestRecord {
   /** False when the signed-in user is the maker (or last editor): maker-checker rule. */
   canVerify?: boolean;
   canEdit?: boolean;
-  fields: Record<string, string>;
+  fields: Record<string, string | boolean>;
 }
 
 /** Field level messages sent by the server for a rejected create / edit. */
