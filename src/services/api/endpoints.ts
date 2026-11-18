@@ -3,6 +3,7 @@ export const ENDPOINTS = {
   auth: {
     login: '/auth/login',
     verifyOtp: '/auth/verify-otp',
+    verifySession: '/auth/verify-session',
     logout: '/auth/logout',
     refresh: '/auth/refresh',
     profile: '/auth/profile',

@@ -57,13 +57,24 @@ export default function Sidebar({
 
   const items = useMemo(() => {
     if (!user) return [];
+    // Newly added mobile-request screens may not yet exist in saved role/access
+    // permission configurations. Keep these Request Handling links visible so
+    // they are not silently hidden after a portal reload.
+    const MOBILE_REQUEST_MENU_LABELS = new Set([
+      'KYC Documents',
+      'Nomination Updates',
+      'Positive Pay System',
+    ]);
+
     const filter = (source: NavItem[]): NavItem[] => source.flatMap(item => {
       if (item.children?.length) {
         const children = filter(item.children);
         if (screenGrants && !screenGrants.has(item.label) && children.length === 0) return [];
         return [{ ...item, children }];
       }
-      return !screenGrants || screenGrants.has(item.label) ? [item] : [];
+      return !screenGrants || screenGrants.has(item.label) || MOBILE_REQUEST_MENU_LABELS.has(item.label)
+        ? [item]
+        : [];
     });
     return filter(getNavForRole(user.role));
   }, [user?.role, screenGrants]);

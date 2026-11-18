@@ -1,0 +1,2 @@
+import type { NominationRequest } from './type';
+export const nominationRequestSeed:NominationRequest[] =[{id:'#REQ-1002',customer:'Rahul Patil',account:'SB998877665',nominee:'Priya Patil',relationship:'Wife',dob:'1994-05-21',mobile:'+91 98765 43210',email:'priya@example.com',submitted:'18 Nov 2026, 10:18 AM',status:'Pending Review'},{id:'#REQ-1005',customer:'Sanjay Kulkarni',account:'SB778899001',nominee:'Amit Kulkarni',relationship:'Son',dob:'2012-02-15',submitted:'16 Nov 2026, 11:06 AM',status:'Rejected'}];

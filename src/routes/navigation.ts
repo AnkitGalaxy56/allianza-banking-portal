@@ -255,6 +255,24 @@ export const NAV_ITEMS: NavItem[] = [
         icon: PaymentsOutlinedIcon,
         roles: ALL_BANK_ROLES,
       },
+      {
+        label: 'KYC Documents',
+        path: PATHS.REQUEST_HANDLING.KYC_DOCUMENTS,
+        icon: DescriptionOutlinedIcon,
+        roles: ALL_BANK_ROLES,
+      },
+      {
+        label: 'Nomination Updates',
+        path: PATHS.REQUEST_HANDLING.NOMINATION_UPDATES,
+        icon: PersonAddAlt1OutlinedIcon,
+        roles: ALL_BANK_ROLES,
+      },
+      {
+        label: 'Positive Pay System',
+        path: PATHS.REQUEST_HANDLING.POSITIVE_PAY,
+        icon: PaymentsOutlinedIcon,
+        roles: ALL_BANK_ROLES,
+      },
 
       // Existing request screens retained
       // {

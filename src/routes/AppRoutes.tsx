@@ -46,6 +46,9 @@ const LockerApplicationPage = lazy(() => import('@/pages/request-handling/locker
 const StandingInstructionsRequestPage = lazy(() => import('@/pages/request-handling/standing-instructions'));
 const FreshLoanApplicationPage = lazy(() => import('@/pages/request-handling/fresh-loan-application'));
 const LoanEMIPaymentPage = lazy(() => import('@/pages/request-handling/loan-emi-payment'));
+const KYCDocumentsPage = lazy(() => import('@/pages/request-handling/kyc-documents'));
+const NominationUpdatesPage = lazy(() => import('@/pages/request-handling/nomination-updates'));
+const PositivePayPage = lazy(() => import('@/pages/request-handling/positive-pay'));
 
 
 // Pages that are really built. Everything else in NAV_ITEMS shows a "Coming soon" placeholder.
@@ -115,6 +118,9 @@ const BUILT_PAGES: Record<string, ReactElement> = {
   [PATHS.REQUEST_HANDLING.LOCKER_APPLICATION]: <LockerApplicationPage />,
   [PATHS.REQUEST_HANDLING.FRESH_LOAN_APPLICATION]: <FreshLoanApplicationPage />,
   [PATHS.REQUEST_HANDLING.LOAN_EMI_PAYMENT]: <LoanEMIPaymentPage />,
+  [PATHS.REQUEST_HANDLING.KYC_DOCUMENTS]: <KYCDocumentsPage />,
+  [PATHS.REQUEST_HANDLING.NOMINATION_UPDATES]: <NominationUpdatesPage />,
+  [PATHS.REQUEST_HANDLING.POSITIVE_PAY]: <PositivePayPage />,
   //---------Request Handling end-----------------------------
 };
 

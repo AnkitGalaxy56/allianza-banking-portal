@@ -27,6 +27,9 @@ export const PATHS = {
     LOAN_EMI_PAYMENT: "/request-handling/loan-emi-payment",
     OPENING_ACCOUNTS: "/request-handling/customer-Onboarding",
     LEAD_MANAGEMENT: "/request-handling/lead-management",
+    KYC_DOCUMENTS: "/request-handling/kyc-documents",
+    NOMINATION_UPDATES: "/request-handling/nomination-updates",
+    POSITIVE_PAY: "/request-handling/positive-pay",
   },
 
   MASTERS: {

@@ -4,6 +4,7 @@ import { Alert, Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack
 import { ROLES } from '@/config/roles';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { logoutUser, selectUser } from '@/redux/slices/authSlice';
+import { authService } from '@/services/auth.service';
 import { loadBankTheme, loadPlatformTheme } from '@/redux/slices/themeSlice';
 import AppRoutes from '@/routes/AppRoutes';
 import BankThemeProvider from '@/theme/BankThemeProvider';
@@ -13,17 +14,23 @@ export default function App() {
   const user = useAppSelector(selectUser);
   const themeState = useAppSelector((state) => state.theme);
   const [showIdleWarning, setShowIdleWarning] = useState(false);
-  const [secondsLeft, setSecondsLeft] = useState(60);
+  const [secondsLeft, setSecondsLeft] = useState(180);
+  const [confirmLoginId, setConfirmLoginId] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [confirmError, setConfirmError] = useState('');
+  const [confirmBusy, setConfirmBusy] = useState(false);
   const [lastActivity, setLastActivity] = useState(() => Date.now());
 
-  // Start a five-minute inactivity period. The user must explicitly confirm
-  // that they are present during the following 60-second warning.
+  // Start a three-minute inactivity period and require credentials during a three-minute warning.
   useEffect(() => {
     if (!user || showIdleWarning) return;
     const timer = window.setTimeout(() => {
-      setSecondsLeft(60);
+      setSecondsLeft(180);
+      setConfirmLoginId(user.email ?? '');
+      setConfirmPassword('');
+      setConfirmError('');
       setShowIdleWarning(true);
-    }, 5 * 60 * 1000);
+    }, 3 * 60 * 1000);
     return () => window.clearTimeout(timer);
   }, [user?.id, lastActivity, showIdleWarning]);
 
@@ -43,7 +50,7 @@ export default function App() {
 
   useEffect(() => {
     if (!user || !showIdleWarning) return;
-    let remaining = 60;
+    let remaining = 180;
     const interval = window.setInterval(() => {
       remaining -= 1;
       setSecondsLeft(remaining);
@@ -56,10 +63,14 @@ export default function App() {
     return () => window.clearInterval(interval);
   }, [user?.id, showIdleWarning, dispatch]);
 
-  const staySignedIn = () => {
-    setShowIdleWarning(false);
-    setSecondsLeft(60);
-    setLastActivity(Date.now());
+  const staySignedIn = async () => {
+    if (!user || confirmBusy) return;
+    setConfirmBusy(true); setConfirmError('');
+    try {
+      await authService.verifySession({ loginId: confirmLoginId, password: confirmPassword });
+      setShowIdleWarning(false); setSecondsLeft(180); setConfirmPassword(''); setLastActivity(Date.now());
+    } catch (e) { setConfirmError(e instanceof Error ? e.message : 'Credential verification failed.'); }
+    finally { setConfirmBusy(false); }
   };
 
   // Once someone is signed in, make sure their bank's look is loaded (also after a page refresh).
@@ -88,14 +99,19 @@ export default function App() {
       <DialogTitle sx={{ fontWeight: 800 }}>Session timeout warning</DialogTitle>
       <DialogContent>
         <Stack spacing={2} alignItems="center" sx={{ py: 1 }}>
-          <Alert severity="warning" sx={{ width: '100%' }}>You have been inactive for 5 minutes. You will be logged out if you do not confirm.</Alert>
+          <Alert severity="warning" sx={{ width: '100%' }}>You have been inactive for 3 minutes. Verify your credentials within the next 3 minutes to continue.</Alert>
           <Typography color="text.secondary">Are you still there?</Typography>
           <Typography aria-live="polite" sx={{ fontSize: 38, fontWeight: 800, fontVariantNumeric: 'tabular-nums', letterSpacing: 2 }}>{timerText}</Typography>
-          <Typography variant="body2" color="text.secondary">Click “I am here” within one minute to keep your session active.</Typography>
+          <Typography variant="body2" color="text.secondary">Enter your Login ID and password, then select “I am here” to continue.</Typography>
         </Stack>
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 3 }}>
-        <Button fullWidth size="large" variant="contained" onClick={staySignedIn} autoFocus>I am here</Button>
+        <Stack spacing={1} sx={{ width: '100%' }}>
+          <input aria-label="Login ID" placeholder="Login ID" value={confirmLoginId} onChange={e => setConfirmLoginId(e.target.value)} style={{ padding: 12, font: 'inherit', borderRadius: 8, border: '1px solid #bdbdbd' }} />
+          <input aria-label="Password" placeholder="Password" type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} style={{ padding: 12, font: 'inherit', borderRadius: 8, border: '1px solid #bdbdbd' }} />
+          {confirmError && <Alert severity="error">{confirmError}</Alert>}
+          <Button fullWidth size="large" variant="contained" onClick={staySignedIn} disabled={confirmBusy || !confirmLoginId || !confirmPassword} autoFocus>{confirmBusy ? 'Verifying…' : 'I am here'}</Button>
+        </Stack>
       </DialogActions>
     </Dialog>
   </BankThemeProvider>;

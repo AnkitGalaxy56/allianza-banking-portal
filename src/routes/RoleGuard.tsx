@@ -16,6 +16,10 @@ export default function RoleGuard({ allowed, screenName, children }: { allowed: 
     settingsService.getMyAccess().then(result => {
       if (!active) return;
       if (!result.configured) { setAccess('allowed'); return; }
+      // These new mobile request pages are available to bank roles and may not
+      // have entries in older saved access-control configurations.
+      const MOBILE_REQUEST_SCREEN_NAMES = new Set(['KYC Documents', 'Nomination Updates', 'Positive Pay System']);
+      if (MOBILE_REQUEST_SCREEN_NAMES.has(screenName)) { setAccess('allowed'); return; }
       const permission = result.permissions.find(item => item.module === screenName);
       setAccess(permission?.actions.includes('view') ? 'allowed' : 'denied');
     }).catch(() => { if (active) setAccess('denied'); });
