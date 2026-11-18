@@ -50,7 +50,7 @@ export default function ThemeFormDialog({ open, theme, onClose, onSave }: ThemeF
       <Stack spacing={2.5}>
         {error && <Alert severity="error">{error}</Alert>}
         <Grid container spacing={1.5}>
-          <Grid item xs={12} sm={4}><TextField label="Theme code" fullWidth size="small" value={code} onChange={(e) => setCode(e.target.value.replace(/[^a-zA-Z0-9-]/g, '-'))} disabled={!isNew || theme?.code === 'allianza'} helperText="Unique ID, e.g. sample-urban" /></Grid>
+          <Grid item xs={12} sm={4}><TextField label="Theme code" fullWidth size="small" value={code} onChange={(e) => setCode(e.target.value.replace(/[^a-zA-Z0-9-]/g, '-'))} disabled={!isNew} helperText="Unique ID, e.g. sample-urban" /></Grid>
           <Grid item xs={12} sm={4}><TextField label="Bank / theme name" fullWidth size="small" value={name} onChange={(e) => setName(e.target.value)} /></Grid>
           <Grid item xs={12} sm={4}><TextField label="Short name" fullWidth size="small" value={shortName} onChange={(e) => setShortName(e.target.value)} /></Grid>
           <Grid item xs={12}><TextField label="Tagline" fullWidth size="small" value={tagline} onChange={(e) => setTagline(e.target.value)} /></Grid>

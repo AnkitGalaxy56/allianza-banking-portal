@@ -5,7 +5,7 @@ export interface RequestRecord {
   id: string;
   status: RequestStatus;
   submittedOn: string;
-  fields: Record<string, string>;
+  fields: Record<string, string | boolean>;
   displayId?: string;
   canVerify?: boolean;
   canEdit?: boolean;
@@ -37,7 +37,7 @@ export interface ValidationRecord {
   id: string;
   status: RequestDecision;
   submittedOn: string;
-  fields: Record<string, string>;
+  fields: Record<string, string | boolean>;
   displayId?: string;
   canVerify?: boolean;
   canEdit?: boolean;

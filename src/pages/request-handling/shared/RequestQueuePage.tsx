@@ -26,25 +26,24 @@ export default function RequestQueuePage({ config, module }: Props) {
   const openDetail = async (r: ValidationRecord) => { try { setSelected(await store.getOne(r.id)); } catch (e) { setFeedback(getErrorMessage(e, 'Unable to load the request.')); } };
   const verify = async (decision: 'Authorised' | 'Rejected') => { if (!selected) return; const label = selected.displayId ?? selected.id; try { await store.decide(selected.id, decision, undefined); setFeedback(`${label} ${decision === 'Authorised' ? 'verified' : 'rejected'} successfully.`); } catch (e) { setFeedback(getErrorMessage(e, 'Unable to update the request.')); } setDecisionConfirm(null); setSelected(null); };
   const requestDecision = (decision: 'Authorised' | 'Rejected') => setDecisionConfirm(decision);
-  // Payment source comes from the API as fields.isSys ('Mobile App' / 'Control Panel').
-  // Keep support for the boolean is_sys shape as well because older API responses may use it.
-  const isMobileRequest = (record: ValidationRecord) => {
+  // PostgreSQL is_sys BOOLEAN: true = Control Panel, false = Mobile App.
+  // Also support the API's formatted source strings and legacy SMALLINT values.
+  const isControlPanelRequest = (record: ValidationRecord) => {
     const source = record.fields.isSys ?? record.fields.is_sys;
     if (typeof source === 'boolean') return source;
-    return String(source ?? '').trim().toLowerCase() === 'mobile app';
+    const normalized = String(source ?? '').trim().toLowerCase();
+    return normalized === 'control panel' || normalized === 'true' || normalized === '2';
   };
-
-  const isControlPanelRequest = (record: ValidationRecord) => !isMobileRequest(record);
 
   const startEdit = async (record: ValidationRecord) => {
     // Payment: only Pending requests created from Control Panel can be edited.
     if (module !== 'payments' || record.status !== 'Pending' || !isControlPanelRequest(record)) return;
     try {
       const d = await store.getOne(record.id);
-      if (d.status !== 'Pending' || isMobileRequest(d)) return;
+      if (d.status !== 'Pending' || !isControlPanelRequest(d)) return;
       setEditing(d);
       const { isSys: _isSys, is_sys: _isSysLegacy, ...editableFields } = d.fields;
-      setEditFields(editableFields as Record<string, string>);
+      setEditFields(Object.fromEntries(Object.entries(editableFields).map(([key, value]) => [key, String(value ?? '')])));
       setSelected(null);
     } catch (e) { setFeedback(getErrorMessage(e, 'Unable to load the request.')); }
   };

@@ -9,7 +9,7 @@ import { serverFieldErrors, useRequestModule } from '../../shared/useRequestModu
 
 export type DepositMode = 'opening' | 'closing';
 export interface DepositConfig { title: string; mode: DepositMode; product: 'FD'|'RD'|'BOTH'; }
-type RecordItem = { id:string; displayId?:string; canVerify?:boolean; status:string; fields:Record<string,string> };
+type RecordItem = { id:string; displayId?:string; canVerify?:boolean; status:string; fields:Record<string,string | boolean> };
 
 const openingFields = [
  ['debitAccountId','Debit Account ID'],['accountStatus','A/c Status'],['availableBalance','Available Balance'],['customerNo','Customer No'],['name','Name'],['productCode','Product Code'],['productName','Product Name'],['schemeCode','Scheme Code'],['schemeName','Scheme Name'],['certificateDate','Certificate Date'],['depositAmount','Deposit / Instal Amt'],['asOfDate','As of Date'],['interestRate','Interest Rate (%)'],['offsetRate','Offset Rate (%)'],['tenure','Tenure (mths)'],['autoRenewal','Auto Renewal'],['interestCreditAccount','Interest Credit A/c'],['renewWithInterest','Renew with Interest'],['maturityCreditAccount','Maturity Credit A/c']
@@ -95,7 +95,7 @@ export default function DepositRequestPage({config}:{config:DepositConfig}) {
   ...visibleKeys.map(([key,label]) => ({ key, label, minWidth: 25, render: (record: RecordItem) => record.fields[key] || (key === 'branch' ? 'Main Branch' : '—') })),
   { key: 'id', label: 'Request ID', minWidth: 50, nowrap: true, render: (record) => record.displayId ?? record.id },
   { key: 'status', label: 'Status', minWidth: 25, nowrap: true, render: (record) => <Chip size="small" label={isPending(record) ? 'Pending for Authorisation' : record.status} color={isPending(record) ? 'warning' : record.status === 'Rejected' ? 'error' : 'success'} variant="outlined" /> },
-  { key: 'actions', label: 'Actions', minWidth: 220, nowrap: true, render: (record) => isPending(record) ? <Button size="small" color="success" variant="contained" disabled={record.canVerify === false} title={record.canVerify === false ? 'Maker-checker: another user must verify this request' : undefined} onClick={() => void openSelected(record)}>Verify</Button> : <Stack direction="row" spacing={0.25}><Button size="small" disabled={record.status === 'Rejected'} onClick={() => void openView(record)}>View</Button></Stack> },
+  { key: 'actions', label: 'Actions', minWidth: 220, nowrap: true, render: (record) => isPending(record) ? <Button size="small" color="success" variant="contained" onClick={() => void openSelected(record)}>Verify</Button> : <Stack direction="row" spacing={0.25}><Button size="small" disabled={record.status === 'Rejected'} onClick={() => void openView(record)}>View</Button></Stack> },
  ];
 
  return <Box>
@@ -169,7 +169,7 @@ export default function DepositRequestPage({config}:{config:DepositConfig}) {
    </DialogContent>
    <DialogActions sx={{px:2,py:1.5}}>
     <Button size="small" onClick={()=>setSelected(null)}>Close</Button>
-    {selected?.canVerify!==false&&<>
+    {<>
       <Button size="small" color="error" variant="outlined" onClick={()=>requestDecision('Rejected')}>Reject</Button>
       <Button size="small" color="success" variant="contained" onClick={()=>requestDecision('Authorised')}>Verify</Button>
     </>}

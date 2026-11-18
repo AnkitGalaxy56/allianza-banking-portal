@@ -4,6 +4,9 @@ export interface ValidationRecord {
   status: RequestDecision;
   submittedOn: string;
   fields: Record<string, string | boolean>;
+  displayId?: string;
+  canVerify?: boolean;
+  canEdit?: boolean;
 }
 export interface ValidationModuleConfig {
   title: string;
