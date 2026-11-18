@@ -18,6 +18,7 @@ export default function RequestHandlingPage({ config, module }: { config: Reques
     const [selected, setSelected] = useState<RequestRecord | null>(null);
     const [formOpen, setFormOpen] = useState(false);
     const [confirmOpen, setConfirmOpen] = useState(false);
+    const [decisionConfirm, setDecisionConfirm] = useState<'Authorised' | 'Rejected' | null>(null);
     const [editing, setEditing] = useState<RequestRecord | null>(null);
     const [fields, setFields] = useState<Record<string, string>>({});
     const [feedback, setFeedback] = useState('');
@@ -29,7 +30,8 @@ export default function RequestHandlingPage({ config, module }: { config: Reques
     // const startEdit = async (r: RequestRecord) => { ...existing edit implementation intentionally disabled... };
     const save = () => { const required = config.requiredKeys ?? config.detailFields.slice(0, 2).map((f) => f.key); const errors = validateRequestForm(fields, required); setFieldErrors(errors); if (Object.keys(errors).length) { setFeedback('Please correct the highlighted fields before submitting.'); return; } setFeedback(''); setConfirmOpen(true); };
     const commit = async () => { try { if (editing) { await store.update(editing.id, fields); setFeedback('Request updated and sent for authorisation.'); } else { await store.create(fields); setFeedback('Request created and sent for authorisation.'); } setConfirmOpen(false); setFormOpen(false); } catch (e) { setConfirmOpen(false); setFieldErrors(serverFieldErrors(e)); setFeedback(`Please correct the highlighted fields before submitting. ${getErrorMessage(e, '')}`); } };
-    const decide = async (status: 'Authorised' | 'Rejected') => { if (!selected) return; const label = selected.displayId ?? selected.id; try { await store.decide(selected.id, status); setFeedback(`${label} ${status === 'Authorised' ? 'verified' : 'rejected'} successfully.`); } catch (e) { setFeedback(`Please review: ${getErrorMessage(e, 'Unable to update the request.')}`); } setSelected(null); };
+    const decide = async (status: 'Authorised' | 'Rejected') => { if (!selected) return; const label = selected.displayId ?? selected.id; try { await store.decide(selected.id, status); setFeedback(`${label} ${status === 'Authorised' ? 'verified' : 'rejected'} successfully.`); } catch (e) { setFeedback(`Please review: ${getErrorMessage(e, 'Unable to update the request.')}`); } setDecisionConfirm(null); setSelected(null); };
+    const requestDecision = (status: 'Authorised' | 'Rejected') => setDecisionConfirm(status);
     const columns: DataTableColumn<RequestRecord>[] = [
         { key: 'id', label: 'Request ID', minWidth: 50, nowrap: true, render: (r) => <Typography fontWeight={700} fontSize={13}>{r.displayId ?? r.id}</Typography> },
         ...config.columns.map((column) => ({ key: column.key, label: column.label, minWidth: 25, render: (r: RequestRecord) => r.fields[column.key] || '—' })),
@@ -80,8 +82,17 @@ export default function RequestHandlingPage({ config, module }: { config: Reques
                     </>
                 )}
             </DialogContent>
-            <DialogActions sx={{ px: 2, py: 1.5 }}><Button size="small" onClick={() => setSelected(null)}>Close</Button>{selected?.status === 'Pending' && <><Button size="small" color="error" variant="outlined" onClick={() => decide('Rejected')}>Reject</Button><Button size="small" color="success" variant="contained" onClick={() => decide('Authorised')}>Verify</Button></>}</DialogActions>
+            <DialogActions sx={{ px: 2, py: 1.5 }}><Button size="small" onClick={() => setSelected(null)}>Close</Button>{selected?.status === 'Pending' && <><Button size="small" color="error" variant="outlined" onClick={() => requestDecision('Rejected')}>Reject</Button><Button size="small" color="success" variant="contained" onClick={() => requestDecision('Authorised')}>Verify</Button></>}</DialogActions>
         </Dialog>
+        <ConfirmDialog
+            open={decisionConfirm !== null}
+            title={decisionConfirm === 'Rejected' ? 'Confirm Rejection' : 'Confirm Verification'}
+            message={decisionConfirm === 'Rejected' ? 'Are you sure you want to reject this request?' : 'Are you sure you want to verify this request?'}
+            confirmText={decisionConfirm === 'Rejected' ? 'Reject' : 'Verify'}
+            variant={decisionConfirm === 'Rejected' ? 'danger' : 'warning'}
+            onCancel={() => setDecisionConfirm(null)}
+            onConfirm={() => decisionConfirm && void decide(decisionConfirm)}
+        />
         {/* <Dialog open={formOpen} onClose={() => setFormOpen(false)} fullWidth maxWidth="lg" PaperProps={{ sx: { width: '100%', maxWidth: 1100, minHeight: { xs: 'auto', md: 520 } } }}> */}
         <Dialog
             open={formOpen}
