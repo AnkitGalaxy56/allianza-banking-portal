@@ -19,6 +19,11 @@ export const authService = {
     return data;
   },
 
+  async checkSession(): Promise<void> {
+    if (env.useMockApi) return;
+    await api.get(ENDPOINTS.auth.profile);
+  },
+
   async verifySession(payload: { loginId: string; password: string }): Promise<void> {
     const { data } = await api.post(ENDPOINTS.auth.verifySession, payload);
     if (data?.verified !== 'true') throw new Error(data?.message ?? 'Verification failed.');

@@ -7,6 +7,9 @@ export function getErrorMessage(
 ): string {
   if (axios.isAxiosError(error)) {
     const data = error.response?.data as { message?: string } | undefined;
+    if (error.response?.status === 401 && /access token|token.*expired|token.*revoked/i.test(data?.message ?? '')) {
+      return 'Your session expired or is no longer valid. Please sign in again.';
+    }
     if (data?.message) return data.message;
     if (error.code === 'ECONNABORTED') return 'The request timed out. Please try again.';
     if (!error.response) return 'Unable to reach the server. Check your connection.';

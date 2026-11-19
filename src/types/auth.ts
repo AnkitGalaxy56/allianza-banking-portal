@@ -4,6 +4,8 @@ export interface User {
   id: string;
   name: string;
   email: string;
+  /** Backend login name used for idle-session credential verification. */
+  loginId?: string;
   role: Role;
   /** Not set for SUPER_ADMIN */
   bankCode?: string;

@@ -17,6 +17,7 @@ import { ENDPOINTS } from './endpoints';
 interface AuthHandlers {
   onTokensRefreshed?: (tokens: RefreshResponse) => void;
   onUnauthorized?: () => void;
+  onSessionReplaced?: () => void;
 }
 
 let handlers: AuthHandlers = {};
@@ -42,23 +43,26 @@ function isPublicThemeRequest(config: Pick<InternalAxiosRequestConfig, 'url' | '
     || /^\/banks\/[^/]+\/theme$/.test(path);
 }
 
-let refreshPromise: Promise<string | null> | null = null;
+let refreshPromise: Promise<{ token: string | null; message?: string }> | null = null;
 
-async function refreshAccessToken(): Promise<string | null> {
+async function refreshAccessToken(): Promise<{ token: string | null; message?: string }> {
   const session = loadSession();
-  if (!session?.refreshToken) return null;
+  if (!session?.refreshToken) return { token: null };
   try {
     // Plain axios on purpose: must not go through our own interceptors.
+    const apiBase = env.apiBaseUrl.replace(/\/+$/, '');
     const { data } = await axios.post<RefreshResponse>(
-      `${env.apiBaseUrl}${ENDPOINTS.auth.refresh}`,
+      `${apiBase}${ENDPOINTS.auth.refresh}`,
       { refreshToken: session.refreshToken },
       { timeout: env.apiTimeoutMs },
     );
+    if (!data?.accessToken) return { token: null };
     updateSessionTokens(data.accessToken, data.refreshToken);
     handlers.onTokensRefreshed?.(data);
-    return data.accessToken;
-  } catch {
-    return null;
+    return { token: data.accessToken };
+  } catch (error) {
+    const responseData = (error as AxiosError<{ message?: string; error?: string }>).response?.data;
+    return { token: null, message: responseData?.message ?? responseData?.error };
   }
 }
 
@@ -94,12 +98,16 @@ api.interceptors.response.use(
           refreshPromise = null;
         });
       }
-      const newToken = await refreshPromise;
-      if (newToken) {
-        original.headers.set('Authorization', `Bearer ${newToken}`);
+      const refreshResult = await refreshPromise;
+      if (refreshResult.token) {
+        original.headers.set('Authorization', `Bearer ${refreshResult.token}`);
         return api(original);
       }
-      handlers.onUnauthorized?.();
+      if (refreshResult.message?.toLowerCase().includes('another device')) {
+        handlers.onSessionReplaced?.();
+      } else {
+        handlers.onUnauthorized?.();
+      }
     }
     return Promise.reject(error);
   },

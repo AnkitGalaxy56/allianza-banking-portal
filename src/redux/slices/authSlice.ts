@@ -17,6 +17,7 @@ export interface AuthState {
   pendingAuth: PendingLoginResponse | null;
   rememberPending: boolean;
   pendingBankCode: string | null;
+  sessionEndReason: string | null;
 }
 
 function getInitialState(): AuthState {
@@ -30,6 +31,7 @@ function getInitialState(): AuthState {
     pendingAuth: null,
     rememberPending: false,
     pendingBankCode: null,
+    sessionEndReason: null,
   };
 
   const session = loadSession();
@@ -95,6 +97,10 @@ export const verifyLoginOtp = createAsyncThunk<
         bankCode: authenticated.user.bankCode ?? pendingBankCode ?? undefined,
       };
       const result = { ...authenticated, user: normalizedUser };
+      // A fresh successful login starts a new inactivity window for this user.
+      const idleKey = `allianza.session.idle.${normalizedUser.id}`;
+      window.localStorage.removeItem(idleKey);
+      window.sessionStorage.removeItem(idleKey);
       saveSession({
         user: normalizedUser,
         accessToken: authenticated.accessToken,
@@ -108,9 +114,9 @@ export const verifyLoginOtp = createAsyncThunk<
   },
 );
 
-export const logoutUser = createAsyncThunk<void, void>(
+export const logoutUser = createAsyncThunk<void, void, { state: { auth: AuthState } }>(
   'auth/logoutUser',
-  async (_arg, { dispatch }) => {
+  async (_arg, { dispatch, getState }) => {
     try {
       await authService.logout();
     } catch {
@@ -118,7 +124,9 @@ export const logoutUser = createAsyncThunk<void, void>(
     }
 
     clearSession();
-    dispatch(sessionCleared());
+    // A 401 may have identified a replacement login while logout was in flight.
+    // Preserve that specific session-ended message instead of overwriting it.
+    if (!getState().auth.sessionEndReason) dispatch(sessionCleared());
   },
 );
 
@@ -136,6 +144,7 @@ const authSlice = createSlice({
       pendingAuth: null,
       rememberPending: false,
       pendingBankCode: null,
+      sessionEndReason: null,
     }),
 
     sessionExpired: () => ({
@@ -148,7 +157,25 @@ const authSlice = createSlice({
       pendingAuth: null,
       rememberPending: false,
       pendingBankCode: null,
+      sessionEndReason: 'Your session has expired. Please sign in again.',
     }),
+
+    sessionReplaced: () => ({
+      user: null,
+      accessToken: null,
+      refreshToken: null,
+      status: 'idle' as RequestState,
+      error: null,
+      otpPending: false,
+      pendingAuth: null,
+      rememberPending: false,
+      pendingBankCode: null,
+      sessionEndReason: 'You have logged in on another device. This session will be logged out.',
+    }),
+
+    dismissSessionEnd: (state) => {
+      state.sessionEndReason = null;
+    },
 
     tokensRefreshed: (state, action: PayloadAction<RefreshResponse>) => {
       state.accessToken = action.payload.accessToken;
@@ -175,6 +202,7 @@ const authSlice = createSlice({
       .addCase(login.fulfilled, (state, action) => {
         state.status = 'idle';
         state.error = null;
+        state.sessionEndReason = null;
         state.otpPending = true;
         state.pendingAuth = action.payload;
         state.rememberPending = action.meta.arg.remember;
@@ -218,6 +246,8 @@ const authSlice = createSlice({
 export const {
   sessionCleared,
   sessionExpired,
+  sessionReplaced,
+  dismissSessionEnd,
   tokensRefreshed,
   clearAuthError,
 } = authSlice.actions;

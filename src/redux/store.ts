@@ -1,7 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { registerAuthHandlers } from '@/services/api/axiosInstance';
 import { clearSession } from '@/utils/authStorage';
-import authReducer, { sessionExpired, tokensRefreshed } from './slices/authSlice';
+import authReducer, { sessionExpired, sessionReplaced, tokensRefreshed } from './slices/authSlice';
 import themeReducer from './slices/themeSlice';
 import requestHandlingReducer from './slices/requestHandlingSlice';
 import mastersReducer from './slices/mastersSlice';
@@ -28,6 +28,10 @@ export type AppDispatch = typeof store.dispatch;
 registerAuthHandlers({
   onTokensRefreshed: (tokens) => {
     store.dispatch(tokensRefreshed(tokens));
+  },
+  onSessionReplaced: () => {
+    clearSession();
+    store.dispatch(sessionReplaced());
   },
   onUnauthorized: () => {
     clearSession();
