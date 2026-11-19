@@ -9,6 +9,8 @@ export interface User {
   bankCode?: string;
   bankName?: string;
   userRole?: string;
+  loginBranch?: string;
+  designation?: string;
   branch?: string;
   idleTimeoutMinutes?: number;
 }

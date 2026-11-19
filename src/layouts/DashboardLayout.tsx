@@ -31,7 +31,7 @@ import { ROLE_LABELS, ROLES } from '@/config/roles';
 
 const DRAWER_WIDTH = 230;
 const COLLAPSED_WIDTH = 76;
-const HEADER_HEIGHT = 76;
+const HEADER_HEIGHT = 54;
 
 export default function DashboardLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -50,7 +50,8 @@ export default function DashboardLayout() {
     user?.role === ROLES.SUPER_ADMIN
       ? 'Allianza'
       : user?.bankName || brand.name || 'Bank';
-
+ 
+  const branchName = user?.branch || 'Bank';
   const handleLogoutClick = () => {
     setLogoutDialogOpen(true);
   };
@@ -84,7 +85,8 @@ export default function DashboardLayout() {
         color="inherit"
         elevation={0}
         sx={{
-          bgcolor: 'background.paper',
+          bgcolor: 'primary.main',
+          color: 'primary.contrastText',
           width: '100%',
           position: 'relative',
           flexShrink: 0,
@@ -96,7 +98,7 @@ export default function DashboardLayout() {
         <Toolbar
           sx={{
             minHeight: {
-              xs: 64,
+              xs: 52,
               md: HEADER_HEIGHT,
             },
             px: {
@@ -135,7 +137,10 @@ export default function DashboardLayout() {
               sx={{
                 display: 'inline-flex',
                 flexShrink: 0,
-                color: 'text.primary',
+                color: 'primary.contrastText',
+                '&:hover': {
+                  bgcolor: 'rgba(255,255,255,0.10)',
+                },
               }}
             >
               <MenuIcon />
@@ -151,15 +156,16 @@ export default function DashboardLayout() {
               minWidth: 0,
               flexShrink: 0,
               maxWidth: {
-                xs: 150,
-                sm: 210,
-                md: 230,
+                xs: 180,
+                sm: 250,
+                md: 285,
               },
             }}
           >
             <BrandLogo
               theme={brand}
-              size={40}
+              size={48}
+              inverted
             />
 
             <Box sx={{ minWidth: 0 }}>
@@ -168,7 +174,9 @@ export default function DashboardLayout() {
                 sx={{
                   fontSize: 14,
                   fontWeight: 800,
-                  lineHeight: 1.25,
+                  lineHeight: 1.15,
+                  color: 'primary.contrastText',
+                  textShadow: '0 0 10px rgba(255,255,255,0.14)',
                 }}
               >
                 {organizationName}
@@ -177,118 +185,12 @@ export default function DashboardLayout() {
               <Typography
                 noWrap
                 sx={{
-                  fontSize: 11,
-                  color: 'text.secondary',
-                  lineHeight: 1.3,
+                  fontSize: 10.5,
+                  color: 'rgba(255,255,255,0.78)',
+                  lineHeight: 1.2,
                 }}
               >
-                {user ? ROLE_LABELS[user.role] : 'Bank'}
-              </Typography>
-            </Box>
-          </Box>
-
-          {/* BRANCH, ROLE AND DESIGNATION */}
-
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: {
-                xs: 1.5,
-                sm: 3,
-              },
-              flex: 1,
-              minWidth: 0,
-            }}
-          >
-            {/* Login branch */}
-
-            <Box sx={{ minWidth: 0 }}>
-              <Typography
-                sx={{
-                  fontSize: 12,
-                  color: 'text.secondary',
-                  lineHeight: 1.3,
-                }}
-              >
-                LOGIN BRANCH
-              </Typography>
-
-              <Typography
-                noWrap
-                sx={{
-                  fontSize: 14,
-                  fontWeight: 700,
-                  mt: 0.4,
-                }}
-              >
-                {user?.bankName || brand.name || '—'}
-              </Typography>
-            </Box>
-
-            {/* User role */}
-
-            <Box
-              sx={{
-                minWidth: 0,
-                display: {
-                  xs: 'none',
-                  sm: 'block',
-                },
-              }}
-            >
-              <Typography
-                sx={{
-                  fontSize: 12,
-                  color: 'text.secondary',
-                  lineHeight: 1.3,
-                }}
-              >
-                USER ROLE
-              </Typography>
-
-              <Typography
-                noWrap
-                sx={{
-                  fontSize: 14,
-                  fontWeight: 700,
-                  mt: 0.4,
-                }}
-              >
-                {user ? ROLE_LABELS[user.role] : '—'}
-              </Typography>
-            </Box>
-
-            {/* Designation */}
-
-            <Box
-              sx={{
-                minWidth: 0,
-                display: {
-                  xs: 'none',
-                  sm: 'block',
-                },
-              }}
-            >
-              <Typography
-                sx={{
-                  fontSize: 12,
-                  color: 'text.secondary',
-                  lineHeight: 1.3,
-                }}
-              >
-                DESIGNATION
-              </Typography>
-
-              <Typography
-                noWrap
-                sx={{
-                  fontSize: 14,
-                  fontWeight: 700,
-                  mt: 0.4,
-                }}
-              >
-                {user ? ROLE_LABELS[user.role] : '—'}
+                {branchName}
               </Typography>
             </Box>
           </Box>
@@ -296,9 +198,10 @@ export default function DashboardLayout() {
           {/* MENU SEARCH - before date and logged-in user */}
           <SidebarMenuSearch
             sx={{
-              width: { xs: 180, sm: 210, md: 230, lg: 250 },
+              ml: 'auto',
+              width: { xs: 170, sm: 200, md: 220, lg: 235 },
               minWidth: 150,
-              flexShrink: 1,
+              flexShrink: 0,
             }}
           />
 
@@ -332,8 +235,8 @@ export default function DashboardLayout() {
               <Typography
                 sx={{
                   flexShrink: 0,
-                  fontSize: 12,
-                  color: 'text.secondary',
+                  fontSize: 10.5,
+                  color: 'rgba(255,255,255,0.86)',
                 }}
               >
                 Date:
@@ -342,8 +245,10 @@ export default function DashboardLayout() {
               <Typography
                 noWrap
                 sx={{
-                  fontSize: 14,
+                  fontSize: 13,
                   fontWeight: 700,
+                  color: 'primary.contrastText',
+                  textShadow: '0 1px 6px rgba(0,0,0,0.22)',
                 }}
               >
                 {new Date().toLocaleDateString('en-IN', {
@@ -368,8 +273,8 @@ export default function DashboardLayout() {
               <Typography
                 sx={{
                   flexShrink: 0,
-                  fontSize: 12,
-                  color: 'text.secondary',
+                  fontSize: 10.5,
+                  color: 'rgba(255,255,255,0.86)',
                 }}
               >
                 User:
@@ -380,8 +285,10 @@ export default function DashboardLayout() {
                 title={user?.name || '—'}
                 sx={{
                   minWidth: 0,
-                  fontSize: 14,
+                  fontSize: 13,
                   fontWeight: 700,
+                  color: 'primary.contrastText',
+                  textShadow: '0 1px 6px rgba(0,0,0,0.22)',
                 }}
               >
                 {user?.name || '—'}
@@ -401,7 +308,7 @@ export default function DashboardLayout() {
               },
 
               '& .MuiIconButton-root': {
-                color: 'text.primary',
+                color: 'primary.contrastText',
               },
 
               '& .MuiSvgIcon-root': {
@@ -409,7 +316,7 @@ export default function DashboardLayout() {
               },
 
               '& .MuiIconButton-root:hover': {
-                bgcolor: 'action.hover',
+                bgcolor: 'rgba(255,255,255,0.10)',
               },
             }}
           >
@@ -465,7 +372,7 @@ export default function DashboardLayout() {
             minHeight: 0,
             height: '100%',
             overflow: 'hidden',
-            transition: 'width 180ms ease', 
+            transition: 'width 180ms ease',
           }}
         >
           {/* MOBILE SIDEBAR */}

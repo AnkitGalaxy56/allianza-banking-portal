@@ -8,6 +8,7 @@ import type { UserProfile } from '@/pages/profile/types/profile';
 
 const initials = (name: string) => name.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join('').toUpperCase();
 const display = (value?: string | null) => value?.trim() || 'Not added';
+const formatRole = (value?: string | null) => value?.trim().replace(/_/g, ' ') || 'Not added';
 
 export default function ProfilePopover() {
   const user = useAppSelector(selectUser);
@@ -51,8 +52,12 @@ export default function ProfilePopover() {
         </Box>
         <Divider />
         <Box sx={{ px: 2.5, py: 1.5 }}>
-          <Typography variant="overline" color="text.secondary">Name</Typography>
-          <Typography variant="body2" sx={{ mb: 1.25 }}>{display(name)}</Typography>
+          <Typography variant="overline" color="text.secondary">Login Branch</Typography>
+          <Typography variant="body2" sx={{ mb: 1.25 }}>{display(profile?.loginBranch || user?.loginBranch)}</Typography>
+          <Typography variant="overline" color="text.secondary">User Role</Typography>
+          <Typography variant="body2" sx={{ mb: 1.25 }}>{formatRole(profile?.userRole || user?.userRole || user?.role)}</Typography>
+          <Typography variant="overline" color="text.secondary">Designation</Typography>
+          <Typography variant="body2" sx={{ mb: 1.25 }}>{display(profile?.designation || user?.designation)}</Typography>
           <Typography variant="overline" color="text.secondary">Email</Typography>
           <Typography variant="body2" sx={{ mb: 1.25, overflowWrap: 'anywhere' }}>{display(email)}</Typography>
           <Typography variant="overline" color="text.secondary">Mobile No</Typography>
