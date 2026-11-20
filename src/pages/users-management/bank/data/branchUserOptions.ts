@@ -1,14 +1,14 @@
 import type { SelectOption } from '@/components/form/FormSelectField';
 
 export const BRANCHES = [
-  { id: 'br-001', name: 'Main branch' },
-  { id: 'br-002', name: 'Branch 2' },
-  { id: 'br-003', name: 'Branch 3' },
-  { id: 'br-004', name: 'Branch 4' },
-  { id: 'br-005', name: 'Branch 5' },
-  { id: 'br-006', name: 'Branch 6' },
-  { id: 'br-007', name: 'Branch 7' },
-  { id: 'br-008', name: 'Branch 8' },
+  { id: 'ALZ001', name: 'Main Branch' },
+  { id: 'ALZ002', name: 'Branch 2' },
+  { id: 'ALZ003', name: 'Branch 3' },
+  { id: 'ALZ004', name: 'Branch 4' },
+  { id: 'ALZ005', name: 'Branch 5' },
+  { id: 'ALZ006', name: 'Branch 6' },
+  { id: 'ALZ007', name: 'Branch 7' },
+  { id: 'ALZ008', name: 'Branch 8' },
 ];
 
 export const BRANCH_OPTIONS: SelectOption[] = BRANCHES.map((branch) => ({
@@ -26,12 +26,14 @@ export const TITLE_OPTIONS: SelectOption[] = [
 
 export const USER_ROLE_OPTIONS: SelectOption[] = [
   { value: 'Bank User', label: 'Bank User' },
-  { value: 'Admin User', label: 'Admin User' },
+  { value: 'Bank Admin', label: 'Bank Admin' },
+  { value: 'Super Admin', label: 'Super Admin' },
 ];
 
 export const SYSTEM_ROLE_OPTIONS: SelectOption[] = [
   { value: 'Checker', label: 'Checker' },
   { value: 'Maker', label: 'Maker' },
+  { value: 'Admin', label: 'Admin' },
 ];
 
 export const STATUS_OPTIONS: SelectOption[] = [

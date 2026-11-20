@@ -25,6 +25,8 @@ export interface RequestHandlingList<T = RequestHandlingRecord> {
   pageSize?: number;
 }
 
+export interface RequestHandlingCounts { total: number; pending: number; modules?: Record<string, { total: number; pending: number }>; }
+
 export type RequestHandlingModule =
   | 'cheque-book' | 'closing-accounts' | 'fd-opening' | 'fresh-loan-application'
   | 'lead-management' | 'loan-emi-payment' | 'locker-application' | 'opening-accounts'
@@ -35,6 +37,7 @@ export type RequestHandlingModule =
 const modulePath = (module: RequestHandlingModule) => module.startsWith('validation/') ? module.slice('validation/'.length) : module;
 
 export const requestHandlingService = {
+  async counts(): Promise<RequestHandlingCounts> { const { data } = await api.get<RequestHandlingCounts>(ENDPOINTS.requestHandling.counts); return data; },
   async list<T = RequestHandlingRecord>(module: RequestHandlingModule, query: RequestHandlingQuery = {}): Promise<RequestHandlingList<T> | T[]> {
     const { data } = await api.get<RequestHandlingList<T> | T[]>(ENDPOINTS.requestHandling.base(modulePath(module)), { params: query });
     return data;

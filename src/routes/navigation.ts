@@ -173,7 +173,7 @@ const ALL_BANK_ROLES: Role[] = [SUPER_ADMIN, BANK_ADMIN, BANK_USER];
 //     label: 'Upload Image',
 //     path: PATHS.uploadImages,
 //     icon: ImageOutlinedIcon,
-//     roles: [SUPER_ADMIN],
+//     roles: [SUPER_ADMIN, BANK_ADMIN],
 //   },
 // ];
 
@@ -345,19 +345,19 @@ export const NAV_ITEMS: NavItem[] = [
     label: 'User Management',
     path: PATHS.USER_MANAGEMENT.ROOT,
     icon: ShieldOutlinedIcon,
-    roles: ALL_BANK_ROLES,
+    roles: [SUPER_ADMIN, BANK_ADMIN],
     children: [
       {
         label: 'User Master',
         path: PATHS.USER_MANAGEMENT.USER_MASTER,
         icon: ManageAccountsOutlinedIcon,
-        roles: ALL_BANK_ROLES,
+        roles: [SUPER_ADMIN, BANK_ADMIN],
       },
       {
         label: 'Assign Password',
         path: PATHS.USER_MANAGEMENT.ASSIGN_PASSWORD,
         icon: ShieldOutlinedIcon,
-        roles: ALL_BANK_ROLES,
+        roles: [SUPER_ADMIN],
       },
     ],
   },
@@ -436,22 +436,22 @@ export const NAV_ITEMS: NavItem[] = [
  
 ];
 
-const filterItemsForRole = (items: NavItem[], role: Role): NavItem[] =>
+const filterItemsForRole = (items: NavItem[], role: Role, systemRole?: string): NavItem[] =>
   items.flatMap((item) => {
     if (!item.roles.includes(role)) {
       return [];
     }
 
     const children = item.children
-      ? filterItemsForRole(item.children, role)
+      ? filterItemsForRole(item.children, role, systemRole)
       : undefined;
 
     // Hide a parent if all its nested items are inaccessible and it has no route.
     return [{ ...item, ...(children ? { children } : {}) }];
   });
 
-export const getNavForRole = (role: Role): NavItem[] =>
-  filterItemsForRole(NAV_ITEMS, role);
+export const getNavForRole = (role: Role, systemRole?: string): NavItem[] =>
+  filterItemsForRole(NAV_ITEMS, role, systemRole);
 
 
 export const getAllNavRoutes = (items: NavItem[] = NAV_ITEMS): NavItem[] => {

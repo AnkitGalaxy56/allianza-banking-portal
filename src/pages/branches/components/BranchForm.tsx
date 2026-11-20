@@ -20,7 +20,7 @@ interface Props {
 export default function BranchForm({ editing, focusSignal, onSaved, onCancel }: Props) {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [banks, setBanks] = useState<Bank[]>([]);
-  const { control, handleSubmit, reset, setFocus, formState } = useForm<BranchFormValues>({
+  const { control, handleSubmit, reset, setFocus, formState: { errors, isSubmitting } } = useForm<BranchFormValues>({
     resolver: zodResolver(branchSchema),
     defaultValues: EMPTY_BRANCH,
   });
@@ -52,13 +52,13 @@ export default function BranchForm({ editing, focusSignal, onSaved, onCancel }: 
     }
   };
 
-  const busy = formState.isSubmitting;
+  const busy = isSubmitting;
   return (
     <Box component="form" noValidate onSubmit={handleSubmit(onSubmit)} sx={{ display: 'grid', gap: 2, pt: 1 }}>
       {submitError && <Alert severity="error">{submitError}</Alert>}
-      {banks.length > 1 && (
+      {banks.length > 0 && (
         <Controller name="bankCode" control={control} render={({ field }) => (
-          <TextField select size="small" label="Bank" value={field.value ?? ''} onChange={field.onChange} disabled={busy || Boolean(editing)}>
+          <TextField select size="small" label="Bank" value={field.value ?? ''} onChange={field.onChange} disabled={busy || Boolean(editing)} error={Boolean(errors.bankCode)} helperText={errors.bankCode?.message}>
             {banks.map((bank) => <MenuItem key={bank.code} value={bank.code}>{bank.name} ({bank.code})</MenuItem>)}
           </TextField>
         )} />

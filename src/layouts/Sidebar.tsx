@@ -76,8 +76,8 @@ export default function Sidebar({
         ? [item]
         : [];
     });
-    return filter(getNavForRole(user.role));
-  }, [user?.role, screenGrants]);
+    return filter(getNavForRole(user.role, user.systemRole));
+  }, [user?.role, user?.systemRole, screenGrants]);
 
   if (!user) return null;
 

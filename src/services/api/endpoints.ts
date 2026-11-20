@@ -68,6 +68,7 @@ banners: {
       byId: (id: string) => `/mobile-utilities/images/${encodeURIComponent(id)}`,
     },
     notifications: {
+      header: '/mobile-utilities/notifications/header',
       base: '/mobile-utilities/notifications',
       byId: (id: string) => `/mobile-utilities/notifications/${encodeURIComponent(id)}`,
       send: (id: string) => `/mobile-utilities/notifications/${encodeURIComponent(id)}/send`,
@@ -81,6 +82,7 @@ banners: {
   },
   /** Request-handling APIs. Override these paths here to match the backend contract. */
   requestHandling: {
+    counts: '/request-handling/counts',
     base: (module: string) => `/request-handling/${module}`,
     byId: (module: string, id: string) => `/request-handling/${module}/${encodeURIComponent(id)}`,
     decision: (module: string, id: string) => `/request-handling/${module}/${encodeURIComponent(id)}/decision`,

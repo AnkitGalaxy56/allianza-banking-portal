@@ -48,6 +48,8 @@ interface BranchUserFormDialogProps {
   readOnly?: boolean;
   verifying?: boolean;
   onAuthenticate?: () => void;
+  branchOptions?: typeof BRANCH_OPTIONS;
+  isMakerAdmin?: boolean;
 }
 
 export default function BranchUserFormDialog({
@@ -64,6 +66,8 @@ export default function BranchUserFormDialog({
   readOnly = false,
   verifying = false,
   onAuthenticate,
+  branchOptions = BRANCH_OPTIONS,
+  isMakerAdmin = false,
 }: BranchUserFormDialogProps) {
   return (
     <Dialog open={open}
@@ -137,17 +141,17 @@ export default function BranchUserFormDialog({
 
             {/* User Role and System Role stay aligned on the same row. */}
             <Grid item xs={12} md={6}>
-              <FormLookupField<BranchUserFormValues> name="role" control={control} label="User Role" options={USER_ROLE_OPTIONS} disabled={saving || readOnly} required />
+              <FormLookupField<BranchUserFormValues> name="role" control={control} label="User Role" options={isMakerAdmin ? USER_ROLE_OPTIONS.filter((option) => option.value === 'Bank User') : USER_ROLE_OPTIONS} disabled={saving || readOnly} required />
             </Grid>
             <Grid item xs={12} md={6}>
-              <FormLookupField<BranchUserFormValues> name="systemRole" control={control} label="System Role" options={SYSTEM_ROLE_OPTIONS} disabled={saving || readOnly} required />
+              <FormLookupField<BranchUserFormValues> name="systemRole" control={control} label="System Role" options={isMakerAdmin ? SYSTEM_ROLE_OPTIONS.filter((option) => option.value === 'Maker') : SYSTEM_ROLE_OPTIONS} disabled={saving || readOnly} required />
             </Grid>
 
             <Grid item xs={12} md={4}>
-              <FormLookupField<BranchUserFormValues> name="branchId" control={control} label="Branch" options={BRANCH_OPTIONS} disabled={saving || readOnly} required />
+              <FormLookupField<BranchUserFormValues> name="branchId" control={control} label="Branch" options={branchOptions} disabled={saving || readOnly || Boolean(editingUser)} required />
             </Grid>
             <Grid item xs={12} md={4}>
-              <FormMultiLookupField<BranchUserFormValues> name="multiBranchAccess" control={control} label="Multi Branch Access" options={BRANCH_OPTIONS} disabled={saving || readOnly} />
+              <FormMultiLookupField<BranchUserFormValues> name="multiBranchAccess" control={control} label="Multi Branch Access" options={branchOptions} disabled={saving || readOnly} />
             </Grid>
             <Grid item xs={12} md={4}>
               <FormTextField<BranchUserFormValues> name="dateOfBirth" control={control} label="Date of Birth" type="date" disabled={saving || readOnly} size="small" required />

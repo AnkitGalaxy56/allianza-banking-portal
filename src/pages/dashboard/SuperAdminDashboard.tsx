@@ -24,6 +24,7 @@ import BarListCard from '@/components/common/BarListCard';
 import ErrorState from '@/components/common/ErrorState';
 import FullPageLoader from '@/components/common/FullPageLoader';
 import PageHeader from '@/components/common/PageHeader';
+import RequestHandlingCounts from '@/components/common/RequestHandlingCounts';
 import QuickActionsCard, { type QuickAction } from '@/components/common/QuickActionsCard';
 import StatCard from '@/components/common/StatCard';
 import StatusChip from '@/components/common/StatusChip';
@@ -93,6 +94,8 @@ export default function SuperAdminDashboard() {
           </>
         }
       />
+
+      <RequestHandlingCounts />
 
       <Box
         sx={{

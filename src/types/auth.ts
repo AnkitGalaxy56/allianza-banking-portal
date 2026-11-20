@@ -11,6 +11,7 @@ export interface User {
   bankCode?: string;
   bankName?: string;
   userRole?: string;
+  systemRole?: 'Admin' | 'Maker' | 'Checker' | string;
   loginBranch?: string;
   designation?: string;
   branch?: string;

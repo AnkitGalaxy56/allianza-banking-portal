@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Alert,
   Avatar,
@@ -29,9 +29,11 @@ import { useAsyncData } from '@/hooks/useAsyncData';
 import { useAppSelector } from '@/redux/hooks';
 import { selectTheme } from '@/redux/slices/themeSlice';
 import { branchUserService } from '@/services/branch-user.service';
+import { branchService } from '@/services/branch.service';
+import { selectUser } from '@/redux/slices/authSlice';
+import type { SelectOption } from '@/components/form/FormSelectField';
 import type { BranchUser, BranchUserInput, BranchUserRole, UserAuthorizationStatus } from '@/types/branchUser';
 import BranchUserFormDialog from './components/BranchUserFormDialog';
-import { BRANCHES } from './data/branchUserOptions';
 import {
   branchUserSchema,
   EMPTY_BRANCH_USER,
@@ -54,6 +56,9 @@ const initials = (name: string): string =>
 
 export default function BankUsersPage() {
   const theme = useAppSelector(selectTheme);
+  const currentUser = useAppSelector(selectUser);
+  const isMakerAdmin = currentUser?.role === 'BANK_ADMIN' && String(currentUser.systemRole ?? '').toLowerCase() === 'maker';
+  const [branchOptions, setBranchOptions] = useState<SelectOption[]>([]);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [branchId, setBranchId] = useState('all');
@@ -68,6 +73,7 @@ export default function BankUsersPage() {
   const [feedback, setFeedback] = useState<Feedback>(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const debouncedSearch = useDebouncedValue(search, 300);
+  useEffect(() => { branchService.list({ page: 1, pageSize: 5000 }).then((r) => setBranchOptions(r.items.map((b) => ({ value: b.code, label: b.name })))).catch(() => setBranchOptions([])); }, []);
 
   const { data, loading, error, reload } = useAsyncData(
     () =>
@@ -75,11 +81,11 @@ export default function BankUsersPage() {
         page,
         pageSize: PAGE_SIZE,
         search: debouncedSearch,
-        branchId,
+        branchId: isMakerAdmin ? currentUser?.branch ?? currentUser?.loginBranch ?? branchId : branchId,
         role,
         authorizationStatus: authorizationFilter,
       }),
-    [page, debouncedSearch, branchId, role, authorizationFilter, refreshKey],
+    [page, debouncedSearch, branchId, role, authorizationFilter, refreshKey, isMakerAdmin, currentUser],
   );
 
   const rows = data?.items ?? [];
@@ -101,7 +107,7 @@ export default function BankUsersPage() {
     setEditingUser(null);
     setReadOnly(false);
     setVerifyingUser(false);
-    reset(EMPTY_BRANCH_USER);
+    reset(isMakerAdmin ? { ...EMPTY_BRANCH_USER, role: 'Bank User', systemRole: 'Maker', branchId: currentUser?.branch ?? currentUser?.loginBranch ?? '' } : EMPTY_BRANCH_USER);
     setFormError('');
     setFormOpen(true);
   };
@@ -163,9 +169,9 @@ export default function BankUsersPage() {
       email: values.email.trim(),
       userName: values.userName.trim(),
       displayName: values.displayName.trim(),
-      role: values.role,
+      role: isMakerAdmin ? 'Bank User' : values.role,
       systemRole: values.systemRole,
-      branchId: values.branchId,
+      branchId: isMakerAdmin ? (currentUser?.branch ?? currentUser?.loginBranch ?? values.branchId) : values.branchId,
       multiBranchAccess: values.multiBranchAccess,
       status: editingUser ? values.status : 'Entered',
       dateOfBirth: values.dateOfBirth,
@@ -265,8 +271,8 @@ export default function BankUsersPage() {
       render: (user) => (
         <Stack direction="row" spacing={0.25}>
           <Button size="small" disabled={user.status === 'Entered'} onClick={() => openViewForm(user)}>View</Button>
-          <Button size="small" disabled={user.status === 'Entered'} startIcon={<EditOutlinedIcon />} onClick={() => openEditForm(user)}>Edit</Button>
-          {user.status === 'Entered' && (
+          {!isMakerAdmin && <Button size="small" disabled={user.status === 'Entered'} startIcon={<EditOutlinedIcon />} onClick={() => openEditForm(user)}>Edit</Button>}
+          {!isMakerAdmin && user.status === 'Entered' && (
             <Button size="small" color="success" startIcon={<CheckCircleOutlineOutlinedIcon />} onClick={() => openVerifyForm(user)}>Verify</Button>
           )}
         </Stack>
@@ -341,7 +347,8 @@ export default function BankUsersPage() {
             select
             size="small"
             label="Branch filter"
-            value={branchId}
+            value={isMakerAdmin ? (currentUser?.branch ?? currentUser?.loginBranch ?? branchId) : branchId}
+            disabled={isMakerAdmin}
             onChange={(event) => {
               setBranchId(event.target.value);
               setPage(1);
@@ -349,8 +356,8 @@ export default function BankUsersPage() {
             sx={{ minWidth: 155 }}
           >
             <MenuItem value="all">All branches</MenuItem>
-            {BRANCHES.map((branch) => (
-              <MenuItem key={branch.id} value={branch.id}>{branch.name}</MenuItem>
+            {branchOptions.map((branch) => (
+              <MenuItem key={branch.value} value={String(branch.value)}>{branch.label}</MenuItem>
             ))}
           </TextField>
           <TextField
@@ -366,7 +373,8 @@ export default function BankUsersPage() {
           >
             <MenuItem value="all">All user roles</MenuItem>
             <MenuItem value="Bank User">Bank User</MenuItem>
-            <MenuItem value="Admin User">Admin User</MenuItem>
+            <MenuItem value="Bank Admin">Bank Admin</MenuItem>
+            <MenuItem value="Super Admin">Super Admin</MenuItem>
           </TextField>
         </Box>
         <Stack direction={{ xs: 'column', md: 'row' }} spacing={1.5} sx={{ p: 2 }}>
@@ -448,6 +456,8 @@ export default function BankUsersPage() {
         readOnly={readOnly}
         verifying={verifyingUser}
         onAuthenticate={() => void authenticateUser()}
+        branchOptions={isMakerAdmin ? branchOptions.filter((option) => option.value === (currentUser?.branch ?? currentUser?.loginBranch)) : branchOptions}
+        isMakerAdmin={isMakerAdmin}
       />
 
       <Snackbar

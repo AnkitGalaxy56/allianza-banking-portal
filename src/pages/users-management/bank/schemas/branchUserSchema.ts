@@ -4,7 +4,7 @@ const employeeTitleSchema = z.enum(['Mr', 'Mrs', 'Miss', 'Ms', 'Dr'], {
   required_error: 'Select a title',
 });
 
-const SYSTEM_ROLE_VALUES = ['Checker', 'Maker'] as const;
+const SYSTEM_ROLE_VALUES = ['Checker', 'Maker', 'Admin'] as const;
 const TWO_FACTOR_DESIGNATION_VALUES = ['Primary', 'Secondary', 'Not Applicable'] as const;
 const AUTHENTICATION_TYPE_VALUES = ['Password', 'OTP', 'Password + OTP', 'Authenticator App'] as const;
 
@@ -14,7 +14,7 @@ const getAllowedValue = <T extends string>(
   fallback: T,
 ): T => allowedValues.find((item) => item === value) ?? fallback;
 
-const branchUserRoleSchema = z.enum(['Bank User', 'Admin User'], {
+const branchUserRoleSchema = z.enum(['Bank User', 'Bank Admin', 'Super Admin'], {
   required_error: 'Select a user role',
 });
 
@@ -65,6 +65,9 @@ export const branchUserSchema = z.object({
     authorise: z.boolean(),
   }),
   sendLoginEmail: z.boolean(),
+}).superRefine((value, ctx) => {
+  if (value.role === 'Super Admin' && value.systemRole !== 'Admin') ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['systemRole'], message: 'Super Admin must use Admin system role' });
+  if (value.role !== 'Super Admin' && !['Maker', 'Checker'].includes(value.systemRole)) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['systemRole'], message: 'Select Maker or Checker for staff users' });
 });
 
 export type BranchUserFormValues = z.infer<typeof branchUserSchema>;
@@ -114,8 +117,8 @@ export const userToFormValues = (user: import('@/types/branchUser').BranchUser):
     email: user.email ?? '',
     userName: user.userName ?? (user.email ? user.email.split('@')[0] : ''),
     displayName: user.displayName ?? user.name ?? '',
-    role: user.role === 'Admin User' ? 'Admin User' : 'Bank User',
-    systemRole: getAllowedValue(user.systemRole, SYSTEM_ROLE_VALUES, 'Maker'),
+    role: user.role === 'Super Admin' ? 'Super Admin' : user.role === 'Bank Admin' ? 'Bank Admin' : 'Bank User',
+    systemRole: getAllowedValue(user.systemRole, SYSTEM_ROLE_VALUES, user.role === 'Super Admin' ? 'Admin' : 'Maker'),
     branchId: user.branchId ?? '',
     multiBranchAccess: user.multiBranchAccess ?? (user.branchId ? [user.branchId] : []),
     status: user.status ?? 'Entered',

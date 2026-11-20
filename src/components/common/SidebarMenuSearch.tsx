@@ -48,7 +48,7 @@ export default function SidebarMenuSearch({ sx }: Props) {
         if (item.children?.length) walk(item.children, item.label);
       });
     };
-    walk(getNavForRole(user.role));
+    walk(getNavForRole(user.role, user.systemRole));
     return result;
   }, [user]);
 
