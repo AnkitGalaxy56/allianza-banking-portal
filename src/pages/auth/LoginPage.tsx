@@ -7,8 +7,6 @@ import {
   FormControlLabel,
   Link,
   Paper,
-  ToggleButton,
-  ToggleButtonGroup,
   Typography,
 } from '@mui/material';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -17,7 +15,7 @@ import { z } from 'zod';
 import DevCredentialsHint from '@/components/auth/DevCredentialsHint';
 import BrandLogo from '@/components/common/BrandLogo';
 import FormTextField from '@/components/form/FormTextField';
-import { isBankRole, LOGIN_ROLE_OPTIONS, ROLES, type Role } from '@/config/roles';
+import { ROLES, type Role } from '@/config/roles';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { clearAuthError, login, selectAuth } from '@/redux/slices/authSlice';
 import { loadBankTheme, setPlatformTheme } from '@/redux/slices/themeSlice';
@@ -45,14 +43,16 @@ export default function LoginPage() {
   const { status, error } = useAppSelector(selectAuth);
   const brand = useAppSelector((state) => state.theme.theme);
   const themeStatus = useAppSelector((state) => state.theme.status);
+  const themeError = useAppSelector((state) => state.theme.error);
 
   const bankCode = useMemo(() => resolveBankCode(), []);
-  const [role, setRole] = useState<Role>(ROLES.BANK_ADMIN);
+  // Login mode is determined by the URL: /login = Allianza, /login?bank=<code> = bank portal.
+  const role: Role = bankCode ? ROLES.BANK_ADMIN : ROLES.SUPER_ADMIN;
   const [showPassword, setShowPassword] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
 
-  const needsBank = isBankRole(role);
-  const bankMissing = needsBank && !bankCode;
+  const needsBank = Boolean(bankCode);
+  const bankThemeFailed = needsBank && themeStatus === 'failed';
   const submitting = status === 'loading';
 
   const { control, handleSubmit, setValue } = useForm<LoginFormValues>({
@@ -60,14 +60,14 @@ export default function LoginPage() {
     defaultValues: { loginId: '', password: '', remember: false },
   });
 
-  // Brand the page: Allianza look for the Allianza admin, the bank's look for bank logins.
+  // Brand the page: direct /login uses Allianza; /login?bank=<code> loads that bank theme.
   useEffect(() => {
-    if (needsBank && bankCode) {
+    if (bankCode) {
       void dispatch(loadBankTheme(bankCode));
     } else {
       dispatch(setPlatformTheme());
     }
-  }, [needsBank, bankCode, dispatch]);
+  }, [bankCode, dispatch]);
 
   // const onSubmit = (values: LoginFormValues) => {
   //   setNotice(null);
@@ -100,13 +100,6 @@ export default function LoginPage() {
       // The existing Redux error alert displays the login error.
     }
   };
-  const handleRoleChange = (_event: unknown, next: Role | null) => {
-    if (!next) return; // keep one option always selected
-    setRole(next);
-    setNotice(null);
-    dispatch(clearAuthError());
-  };
-
   return (
     <Box sx={{ minHeight: '100vh', display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' } }}>
       {/* Left: brand panel */}
@@ -246,32 +239,6 @@ export default function LoginPage() {
             <Typography variant="subtitle1">{brand.name}</Typography>
           </Box>
 
-          <Typography variant="caption" fontWeight={800} color="text.secondary" sx={{ display: 'block', mb: 1 }}>
-            SIGN IN AS
-          </Typography>
-          <ToggleButtonGroup
-            exclusive
-            fullWidth
-            size="small"
-            value={role}
-            onChange={handleRoleChange}
-            aria-label="Login type"
-            sx={{
-              mb: 3,
-              '& .MuiToggleButton-root': { textTransform: 'none', fontWeight: 700, py: 1 },
-              '& .MuiToggleButton-root.Mui-selected, & .MuiToggleButton-root.Mui-selected:hover': {
-                bgcolor: 'primary.light',
-                color: 'primary.dark',
-              },
-            }}
-          >
-            {LOGIN_ROLE_OPTIONS.map((option) => (
-              <ToggleButton key={option.value} value={option.value}>
-                {option.label}
-              </ToggleButton>
-            ))}
-          </ToggleButtonGroup>
-
           <Typography variant="h5" component="h1" sx={{ mb: 0.5 }}>
             Sign in
           </Typography>
@@ -279,15 +246,9 @@ export default function LoginPage() {
             {ROLE_DESCRIPTION[role]}
           </Typography>
 
-          {bankMissing && (
-            <Alert severity="warning" sx={{ mb: 2 }}>
-              We could not tell which bank this is. Open the portal from your bank&apos;s link, or add{' '}
-              <code>?bank=&lt;bank-code&gt;</code> to the address.
-            </Alert>
-          )}
-          {needsBank && bankCode && themeStatus === 'failed' && (
-            <Alert severity="info" sx={{ mb: 2 }}>
-              Could not load the branding for &quot;{bankCode}&quot;. Showing the default look.
+          {bankThemeFailed && (
+            <Alert severity="error" sx={{ mb: 3 }}>
+              {themeError ?? `Theme not found: ${bankCode}`}
             </Alert>
           )}
           {error && (
@@ -301,6 +262,8 @@ export default function LoginPage() {
             </Alert>
           )}
 
+          {!bankThemeFailed && (
+            <>
           <Box
             component="form"
             noValidate
@@ -365,21 +328,23 @@ export default function LoginPage() {
               </Link>
             </Box>
 
-            <Button type="submit" variant="contained" size="large" fullWidth disabled={submitting || bankMissing}>
+            <Button type="submit" variant="contained" size="large" fullWidth disabled={submitting}>
               {submitting ? 'Signing in…' : 'Sign in'}
             </Button>
           </Box>
 
 
 
-          {/* <DevCredentialsHint
+          <DevCredentialsHint
             role={role}
             bankCode={bankCode}
             onUse={(c) => {
               setValue('loginId', c.loginId, { shouldValidate: true });
               setValue('password', c.password, { shouldValidate: true });
             }}
-          /> */}
+          />
+            </>
+          )}
 
 
 

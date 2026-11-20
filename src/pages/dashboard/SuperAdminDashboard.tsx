@@ -1,7 +1,10 @@
+import { useState } from 'react';
 import {
   Box,
   Button,
+  MenuItem,
   Paper,
+  Select,
   Table,
   TableBody,
   TableCell,
@@ -42,8 +45,25 @@ const ACTIONS: QuickAction[] = [
 export default function SuperAdminDashboard() {
   const { data, loading, error, reload } = useAsyncData(() => dashboardService.getSuperAdminDashboard(), []);
 
+  const [selectedBankCode, setSelectedBankCode] = useState('');
+
   if (loading && !data) return <FullPageLoader />;
   if (!data) return <ErrorState message={error ?? 'Unable to load the dashboard.'} onRetry={reload} />;
+
+  const selectedBank = data.recentBanks.find((bank) => bank.code === selectedBankCode);
+  const visibleBanks = selectedBank ? data.recentBanks.filter((bank) => bank.code === selectedBank.code) : data.recentBanks;
+  const visibleRequests = selectedBank
+    ? data.requestsByBank.filter((item) => item.label === selectedBank.name)
+    : data.requestsByBank;
+  const selectedRequestCount = visibleRequests.reduce((sum, item) => sum + item.count, 0);
+
+  const displayStats = data.stats.map((stat) => {
+    if (!selectedBank) return stat;
+    if (stat.key === 'banks') return { ...stat, value: '1', helper: 'Selected bank', helperTone: 'neutral' as const };
+    if (stat.key === 'users') return { ...stat, value: formatNumber(selectedBank.users), helper: 'Selected bank users', helperTone: 'neutral' as const };
+    if (stat.key === 'requests') return { ...stat, value: formatNumber(selectedRequestCount), helper: 'Selected bank requests', helperTone: 'neutral' as const };
+    return stat;
+  });
 
   return (
     <Box>
@@ -51,9 +71,26 @@ export default function SuperAdminDashboard() {
         title="Dashboard"
         subtitle="Banks, application users and requests across the platform"
         actions={
-          <Button component={RouterLink} to={PATHS.MASTERS.BANK_MASTER} variant="contained" startIcon={<AccountBalanceOutlinedIcon />}>
-            Manage banks
-          </Button>
+          <>
+            <Select
+              size="small"
+              displayEmpty
+              value={selectedBankCode}
+              onChange={(e) => setSelectedBankCode(e.target.value)}
+              inputProps={{ 'aria-label': 'Filter by bank' }}
+              sx={{ minWidth: 250, fontWeight: 600 }}
+            >
+              <MenuItem value="">All banks</MenuItem>
+              {data.recentBanks.map((bank) => (
+                <MenuItem key={bank.id} value={bank.code}>
+                  {bank.name}
+                </MenuItem>
+              ))}
+            </Select>
+            <Button component={RouterLink} to={PATHS.MASTERS.BANK_MASTER} variant="contained" startIcon={<AccountBalanceOutlinedIcon />}>
+              Manage banks
+            </Button>
+          </>
         }
       />
 
@@ -65,7 +102,7 @@ export default function SuperAdminDashboard() {
           gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, minmax(0, 1fr))', lg: `repeat(${data.stats.length}, minmax(0, 1fr))` },
         }}
       >
-        {data.stats.map((stat) => (
+        {displayStats.map((stat) => (
           <StatCard key={stat.key} data={stat} />
         ))}
       </Box>
@@ -88,7 +125,7 @@ export default function SuperAdminDashboard() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {data.recentBanks.map((bank) => (
+                {visibleBanks.map((bank) => (
                   <TableRow key={bank.id} hover>
                     <TableCell sx={{ fontWeight: 700 }}>{bank.name}</TableCell>
                     <TableCell>{bank.code}</TableCell>
@@ -107,7 +144,7 @@ export default function SuperAdminDashboard() {
 
         <Box sx={{ display: 'grid', gap: 2.5 }}>
           <QuickActionsCard actions={ACTIONS} />
-          <BarListCard title="Requests by bank" items={data.requestsByBank} />
+          <BarListCard title="Requests by bank" items={visibleRequests} />
         </Box>
       </Box>
     </Box>
