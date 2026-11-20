@@ -55,3 +55,20 @@ export interface SuperAdminDashboardData {
   recentBanks: BankSummaryRow[];
   requestsByBank: BarItem[];
 }
+
+/** Analytics summary used by the Super Admin dashboard's bank-level card. */
+export interface BankRequestAnalytics {
+  code: string;
+  bank: string;
+  branches: number;
+  pending: number;
+  total: number;
+}
+
+/** Branch analytics summary used by the dashboard's branch-level card. */
+export interface BranchRequestAnalytics {
+  branch: string;
+  pending: number;
+  total: number;
+  types: Array<{ label: string; count: number }>;
+}

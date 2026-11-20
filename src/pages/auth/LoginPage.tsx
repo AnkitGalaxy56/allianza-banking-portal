@@ -12,7 +12,6 @@ import {
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
-import DevCredentialsHint from '@/components/auth/DevCredentialsHint';
 import BrandLogo from '@/components/common/BrandLogo';
 import FormTextField from '@/components/form/FormTextField';
 import { ROLES, type Role } from '@/config/roles';
@@ -335,14 +334,7 @@ export default function LoginPage() {
 
 
 
-          <DevCredentialsHint
-            role={role}
-            bankCode={bankCode}
-            onUse={(c) => {
-              setValue('loginId', c.loginId, { shouldValidate: true });
-              setValue('password', c.password, { shouldValidate: true });
-            }}
-          />
+
             </>
           )}
 

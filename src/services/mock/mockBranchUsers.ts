@@ -33,7 +33,7 @@ const USERS: BranchUser[] = Array.from({ length: 96 }, (_, i) => {
   const fallback = i < sampleNames.length
     ? person
     : { title: i % 2 === 0 ? 'Mr' as const : 'Ms' as const, firstName: 'User', middleName: '', lastName: `name ${i + 1}` };
-  const role: BranchUser['role'] = i % 3 === 0 ? 'Admin User' : 'Bank User';
+  const role: BranchUser['role'] = i % 3 === 0 ? 'Bank Admin' : 'Bank User';
   const status = STATUSES[i % STATUSES.length];
 
   return {
@@ -49,7 +49,7 @@ const USERS: BranchUser[] = Array.from({ length: 96 }, (_, i) => {
     userName: i === 0 ? 'amit.sharma' : i === 1 ? 'priya.patil' : `user${i + 1}`,
     displayName: name,
     role,
-    systemRole: role === 'Admin User' ? 'Branch Manager' : 'Branch Officer',
+    systemRole: role === 'Bank Admin' ? 'Branch Manager' : 'Branch Officer',
     branchId: branch.id,
     branchName: branch.name,
     multiBranchAccess: i % 4 === 0 ? [branch.id, MOCK_BRANCHES[(i + 1) % MOCK_BRANCHES.length].id] : [branch.id],
@@ -65,10 +65,10 @@ const USERS: BranchUser[] = Array.from({ length: 96 }, (_, i) => {
     twoFactorLogin: i % 2 === 0,
     authenticationType: i % 2 === 0 ? 'Password + OTP' : 'Password',
     accessLevel: {
-      create: role === 'Admin User',
-      modify: role === 'Admin User',
+      create: role === 'Bank Admin',
+      modify: role === 'Bank Admin',
       view: true,
-      authorise: role === 'Admin User',
+      authorise: role === 'Bank Admin',
     },
     lastLogin: ['Today, 10:42', 'Today, 09:15', 'Yesterday', 'Never', '3 days ago'][i % 5],
   };
