@@ -1,29 +1,10 @@
-import { ROLES } from '@/config/roles';
 import { useAppSelector } from '@/redux/hooks';
-import { selectUser } from '@/redux/slices/authSlice';
+import { selectPortalType } from '@/redux/slices/authSlice';
 import AllianzaUsersPage from './allianza';
 import BankUsersPage from './bank';
 
-
-// import BranchUsersPage from './BranchUsersPage';
-// import SuperAdminDashboard from './SuperAdminDashboard';
-
-/** One route (/dashboard), a different dashboard per role. */
-// export default function userManagement() {
-//   const user = useAppSelector(selectUser);
-//   if (user?.role === ROLES.SUPER_ADMIN) return <BranchUsersPage />;
-//   return <BranchUsersPage />;
-// }
-
-
-
-/** One User Management route with a role-specific page entry point. */
-export default function userManagement() {
-  const user = useAppSelector(selectUser);
-
-  if (user?.role === ROLES.SUPER_ADMIN) {
-    return <AllianzaUsersPage />;
-  }
-
-  return <BankUsersPage />;
+/** User-management entry point is selected by portal, not by user role. */
+export default function UserManagement() {
+  const portalType = useAppSelector(selectPortalType);
+  return portalType === 'ALLIANZA' ? <AllianzaUsersPage /> : <BankUsersPage />;
 }

@@ -1,7 +1,9 @@
 import { createAsyncThunk, createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import { getErrorMessage } from '@/services/api/apiError';
+import { env } from '@/config/env';
 import { authService } from '@/services/auth.service';
-import type { LoginRequest, LoginResponse, PendingLoginResponse, RefreshResponse, User } from '@/types/auth';
+import { profileService } from '@/services/profile.service';
+import type { LoginRequest, LoginResponse, PendingLoginResponse, PortalType, RefreshResponse, User } from '@/types/auth';
 import { clearSession, loadSession, saveSession } from '@/utils/authStorage';
 import { isTokenExpired } from '@/utils/jwt';
 
@@ -11,12 +13,15 @@ export interface AuthState {
   user: User | null;
   accessToken: string | null;
   refreshToken: string | null;
+  /** Portal is selected from the login URL, never from the user's role. */
+  portalType: PortalType | null;
   status: RequestState;
   error: string | null;
   otpPending: boolean;
   pendingAuth: PendingLoginResponse | null;
   rememberPending: boolean;
   pendingBankCode: string | null;
+  pendingPortalType: PortalType | null;
   sessionEndReason: string | null;
 }
 
@@ -25,12 +30,14 @@ function getInitialState(): AuthState {
     user: null,
     accessToken: null,
     refreshToken: null,
+    portalType: null,
     status: 'idle',
     error: null,
     otpPending: false,
     pendingAuth: null,
     rememberPending: false,
     pendingBankCode: null,
+    pendingPortalType: null,
     sessionEndReason: null,
   };
 
@@ -38,7 +45,6 @@ function getInitialState(): AuthState {
   if (!session) return empty;
 
   const usable = !isTokenExpired(session.accessToken) || Boolean(session.refreshToken);
-
   if (!usable) {
     clearSession();
     return empty;
@@ -49,6 +55,7 @@ function getInitialState(): AuthState {
     user: session.user,
     accessToken: session.accessToken,
     refreshToken: session.refreshToken ?? null,
+    portalType: session.portalType ?? (session.user.bankCode ? 'BANK' : 'ALLIANZA'),
   };
 }
 
@@ -60,53 +67,75 @@ export const login = createAsyncThunk<
   { rejectValue: string }
 >(
   'auth/login',
-  async ({ remember: _remember, ...credentials }, { rejectWithValue }) => {
+  async ({ remember: _remember, portalType: _portalType, ...credentials }, { rejectWithValue }) => {
     try {
-      // Login validates credentials, but does not save an authenticated session.
-      return await authService.login(credentials);
+      return await authService.login({ ...credentials, portalType: _portalType });
     } catch (error) {
-      return rejectWithValue(
-        getErrorMessage(error, 'Unable to sign in. Please try again.'),
-      );
+      return rejectWithValue(getErrorMessage(error, 'Unable to sign in. Please try again.'));
     }
   },
 );
 
+function userFromProfile(profile: Awaited<ReturnType<typeof profileService.getCurrent>>, authenticated: LoginResponse, bankCode?: string): User {
+  return {
+    id: profile.id || authenticated.user.id,
+    name: profile.fullName || authenticated.user.name,
+    email: profile.email || authenticated.user.email,
+    loginId: profile.userName || authenticated.user.loginId,
+    userRole: profile.userRole,
+    // Compatibility only. Portal routing does NOT use this field.
+    role: profile.userRole,
+    bankCode: bankCode ?? authenticated.user.bankCode,
+    bankName: profile.organizationName || authenticated.user.bankName,
+    loginBranch: profile.loginBranch,
+    designation: profile.designation,
+    branch: profile.loginBranch,
+    idleTimeoutMinutes: profile.sessionTimeoutSeconds ? Math.max(1, Math.round(profile.sessionTimeoutSeconds / 60)) : undefined,
+  };
+}
+
 export const verifyLoginOtp = createAsyncThunk<
-  LoginResponse,
+  LoginResponse & { user: User; portalType: PortalType },
   { otp: string },
   { state: { auth: AuthState }; rejectValue: string }
 >(
   'auth/verifyLoginOtp',
   async ({ otp }, { getState, rejectWithValue }) => {
-    const { pendingAuth, rememberPending, pendingBankCode } = getState().auth;
+    const { pendingAuth, rememberPending, pendingBankCode, pendingPortalType } = getState().auth;
 
-    if (!pendingAuth) {
+    if (!pendingAuth || !pendingPortalType) {
       return rejectWithValue('Please sign in again.');
     }
 
     try {
       const authenticated = await authService.verifyOtp({ challengeId: pendingAuth.challengeId, otp });
-      // The portal API identifies the user's role, while the bank code is selected
-      // from the bank portal URL/configuration during login.
-      const apiRole = String(authenticated.user.userRole ?? authenticated.user.role ?? '').toUpperCase();
-      const normalizedUser = {
-        ...authenticated.user,
-        role: apiRole === 'SUPER_ADMIN' ? 'SUPER_ADMIN' as const
-          : apiRole.includes('ADMIN') ? 'BANK_ADMIN' as const : 'BANK_USER' as const,
-        bankCode: authenticated.user.bankCode ?? pendingBankCode ?? undefined,
+
+      // IMPORTANT:
+      // The portal is already known from the URL used for login.
+      // The user's actual role is read from /auth/profile after OTP.
+      const profile = env.useMockApi
+        ? await profileService.getCurrent(authenticated.user)
+        : await profileService.getCurrentWithToken(authenticated.accessToken);
+      const normalizedUser = userFromProfile(profile, authenticated, pendingBankCode ?? undefined);
+
+      const result = {
+        ...authenticated,
+        user: normalizedUser,
+        portalType: pendingPortalType,
       };
-      const result = { ...authenticated, user: normalizedUser };
-      // A fresh successful login starts a new inactivity window for this user.
+
       const idleKey = `allianza.session.idle.${normalizedUser.id}`;
       window.localStorage.removeItem(idleKey);
       window.sessionStorage.removeItem(idleKey);
+
       saveSession({
         user: normalizedUser,
         accessToken: authenticated.accessToken,
         refreshToken: authenticated.refreshToken,
+        portalType: pendingPortalType,
         remember: rememberPending,
       });
+
       return result;
     } catch (error) {
       return rejectWithValue(getErrorMessage(error, 'OTP verification failed.'));
@@ -124,80 +153,56 @@ export const logoutUser = createAsyncThunk<void, void, { state: { auth: AuthStat
     }
 
     clearSession();
-    // A 401 may have identified a replacement login while logout was in flight.
-    // Preserve that specific session-ended message instead of overwriting it.
     if (!getState().auth.sessionEndReason) dispatch(sessionCleared());
   },
 );
+
+const emptyAuthState = () => ({
+  user: null,
+  accessToken: null,
+  refreshToken: null,
+  portalType: null,
+  status: 'idle' as RequestState,
+  error: null,
+  otpPending: false,
+  pendingAuth: null,
+  rememberPending: false,
+  pendingBankCode: null,
+  pendingPortalType: null,
+  sessionEndReason: null,
+});
 
 const authSlice = createSlice({
   name: 'auth',
   initialState: getInitialState,
   reducers: {
-    sessionCleared: () => ({
-      user: null,
-      accessToken: null,
-      refreshToken: null,
-      status: 'idle' as RequestState,
-      error: null,
-      otpPending: false,
-      pendingAuth: null,
-      rememberPending: false,
-      pendingBankCode: null,
-      sessionEndReason: null,
-    }),
-
+    sessionCleared: emptyAuthState,
     sessionExpired: () => ({
-      user: null,
-      accessToken: null,
-      refreshToken: null,
-      status: 'idle' as RequestState,
+      ...emptyAuthState(),
       error: 'Your session has expired. Please sign in again.',
-      otpPending: false,
-      pendingAuth: null,
-      rememberPending: false,
-      pendingBankCode: null,
       sessionEndReason: 'Your session has expired. Please sign in again.',
     }),
-
     sessionReplaced: () => ({
-      user: null,
-      accessToken: null,
-      refreshToken: null,
-      status: 'idle' as RequestState,
-      error: null,
-      otpPending: false,
-      pendingAuth: null,
-      rememberPending: false,
-      pendingBankCode: null,
+      ...emptyAuthState(),
       sessionEndReason: 'You have logged in on another device. This session will be logged out.',
     }),
-
-    dismissSessionEnd: (state) => {
-      state.sessionEndReason = null;
-    },
-
+    dismissSessionEnd: (state) => { state.sessionEndReason = null; },
     tokensRefreshed: (state, action: PayloadAction<RefreshResponse>) => {
       state.accessToken = action.payload.accessToken;
-      if (action.payload.refreshToken) {
-        state.refreshToken = action.payload.refreshToken;
-      }
+      if (action.payload.refreshToken) state.refreshToken = action.payload.refreshToken;
     },
-
-    clearAuthError: (state) => {
-      state.error = null;
-    },
+    clearAuthError: (state) => { state.error = null; },
   },
-
   extraReducers: (builder) => {
     builder
-      .addCase(login.pending, (state) => {
+      .addCase(login.pending, (state, action) => {
         state.status = 'loading';
         state.error = null;
         state.otpPending = false;
         state.pendingAuth = null;
         state.rememberPending = false;
-        state.pendingBankCode = null;
+        state.pendingBankCode = action.meta.arg.bankCode ?? null;
+        state.pendingPortalType = action.meta.arg.portalType;
       })
       .addCase(login.fulfilled, (state, action) => {
         state.status = 'idle';
@@ -207,11 +212,11 @@ const authSlice = createSlice({
         state.pendingAuth = action.payload;
         state.rememberPending = action.meta.arg.remember;
         state.pendingBankCode = action.meta.arg.bankCode ?? null;
-
-        // Do not set user/accessToken until OTP is verified.
+        state.pendingPortalType = action.meta.arg.portalType;
         state.user = null;
         state.accessToken = null;
         state.refreshToken = null;
+        state.portalType = null;
       })
       .addCase(login.rejected, (state, action) => {
         state.status = 'failed';
@@ -220,6 +225,7 @@ const authSlice = createSlice({
         state.pendingAuth = null;
         state.rememberPending = false;
         state.pendingBankCode = null;
+        state.pendingPortalType = null;
       })
       .addCase(verifyLoginOtp.pending, (state) => {
         state.status = 'loading';
@@ -231,10 +237,12 @@ const authSlice = createSlice({
         state.user = action.payload.user;
         state.accessToken = action.payload.accessToken;
         state.refreshToken = action.payload.refreshToken ?? null;
+        state.portalType = action.payload.portalType;
         state.otpPending = false;
         state.pendingAuth = null;
         state.rememberPending = false;
         state.pendingBankCode = null;
+        state.pendingPortalType = null;
       })
       .addCase(verifyLoginOtp.rejected, (state, action) => {
         state.status = 'failed';
@@ -255,8 +263,7 @@ export const {
 export default authSlice.reducer;
 
 type WithAuth = { auth: AuthState };
-
 export const selectAuth = (state: WithAuth) => state.auth;
 export const selectUser = (state: WithAuth) => state.auth.user;
-export const selectIsAuthenticated = (state: WithAuth) =>
-  Boolean(state.auth.user && state.auth.accessToken);
+export const selectPortalType = (state: WithAuth) => state.auth.portalType;
+export const selectIsAuthenticated = (state: WithAuth) => Boolean(state.auth.user && state.auth.accessToken);

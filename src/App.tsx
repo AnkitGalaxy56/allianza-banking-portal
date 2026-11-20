@@ -1,9 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import FullPageLoader from '@/components/common/FullPageLoader';
 import { Alert, Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, Typography } from '@mui/material';
-import { ROLES } from '@/config/roles';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
-import { dismissSessionEnd, logoutUser, selectUser } from '@/redux/slices/authSlice';
+import { dismissSessionEnd, logoutUser, selectPortalType, selectUser } from '@/redux/slices/authSlice';
 import { authService } from '@/services/auth.service';
 import { loadBankTheme, loadPlatformTheme } from '@/redux/slices/themeSlice';
 import AppRoutes from '@/routes/AppRoutes';
@@ -24,6 +23,7 @@ function idleStorage(): Storage {
 export default function App() {
   const dispatch = useAppDispatch();
   const user = useAppSelector(selectUser);
+  const portalType = useAppSelector(selectPortalType);
   const sessionEndReason = useAppSelector((state) => state.auth.sessionEndReason);
   const themeState = useAppSelector((state) => state.theme);
   const [showIdleWarning, setShowIdleWarning] = useState(false);
@@ -191,20 +191,19 @@ export default function App() {
 
   // Once someone is signed in, make sure their bank's look is loaded (also after a page refresh).
   useEffect(() => {
-    if (!user) return;
-    if (user.role === ROLES.SUPER_ADMIN || !user.bankCode) {
+    if (!user || !portalType) return;
+    if (portalType === 'ALLIANZA') {
       void dispatch(loadPlatformTheme());
-    } else {
+    } else if (user.bankCode) {
       void dispatch(loadBankTheme(user.bankCode));
     }
-  }, [user, dispatch]);
+  }, [user, portalType, dispatch]);
 
-  const isPlatformUser = !!user && (user.role === ROLES.SUPER_ADMIN || !user.bankCode);
   const themeReady =
     !user ||
     themeState.status === 'failed' ||
-    (isPlatformUser && themeState.status === 'succeeded' && themeState.bankCode === 'allianza') ||
-    (!!user && !isPlatformUser && themeState.status === 'succeeded' && themeState.bankCode === user.bankCode);
+    (portalType === 'ALLIANZA' && themeState.status === 'succeeded' && themeState.bankCode === 'allianza') ||
+    (portalType === 'BANK' && !!user.bankCode && themeState.status === 'succeeded' && themeState.bankCode === user.bankCode);
 
   const timerText = `${String(Math.floor(secondsLeft / 60)).padStart(2, '0')}:${String(secondsLeft % 60).padStart(2, '0')}`;
 

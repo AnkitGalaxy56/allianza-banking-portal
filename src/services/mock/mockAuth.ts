@@ -1,4 +1,3 @@
-import { ROLES } from '@/config/roles';
 import type { LoginRequest, LoginResponse } from '@/types/auth';
 import { delay } from '@/utils/delay';
 import { createMockJwt } from './mockJwt';
@@ -11,20 +10,19 @@ export async function mockLogin(req: LoginRequest): Promise<LoginResponse> {
     (a) =>
       a.loginId.toLowerCase() === req.loginId.trim().toLowerCase() &&
       a.password === req.password &&
-      a.user.role === req.role,
+      (req.portalType === 'ALLIANZA' ? !a.user.bankCode : Boolean(a.user.bankCode)) &&
+      (!req.bankCode || a.user.bankCode === req.bankCode),
   );
+
   if (!account) {
-    throw new Error('Invalid login ID or password for the selected login type.');
-  }
-  if (req.role !== ROLES.SUPER_ADMIN && req.bankCode && account.user.bankCode !== req.bankCode) {
-    throw new Error('This account does not belong to the selected bank.');
+    throw new Error('Invalid login ID or password for this portal.');
   }
 
   const { user } = account;
   return {
     user,
     accessToken: createMockJwt(
-      { sub: user.id, name: user.name, email: user.email, role: user.role, bankCode: user.bankCode },
+      { sub: user.id, name: user.name, email: user.email, userRole: user.userRole, bankCode: user.bankCode },
       60 * 60,
     ),
     refreshToken: createMockJwt({ sub: user.id, type: 'refresh' }, 7 * 24 * 60 * 60),

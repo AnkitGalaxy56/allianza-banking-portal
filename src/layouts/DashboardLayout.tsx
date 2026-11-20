@@ -25,9 +25,8 @@ import BrandLogo from '@/components/common/BrandLogo';
 import SidebarMenuSearch from '@/components/common/SidebarMenuSearch';
 
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
-import { logoutUser, selectUser } from '@/redux/slices/authSlice';
+import { logoutUser, selectPortalType, selectUser } from '@/redux/slices/authSlice';
 import { selectTheme } from '@/redux/slices/themeSlice';
-import { ROLE_LABELS, ROLES } from '@/config/roles';
 
 const DRAWER_WIDTH = 230;
 const COLLAPSED_WIDTH = 76;
@@ -40,17 +39,18 @@ export default function DashboardLayout() {
 
   const brand = useAppSelector(selectTheme);
   const user = useAppSelector(selectUser);
+  const portalType = useAppSelector(selectPortalType);
   const dispatch = useAppDispatch();
 
   const sidebarWidth = sidebarCollapsed
     ? COLLAPSED_WIDTH
     : DRAWER_WIDTH;
 
-  const organizationName =
-    user?.role === ROLES.SUPER_ADMIN
-      ? 'Allianza'
-      : user?.bankName || brand.name || 'Bank';
- 
+  // The active theme API is the source of truth for the organization/bank name.
+  // Portal type only decides which theme is loaded; it must not override the
+  // bank name returned by the theme API.
+  const organizationName = brand.name || (portalType === 'ALLIANZA' ? 'Allianza' : 'Bank');
+
   const branchName = user?.branch || 'Bank';
   const handleLogoutClick = () => {
     setLogoutDialogOpen(true);

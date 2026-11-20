@@ -12,9 +12,10 @@ import {
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
+import DevCredentialsHint from '@/components/auth/DevCredentialsHint';
 import BrandLogo from '@/components/common/BrandLogo';
 import FormTextField from '@/components/form/FormTextField';
-import { ROLES, type Role } from '@/config/roles';
+import type { PortalType } from '@/types/auth';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { clearAuthError, login, selectAuth } from '@/redux/slices/authSlice';
 import { loadBankTheme, setPlatformTheme } from '@/redux/slices/themeSlice';
@@ -30,12 +31,6 @@ const loginSchema = z.object({
 });
 type LoginFormValues = z.infer<typeof loginSchema>;
 
-const ROLE_DESCRIPTION: Record<Role, string> = {
-  SUPER_ADMIN: 'Enter your login ID and password to manage the Allianza platform.',
-  BANK_ADMIN: 'Enter your login ID and password to manage your bank.',
-  BANK_USER: 'Enter your login ID and password to open your bank workspace.',
-};
-
 export default function LoginPage() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
@@ -45,8 +40,8 @@ export default function LoginPage() {
   const themeError = useAppSelector((state) => state.theme.error);
 
   const bankCode = useMemo(() => resolveBankCode(), []);
-  // Login mode is determined by the URL: /login = Allianza, /login?bank=<code> = bank portal.
-  const role: Role = bankCode ? ROLES.BANK_ADMIN : ROLES.SUPER_ADMIN;
+  // Portal mode is determined ONLY by the URL. The user's backend role is loaded later from /auth/profile.
+  const portalType: PortalType = bankCode ? 'BANK' : 'ALLIANZA';
   const [showPassword, setShowPassword] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
 
@@ -88,7 +83,7 @@ export default function LoginPage() {
         login({
           loginId: values.loginId.trim(),
           password: values.password,
-          role,
+          portalType,
           bankCode: needsBank ? bankCode ?? undefined : undefined,
           remember: values.remember,
         }),
@@ -238,108 +233,127 @@ export default function LoginPage() {
             <Typography variant="subtitle1">{brand.name}</Typography>
           </Box>
 
-          <Typography variant="h5" component="h1" sx={{ mb: 0.5 }}>
-            Sign in
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-            {ROLE_DESCRIPTION[role]}
-          </Typography>
-
-          {bankThemeFailed && (
-            <Alert severity="error" sx={{ mb: 3 }}>
-              {themeError ?? `Theme not found: ${bankCode}`}
-            </Alert>
-          )}
-          {error && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {error}
-            </Alert>
-          )}
-          {notice && (
-            <Alert severity="info" sx={{ mb: 2 }}>
-              {notice}
-            </Alert>
-          )}
-
-          {!bankThemeFailed && (
-            <>
-          <Box
-            component="form"
-            noValidate
-            onSubmit={handleSubmit(onSubmit)}
-            onChange={() => error && dispatch(clearAuthError())}
-            sx={{ display: 'grid', gap: 2.5 }}
-          >
-            <FormTextField<LoginFormValues>
-              name="loginId"
-              control={control}
-              label="Login ID"
-              placeholder="Enter your login ID"
-              autoComplete="username"
-              disabled={submitting}
-              autoFocus
-            />
-            <FormTextField<LoginFormValues>
-              name="password"
-              control={control}
-              label="Password"
-              placeholder="Enter your password"
-              type={showPassword ? 'text' : 'password'}
-              autoComplete="current-password"
-              disabled={submitting}
-              endAdornment={
-                <Button
-                  size="small"
-                  onClick={() => setShowPassword((s) => !s)}
-                  sx={{ minWidth: 0, fontWeight: 700 }}
-                >
-                  {showPassword ? 'Hide' : 'Show'}
-                </Button>
-              }
-            />
-
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <Controller
-                name="remember"
-                control={control}
-                render={({ field }) => (
-                  <FormControlLabel
-                    label={<Typography variant="body2">Remember this device</Typography>}
-                    control={
-                      <Checkbox
-                        size="small"
-                        checked={field.value}
-                        onChange={(e) => field.onChange(e.target.checked)}
-                      />
-                    }
-                  />
-                )}
-              />
-              <Link
-                component="button"
-                type="button"
-                underline="hover"
-                variant="body2"
-                fontWeight={700}
-                onClick={() => setNotice('Password reset will be available once the backend API is connected.')}
+          {bankThemeFailed ? (
+            <Box sx={{ py: 3 }}>
+              <Typography variant="h5" component="h1" sx={{ mb: 1, fontWeight: 800 }}>
+                Bank portal unavailable
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                The requested bank portal could not be found. No login is available for this URL.
+              </Typography>
+              <Alert severity="error">
+                {themeError ?? `Theme not found: ${bankCode}`}
+              </Alert>
+              <Button
+                fullWidth
+                variant="outlined"
+                sx={{ mt: 3 }}
+                onClick={() => navigate(PATHS.login, { replace: true })}
               >
-                Forgot password?
-              </Link>
+                Go to Allianza Login
+              </Button>
             </Box>
+          ) : (
+            <>
+              <Typography variant="h5" component="h1" sx={{ mb: 0.5 }}>
+                Sign in
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                {portalType === 'ALLIANZA'
+                  ? 'Enter your login ID and password to manage the Allianza platform.'
+                  : `Enter your login ID and password to manage ${brand.name}.`}
+              </Typography>
 
-            <Button type="submit" variant="contained" size="large" fullWidth disabled={submitting}>
-              {submitting ? 'Signing in…' : 'Sign in'}
-            </Button>
-          </Box>
+              {error && (
+                <Alert severity="error" sx={{ mb: 2 }}>
+                  {error}
+                </Alert>
+              )}
+              {notice && (
+                <Alert severity="info" sx={{ mb: 2 }}>
+                  {notice}
+                </Alert>
+              )}
 
+              <Box
+                component="form"
+                noValidate
+                onSubmit={handleSubmit(onSubmit)}
+                onChange={() => error && dispatch(clearAuthError())}
+                sx={{ display: 'grid', gap: 2.5 }}
+              >
+                <FormTextField<LoginFormValues>
+                  name="loginId"
+                  control={control}
+                  label="Login ID"
+                  placeholder="Enter your login ID"
+                  autoComplete="username"
+                  disabled={submitting}
+                  autoFocus
+                />
+                <FormTextField<LoginFormValues>
+                  name="password"
+                  control={control}
+                  label="Password"
+                  placeholder="Enter your password"
+                  type={showPassword ? 'text' : 'password'}
+                  autoComplete="current-password"
+                  disabled={submitting}
+                  endAdornment={
+                    <Button
+                      size="small"
+                      onClick={() => setShowPassword((s) => !s)}
+                      sx={{ minWidth: 0, fontWeight: 700 }}
+                    >
+                      {showPassword ? 'Hide' : 'Show'}
+                    </Button>
+                  }
+                />
 
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <Controller
+                    name="remember"
+                    control={control}
+                    render={({ field }) => (
+                      <FormControlLabel
+                        label={<Typography variant="body2">Remember this device</Typography>}
+                        control={
+                          <Checkbox
+                            size="small"
+                            checked={field.value}
+                            onChange={(e) => field.onChange(e.target.checked)}
+                          />
+                        }
+                      />
+                    )}
+                  />
+                  <Link
+                    component="button"
+                    type="button"
+                    underline="hover"
+                    variant="body2"
+                    fontWeight={700}
+                    onClick={() => setNotice('Password reset will be available once the backend API is connected.')}
+                  >
+                    Forgot password?
+                  </Link>
+                </Box>
 
+                <Button type="submit" variant="contained" size="large" fullWidth disabled={submitting}>
+                  {submitting ? 'Signing in…' : 'Sign in'}
+                </Button>
+              </Box>
 
+              <DevCredentialsHint
+                portalType={portalType}
+                bankCode={bankCode}
+                onUse={(c) => {
+                  setValue('loginId', c.loginId, { shouldValidate: true });
+                  setValue('password', c.password, { shouldValidate: true });
+                }}
+              />
             </>
           )}
-
-
-
         </Paper>
       </Box>
     </Box>

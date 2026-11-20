@@ -1,12 +1,18 @@
-import { ROLES } from '@/config/roles';
 import { useAppSelector } from '@/redux/hooks';
-import { selectUser } from '@/redux/slices/authSlice';
+import { selectPortalType } from '@/redux/slices/authSlice';
 import BankDashboard from './BankDashboard';
 import SuperAdminDashboard from './SuperAdminDashboard';
 
-/** One route (/dashboard), a different dashboard per role. */
+/**
+ * Portal selection is based on the URL used for authentication:
+ *   /login                  -> Allianza portal
+ *   /login?bank=<bankCode>  -> Bank portal
+ *
+ * The user's backend role is NOT used to choose the dashboard.
+ */
 export default function DashboardPage() {
-  const user = useAppSelector(selectUser);
-  if (user?.role === ROLES.SUPER_ADMIN) return <SuperAdminDashboard />;
-  return <BankDashboard />;
+  const portalType = useAppSelector(selectPortalType);
+
+  if (portalType === 'BANK') return <BankDashboard />;
+  return <SuperAdminDashboard />;
 }

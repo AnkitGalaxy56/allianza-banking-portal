@@ -18,7 +18,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { useAppSelector } from '@/redux/hooks';
 import { selectUser } from '@/redux/slices/authSlice';
-import { getNavForRole, type NavItem } from '@/routes/navigation';
+import { getNavItems, type NavItem } from '@/routes/navigation';
 
 interface Props {
   sx?: Record<string, unknown>;
@@ -48,7 +48,7 @@ export default function SidebarMenuSearch({ sx }: Props) {
         if (item.children?.length) walk(item.children, item.label);
       });
     };
-    walk(getNavForRole(user.role, user.systemRole));
+    walk(getNavItems());
     return result;
   }, [user]);
 

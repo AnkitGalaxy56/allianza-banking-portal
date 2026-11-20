@@ -26,11 +26,9 @@ import BarListCard from '@/components/common/BarListCard';
 import ErrorState from '@/components/common/ErrorState';
 import FullPageLoader from '@/components/common/FullPageLoader';
 import PageHeader from '@/components/common/PageHeader';
-import RequestHandlingCounts from '@/components/common/RequestHandlingCounts';
 import QuickActionsCard, { type QuickAction } from '@/components/common/QuickActionsCard';
 import StatCard from '@/components/common/StatCard';
 import StatusChip from '@/components/common/StatusChip';
-import { ROLES } from '@/config/roles';
 import { useAsyncData } from '@/hooks/useAsyncData';
 import { useAppSelector } from '@/redux/hooks';
 import { selectUser } from '@/redux/slices/authSlice';
@@ -160,7 +158,7 @@ function aggregateBranches(branches: DemoBranch[]) {
 /** Dashboard for Bank Admin and Bank User. */
 export default function BankDashboard() {
   const user = useAppSelector(selectUser);
-  const isAdmin = user?.role === ROLES.BANK_ADMIN;
+  const isAdmin = String(user?.userRole ?? user?.role ?? '').toUpperCase().includes('ADMIN');
   const [branchId, setBranchId] = useState('');
 
   // A bank dashboard is always scoped to the bank selected at login.
@@ -303,8 +301,6 @@ export default function BankDashboard() {
           <ErrorState message={error} onRetry={reload} />
         </Box>
       )}
-
-      <RequestHandlingCounts />
 
       <Box
         sx={{

@@ -1,4 +1,3 @@
-import type { Role } from '@/config/roles';
 
 export interface UserProfile {
   id: string;
@@ -14,7 +13,7 @@ export interface UserProfile {
   gender: string;
   accountState: string;
   designation: string;
-  userRole: Role;
+  userRole: string;
   loginBranch: string;
   branchId: string;
   allowMultiBranch: boolean;

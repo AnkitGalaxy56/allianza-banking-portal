@@ -1,16 +1,16 @@
-import type { Role } from '@/config/roles';
+export type PortalType = 'ALLIANZA' | 'BANK';
 
 export interface User {
   id: string;
   name: string;
   email: string;
-  /** Backend login name used for idle-session credential verification. */
   loginId?: string;
-  role: Role;
-  /** Not set for SUPER_ADMIN */
+  /** Backend/profile supplied role. Never used to determine the portal. */
+  userRole?: string;
+  /** Kept for compatibility with existing screens; populated from profile.userRole. */
+  role?: string;
   bankCode?: string;
   bankName?: string;
-  userRole?: string;
   systemRole?: 'Admin' | 'Maker' | 'Checker' | string;
   loginBranch?: string;
   designation?: string;
@@ -21,8 +21,9 @@ export interface User {
 export interface LoginRequest {
   loginId: string;
   password: string;
-  role: Role;
-  /** Required for bank roles - which bank the person is signing in to */
+  /** Portal selected by the login URL. */
+  portalType: PortalType;
+  /** Present only when signing in through /login?bank=<code>. */
   bankCode?: string;
 }
 
@@ -47,6 +48,7 @@ export interface AuthSession {
   user: User;
   accessToken: string;
   refreshToken?: string;
-  /** true -> localStorage ("Remember this device"), false -> sessionStorage */
+  /** Portal is decided by the URL used for login, not by the user's role. */
+  portalType: PortalType;
   remember: boolean;
 }

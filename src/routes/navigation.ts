@@ -19,21 +19,16 @@ import FactCheckOutlinedIcon from '@mui/icons-material/FactCheckOutlined';
 import PersonAddAlt1OutlinedIcon from '@mui/icons-material/PersonAddAlt1Outlined';
 import TrendingUpOutlinedIcon from '@mui/icons-material/TrendingUpOutlined';
 
-import { ROLES, type Role } from '@/config/roles';
 import { PATHS } from './paths';
 
 export interface NavItem {
   label: string;
   path: string;
   icon: SvgIconComponent;
-  /** Roles that can see this menu item and access its route. */
-  roles: Role[];
   /** Optional nested sidebar links. */
   children?: NavItem[];
 }
 
-const { SUPER_ADMIN, BANK_ADMIN, BANK_USER } = ROLES;
-const ALL_BANK_ROLES: Role[] = [SUPER_ADMIN, BANK_ADMIN, BANK_USER];
 
 /**
  * Single source of truth for sidebar navigation and generated protected routes.
@@ -173,7 +168,7 @@ const ALL_BANK_ROLES: Role[] = [SUPER_ADMIN, BANK_ADMIN, BANK_USER];
 //     label: 'Upload Image',
 //     path: PATHS.uploadImages,
 //     icon: ImageOutlinedIcon,
-//     roles: [SUPER_ADMIN, BANK_ADMIN],
+//     roles: [SUPER_ADMIN],
 //   },
 // ];
 
@@ -184,7 +179,7 @@ export const NAV_ITEMS: NavItem[] = [
     label: 'Dashboard',
     path: PATHS.dashboard,
     icon: GridViewOutlinedIcon,
-    roles: ALL_BANK_ROLES,
+    //roles: ALL_BANK_ROLES,
   },
 
   
@@ -193,85 +188,76 @@ export const NAV_ITEMS: NavItem[] = [
     label: 'Request Handling',
     path: PATHS.REQUEST_HANDLING.ROOT,
     icon: FactCheckOutlinedIcon,
-    roles: ALL_BANK_ROLES,
+    //roles: ALL_BANK_ROLES,
     children: [
       {
         label: 'Payments',
         path: PATHS.REQUEST_HANDLING.PAYMENTS,
         icon: PaymentsOutlinedIcon,
-        roles: ALL_BANK_ROLES,
+        //roles: ALL_BANK_ROLES,
       },
       {
         label: 'Cheque Book',
         path: PATHS.REQUEST_HANDLING.CHEQUE_BOOK,
         icon: DescriptionOutlinedIcon,
-        roles: ALL_BANK_ROLES,
+        //roles: ALL_BANK_ROLES,
       },
       {
         label: 'Stop Payment',
         path: PATHS.REQUEST_HANDLING.STOP_PAYMENT,
         icon: BlockOutlinedIcon,
-        roles: ALL_BANK_ROLES,
+        //roles: ALL_BANK_ROLES,
       },
       {
         label: 'FD Opening',
         path: PATHS.REQUEST_HANDLING.FD_OPENING,
         icon: AccountBalanceOutlinedIcon,
-        roles: ALL_BANK_ROLES,
+     //   roles: ALL_BANK_ROLES,
       },
       {
         label: 'RD Opening',
         path: PATHS.REQUEST_HANDLING.RD_OPENING,
         icon: AccountBalanceOutlinedIcon,
-        roles: ALL_BANK_ROLES,
       },
       {
         label: 'FD / RD Closing',
         path: PATHS.REQUEST_HANDLING.FD_RD_CLOSING,
         icon: CancelPresentationOutlinedIcon,
-        roles: ALL_BANK_ROLES,
       },
       {
         label: 'Locker Application',
         path: PATHS.REQUEST_HANDLING.LOCKER_APPLICATION,
         icon: DescriptionOutlinedIcon,
-        roles: ALL_BANK_ROLES,
       },
       {
         label: 'Standing Instructions',
         path: PATHS.REQUEST_HANDLING.STANDING_INSTRUCTIONS,
         icon: DescriptionOutlinedIcon,
-        roles: ALL_BANK_ROLES,
       },
       {
         label: 'Fresh Loan Application',
         path: PATHS.REQUEST_HANDLING.FRESH_LOAN_APPLICATION,
         icon: AttachMoneyOutlinedIcon,
-        roles: ALL_BANK_ROLES,
       },
       {
         label: 'Loan EMI Payment',
         path: PATHS.REQUEST_HANDLING.LOAN_EMI_PAYMENT,
         icon: PaymentsOutlinedIcon,
-        roles: ALL_BANK_ROLES,
       },
       {
         label: 'KYC Documents',
         path: PATHS.REQUEST_HANDLING.KYC_DOCUMENTS,
         icon: DescriptionOutlinedIcon,
-        roles: ALL_BANK_ROLES,
       },
       {
         label: 'Nomination Updates',
         path: PATHS.REQUEST_HANDLING.NOMINATION_UPDATES,
         icon: PersonAddAlt1OutlinedIcon,
-        roles: ALL_BANK_ROLES,
       },
       {
         label: 'Positive Pay System',
         path: PATHS.REQUEST_HANDLING.POSITIVE_PAY,
         icon: PaymentsOutlinedIcon,
-        roles: ALL_BANK_ROLES,
       },
 
       // Existing request screens retained
@@ -295,19 +281,16 @@ export const NAV_ITEMS: NavItem[] = [
     label: 'Masters',
     path: '/masters',
     icon: AccountBalanceOutlinedIcon,
-    roles: ALL_BANK_ROLES,
     children: [
       {
         label: 'Bank Master',
         path: PATHS.MASTERS.BANK_MASTER,
         icon: AccountBalanceOutlinedIcon,
-        roles: ALL_BANK_ROLES,
       },
       {
         label: 'Branch Master',
         path: PATHS.MASTERS.BRANCH_MASTER,
         icon: AccountBalanceOutlinedIcon,
-        roles: ALL_BANK_ROLES,
       },
     ],
   },
@@ -317,25 +300,21 @@ export const NAV_ITEMS: NavItem[] = [
     label: 'Mobile Utilities',
     path: '/mobile-utilities',
     icon: SmartphoneOutlinedIcon,
-    roles: ALL_BANK_ROLES,
     children: [
       {
         label: 'Image Uploading',
         path: PATHS.MOBILE_UTILITIES.IMAGE_UPLOADING,
         icon: ImageOutlinedIcon,
-        roles: ALL_BANK_ROLES,
       },
       {
         label: 'Push Notification',
         path: PATHS.MOBILE_UTILITIES.PUSH_NOTIFICATION,
         icon: NotificationsNoneOutlinedIcon,
-        roles: ALL_BANK_ROLES,
       },
       {
         label: 'Device Reset',
         path: PATHS.MOBILE_UTILITIES.DEVICE_RESET,
         icon: SmartphoneOutlinedIcon,
-        roles: ALL_BANK_ROLES,
       },
     ],
   },
@@ -345,19 +324,16 @@ export const NAV_ITEMS: NavItem[] = [
     label: 'User Management',
     path: PATHS.USER_MANAGEMENT.ROOT,
     icon: ShieldOutlinedIcon,
-    roles: [SUPER_ADMIN, BANK_ADMIN],
     children: [
       {
         label: 'User Master',
         path: PATHS.USER_MANAGEMENT.USER_MASTER,
         icon: ManageAccountsOutlinedIcon,
-        roles: [SUPER_ADMIN, BANK_ADMIN],
       },
       {
         label: 'Assign Password',
         path: PATHS.USER_MANAGEMENT.ASSIGN_PASSWORD,
         icon: ShieldOutlinedIcon,
-        roles: [SUPER_ADMIN],
       },
     ],
   },
@@ -367,25 +343,21 @@ export const NAV_ITEMS: NavItem[] = [
     label: 'Reports',
     path: PATHS.reports,
     icon: BarChartOutlinedIcon,
-    roles: ALL_BANK_ROLES,
     children: [
       {
         label: 'Requests',
         path: PATHS.REPORTS.REQUESTS,
         icon: DescriptionOutlinedIcon,
-        roles: ALL_BANK_ROLES,
       },
       {
         label: 'User Master Report',
         path: PATHS.REPORTS.USER_MASTER,
         icon: ManageAccountsOutlinedIcon,
-        roles: ALL_BANK_ROLES,
       },
       {
         label: 'Notification',
         path: PATHS.REPORTS.NOTIFICATION,
         icon: NotificationsNoneOutlinedIcon,
-        roles: ALL_BANK_ROLES,
       },
     ],
   },
@@ -395,31 +367,26 @@ export const NAV_ITEMS: NavItem[] = [
     label: 'Settings',
     path: '/settings',
     icon: ManageAccountsOutlinedIcon,
-    roles: ALL_BANK_ROLES,
     children: [
       {
         label: 'Change Password',
         path: PATHS.SETTINGS.CHANGE_PASSWORD,
         icon: ShieldOutlinedIcon,
-        roles: ALL_BANK_ROLES,
       },
       {
         label: 'Profile',
         path: PATHS.SETTINGS.PROFILE,
         icon: ManageAccountsOutlinedIcon,
-        roles: ALL_BANK_ROLES,
       },
       {
         label: 'Roles and Access Control',
         path: PATHS.SETTINGS.ROLES_ACCESS_CONTROL,
         icon: ShieldOutlinedIcon,
-        roles: ALL_BANK_ROLES,
       },
       {
         label: 'Change Colour Theme',
         path: '/settings/change-colour-theme',
         icon: ManageAccountsOutlinedIcon,
-        roles: ALL_BANK_ROLES,
       },
     ],
   },
@@ -430,49 +397,28 @@ export const NAV_ITEMS: NavItem[] = [
     label: 'Banners & Content',
     path: PATHS.banners,
     icon: ImageOutlinedIcon,
-    roles: [SUPER_ADMIN, BANK_ADMIN, BANK_USER],
   },
 
  
 ];
 
-const filterItemsForRole = (items: NavItem[], role: Role, systemRole?: string): NavItem[] =>
-  items.flatMap((item) => {
-    if (!item.roles.includes(role)) {
-      return [];
-    }
+export const getNavItems = (): NavItem[] => NAV_ITEMS;
 
-    const children = item.children
-      ? filterItemsForRole(item.children, role, systemRole)
-      : undefined;
-
-    // Hide a parent if all its nested items are inaccessible and it has no route.
-    return [{ ...item, ...(children ? { children } : {}) }];
-  });
-
-export const getNavForRole = (role: Role, systemRole?: string): NavItem[] =>
-  filterItemsForRole(NAV_ITEMS, role, systemRole);
-
+/**
+ * Backward-compatible alias for older Sidebar imports.
+ * Portal/navigation is NOT determined by role anymore; the backend/profile
+ * provides the user role for access control, while portal type comes from
+ * the authenticated login session.
+ */
+export const getNavForRole = (_role?: string): NavItem[] => NAV_ITEMS;
 
 export const getAllNavRoutes = (items: NavItem[] = NAV_ITEMS): NavItem[] => {
   const routesByPath = new Map<string, NavItem>();
 
   const visit = (navItems: NavItem[]) => {
     navItems.forEach((item) => {
-      const existing = routesByPath.get(item.path);
-
-      if (existing) {
-        routesByPath.set(item.path, {
-          ...existing,
-          roles: Array.from(new Set([...existing.roles, ...item.roles])),
-        });
-      } else {
-        routesByPath.set(item.path, item);
-      }
-
-      if (item.children?.length) {
-        visit(item.children);
-      }
+      if (!routesByPath.has(item.path)) routesByPath.set(item.path, item);
+      if (item.children?.length) visit(item.children);
     });
   };
 

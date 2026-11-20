@@ -94,11 +94,10 @@ const themeSlice = createSlice({
         state.theme = action.payload;
       })
       .addCase(loadBankTheme.rejected, (state, action) => {
-        // Keep whatever theme is showing; the app stays usable with the default look.
+        // Do NOT fall back to Allianza for an invalid bank URL. The login page
+        // must stay in the requested bank context and show the backend error.
         state.status = 'failed';
         state.error = action.payload ?? 'Unable to load bank theme.';
-        state.bankCode = ALLIANZA_THEME.code;
-        state.theme = ALLIANZA_THEME;
       });
   },
 });

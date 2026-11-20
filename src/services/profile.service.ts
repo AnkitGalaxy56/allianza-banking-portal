@@ -24,9 +24,9 @@ function defaultProfile(user: User): UserProfile {
     gender: '',
     accountState: 'OPERATIVE',
     designation: user.designation ?? '',
-    userRole: (user.userRole as UserProfile['userRole']) ?? user.role,
-    loginBranch: user.loginBranch ?? (user.role === 'SUPER_ADMIN' ? 'Allianza' : 'Main branch'),
-    branchId: user.role === 'SUPER_ADMIN' ? '' : '1',
+    userRole: user.userRole ?? user.role ?? 'Not added',
+    loginBranch: user.loginBranch ?? (user.bankCode ? 'Main branch' : 'Allianza'),
+    branchId: user.bankCode ? '1' : '',
     allowMultiBranch: false,
     allowLoginOnHolidays: false,
     permittedLoginTime: '',
@@ -40,6 +40,16 @@ function defaultProfile(user: User): UserProfile {
 }
 
 export const profileService = {
+
+  async getCurrentWithToken(accessToken: string): Promise<UserProfile> {
+    if (env.useMockApi) {
+      throw new Error('getCurrentWithToken is not used in mock mode');
+    }
+    const { data } = await api.get<UserProfile>(ENDPOINTS.auth.profile, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    return data;
+  },
   async getCurrent(user: User): Promise<UserProfile> {
     if (env.useMockApi) {
       const saved = window.localStorage.getItem(profileKey(user.id));

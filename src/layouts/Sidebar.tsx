@@ -20,7 +20,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 
 import { useAppSelector } from '@/redux/hooks';
 import { selectUser } from '@/redux/slices/authSlice';
-import { getNavForRole, type NavItem } from '@/routes/navigation';
+import { getNavItems, type NavItem } from '@/routes/navigation';
 import { settingsService } from '@/services/settings.service';
 
 interface SidebarProps {
@@ -76,8 +76,8 @@ export default function Sidebar({
         ? [item]
         : [];
     });
-    return filter(getNavForRole(user.role, user.systemRole));
-  }, [user?.role, user?.systemRole, screenGrants]);
+    return filter(getNavItems());
+  }, [user?.role, screenGrants]);
 
   if (!user) return null;
 

@@ -1,29 +1,25 @@
 import { useEffect, useState } from 'react';
 import { Box, Button, Typography } from '@mui/material';
 import { env } from '@/config/env';
-import type { Role } from '@/config/roles';
+import type { PortalType } from '@/types/auth';
 import type { DevCredential } from '@/services/mock/mockUsers';
 
 interface Props {
-  role: Role;
+  portalType: PortalType;
   bankCode: string | null;
   onUse: (credential: DevCredential) => void;
 }
 
-/**
- * Shows the temporary development logins (mock mode only).
- * The mock module is loaded dynamically, so none of this is included in production builds.
- */
-export default function DevCredentialsHint({ role, bankCode, onUse }: Props) {
+/** Temporary development logins (mock mode only), filtered by portal URL. */
+export default function DevCredentialsHint({ portalType, bankCode, onUse }: Props) {
   const [credentials, setCredentials] = useState<DevCredential[]>([]);
 
   useEffect(() => {
-    if (env.useMockApi) {
-      void import('@/services/mock/mockUsers').then((m) => {
-        setCredentials(m.getDevCredentials(role, bankCode));
-      });
-    }
-  }, [role, bankCode]);
+    if (!env.useMockApi) return;
+    void import('@/services/mock/mockUsers').then((m) => {
+      setCredentials(m.getDevCredentials(portalType, bankCode));
+    });
+  }, [portalType, bankCode]);
 
   if (credentials.length === 0) return null;
 

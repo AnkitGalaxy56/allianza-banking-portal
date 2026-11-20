@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Box,
   Button,
@@ -24,14 +24,15 @@ import BarListCard from '@/components/common/BarListCard';
 import ErrorState from '@/components/common/ErrorState';
 import FullPageLoader from '@/components/common/FullPageLoader';
 import PageHeader from '@/components/common/PageHeader';
-import RequestHandlingCounts from '@/components/common/RequestHandlingCounts';
 import QuickActionsCard, { type QuickAction } from '@/components/common/QuickActionsCard';
 import StatCard from '@/components/common/StatCard';
 import StatusChip from '@/components/common/StatusChip';
 import { useAsyncData } from '@/hooks/useAsyncData';
 import { PATHS } from '@/routes/paths';
 import { dashboardService } from '@/services/dashboard.service';
+import { mastersService } from '@/services/masters.service';
 import { formatNumber } from '@/utils/format';
+import type { BankSummaryRow } from '@/types/dashboard';
 
 const ACTIONS: QuickAction[] = [
   { label: 'Bank management', to: PATHS.MASTERS.BANK_MASTER, icon: AccountBalanceOutlinedIcon },
@@ -44,21 +45,56 @@ const ACTIONS: QuickAction[] = [
 
 /** Allianza (super admin) dashboard - follows slide 14 of the project document. */
 export default function SuperAdminDashboard() {
-  const { data, loading, error, reload } = useAsyncData(() => dashboardService.getSuperAdminDashboard(), []);
-
   const [selectedBankCode, setSelectedBankCode] = useState('');
+  const [bankOptions, setBankOptions] = useState<BankSummaryRow[]>([]);
+  const { data, loading, error, reload } = useAsyncData(
+    () => dashboardService.getSuperAdminDashboard(selectedBankCode || undefined),
+    [selectedBankCode],
+  );
+
+  useEffect(() => {
+    if (!data) return;
+    if (!selectedBankCode || bankOptions.length === 0) {
+      const apiBanks = Array.isArray(data.recentBanks) ? data.recentBanks : [];
+      if (apiBanks.length > 0) {
+        setBankOptions(apiBanks);
+        return;
+      }
+
+      // Fallback only for the selector: the Allianza bank master already exposes
+      // the bank list even when the analytics response does not include it.
+      void mastersService.listBanks({ page: 1, pageSize: 100 })
+        .then((result) => {
+          const options: BankSummaryRow[] = (result.items ?? []).map((bank) => ({
+            id: bank.id,
+            name: bank.name,
+            code: bank.code,
+            type: bank.type,
+            branches: Number(bank.branches ?? 0),
+            users: 0,
+            status: 'active',
+          }));
+          if (options.length > 0) setBankOptions(options);
+        })
+        .catch(() => {
+          // The dashboard still renders; analytics API remains the source of truth.
+        });
+    }
+  }, [data, selectedBankCode, bankOptions.length]);
 
   if (loading && !data) return <FullPageLoader />;
   if (!data) return <ErrorState message={error ?? 'Unable to load the dashboard.'} onRetry={reload} />;
 
-  const selectedBank = data.recentBanks.find((bank) => bank.code === selectedBankCode);
-  const visibleBanks = selectedBank ? data.recentBanks.filter((bank) => bank.code === selectedBank.code) : data.recentBanks;
+  const banks = Array.isArray(data.recentBanks) ? data.recentBanks : [];
+  const requestsByBank = Array.isArray(data.requestsByBank) ? data.requestsByBank : [];
+  const selectedBank = banks.find((bank) => bank.code === selectedBankCode);
+  const visibleBanks = selectedBank ? banks.filter((bank) => bank.code === selectedBank.code) : banks;
   const visibleRequests = selectedBank
-    ? data.requestsByBank.filter((item) => item.label === selectedBank.name)
-    : data.requestsByBank;
+    ? requestsByBank.filter((item) => item.label === selectedBank.name)
+    : requestsByBank;
   const selectedRequestCount = visibleRequests.reduce((sum, item) => sum + item.count, 0);
 
-  const displayStats = data.stats.map((stat) => {
+  const displayStats = (Array.isArray(data.stats) ? data.stats : []).map((stat) => {
     if (!selectedBank) return stat;
     if (stat.key === 'banks') return { ...stat, value: '1', helper: 'Selected bank', helperTone: 'neutral' as const };
     if (stat.key === 'users') return { ...stat, value: formatNumber(selectedBank.users), helper: 'Selected bank users', helperTone: 'neutral' as const };
@@ -82,7 +118,7 @@ export default function SuperAdminDashboard() {
               sx={{ minWidth: 250, fontWeight: 600 }}
             >
               <MenuItem value="">All banks</MenuItem>
-              {data.recentBanks.map((bank) => (
+              {bankOptions.map((bank) => (
                 <MenuItem key={bank.id} value={bank.code}>
                   {bank.name}
                 </MenuItem>
@@ -94,8 +130,6 @@ export default function SuperAdminDashboard() {
           </>
         }
       />
-
-      <RequestHandlingCounts />
 
       <Box
         sx={{
