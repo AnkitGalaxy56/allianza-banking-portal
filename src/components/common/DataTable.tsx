@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import {
   Table,
   TableBody,
@@ -35,6 +35,10 @@ export interface DataTableProps<T> {
   maxHeight?: number | string;
   tableLayout?: 'auto' | 'fixed';
   hover?: boolean;
+  /** Keep the table inside the available viewport and scroll rows vertically when needed. */
+  fitViewport?: boolean;
+  /** Space to keep below the table when fitViewport is enabled (for page footers/actions). */
+  viewportBottomOffset?: number;
 }
 
 export default function DataTable<T>({
@@ -49,7 +53,47 @@ export default function DataTable<T>({
   maxHeight,
   tableLayout = 'auto',
   hover = true,
+  fitViewport = true,
+  viewportBottomOffset = 96,
 }: DataTableProps<T>) {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [viewportHeight, setViewportHeight] = useState<number | null>(null);
+
+  useLayoutEffect(() => {
+    if (!fitViewport || maxHeight !== undefined) {
+      setViewportHeight(null);
+      return;
+    }
+
+    const updateHeight = () => {
+      const element = containerRef.current;
+      if (!element) return;
+
+      const top = element.getBoundingClientRect().top;
+      const available = Math.floor(window.innerHeight - top - viewportBottomOffset);
+      setViewportHeight(Math.max(180, available));
+    };
+
+    updateHeight();
+    window.addEventListener('resize', updateHeight);
+    window.addEventListener('scroll', updateHeight, { passive: true });
+
+    const resizeObserver = typeof ResizeObserver !== 'undefined'
+      ? new ResizeObserver(updateHeight)
+      : null;
+    if (resizeObserver && containerRef.current) {
+      resizeObserver.observe(containerRef.current);
+    }
+
+    return () => {
+      window.removeEventListener('resize', updateHeight);
+      window.removeEventListener('scroll', updateHeight);
+      resizeObserver?.disconnect();
+    };
+  }, [fitViewport, maxHeight, viewportBottomOffset]);
+
+  const effectiveMaxHeight = maxHeight ?? (viewportHeight ?? undefined);
+  const effectiveStickyHeader = stickyHeader || (fitViewport && effectiveMaxHeight !== undefined);
   const compact = cellPadding === 'compact';
   const cellSx = {
     px: compact ? 1.25 : 2,
@@ -61,9 +105,10 @@ export default function DataTable<T>({
 
   return (
     <TableContainer
+      ref={containerRef}
       sx={{
         width: '100%',
-        maxHeight,
+        maxHeight: effectiveMaxHeight,
         overflowX: 'auto',
         '&::-webkit-scrollbar': { height: 6, width: 6 },
         '&::-webkit-scrollbar-thumb': {
@@ -74,7 +119,7 @@ export default function DataTable<T>({
     >
       <Table
         size="small"
-        stickyHeader={stickyHeader}
+        stickyHeader={effectiveStickyHeader}
         sx={{
           width: '100%',
           tableLayout,

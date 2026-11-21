@@ -260,19 +260,7 @@ export const NAV_ITEMS: NavItem[] = [
         icon: PaymentsOutlinedIcon,
       },
 
-      // Existing request screens retained
-      // {
-      //   label: 'Opening Accounts / Customer Onboarding',
-      //   path: PATHS.customerOnboarding,
-      //   icon: PersonAddAlt1OutlinedIcon,
-      //   roles: ALL_BANK_ROLES,
-      // },
-      // {
-      //   label: 'Lead Management',
-      //   path: PATHS.REQUEST_HANDLING.LEAD_MANAGEMENT,
-      //   icon: TrendingUpOutlinedIcon,
-      //   roles: ALL_BANK_ROLES,
-      // },
+      
     ],
   },
 
@@ -393,11 +381,11 @@ export const NAV_ITEMS: NavItem[] = [
 
   
 
-  {
-    label: 'Banners & Content',
-    path: PATHS.banners,
-    icon: ImageOutlinedIcon,
-  },
+  // {
+  //   label: 'Banners & Content',
+  //   path: PATHS.banners,
+  //   icon: ImageOutlinedIcon,
+  // },
 
  
 ];

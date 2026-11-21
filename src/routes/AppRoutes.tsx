@@ -95,7 +95,7 @@ const BUILT_PAGES: Record<string, ReactElement> = {
   // [PATHS.reports]: <ReportsPage />,
   [PATHS.pushNotifications]: <PushNotificationsPage />,
   [PATHS.deviceReset]: <DeviceResetPage />,
-  [PATHS.banners]: <BannersPage />,
+  // [PATHS.banners]: <BannersPage />,
 
   //-----Request mobile utilities start-------
   [PATHS.MOBILE_UTILITIES.IMAGE_UPLOADING]: <UploadImagesPage />,
