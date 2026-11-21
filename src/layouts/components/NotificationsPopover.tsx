@@ -10,7 +10,7 @@ export default function NotificationsPopover() {
   const [readIds, setReadIds] = useState<string[]>([]);
   const [error, setError] = useState('');
   const open = Boolean(anchorEl);
-  const unreadCount = items.filter((item) => !readIds.includes(String(item.id))).length;
+  const unreadCount = items.filter((item) => item.is_read !== true && !readIds.includes(String(item.id))).length;
 
   const refresh = async () => {
     try { setItems(await headerNotificationService.list()); setError(''); }
@@ -37,7 +37,7 @@ export default function NotificationsPopover() {
         {error && <Alert severity="error" sx={{ m: 1 }}>{error}</Alert>}
         <List disablePadding sx={{ maxHeight: 360, overflowY: 'auto' }}>
           {items.map((item) => {
-            const unread = !readIds.includes(String(item.id));
+            const unread = item.is_read !== true && !readIds.includes(String(item.id));
             return <ListItem key={item.id} alignItems="flex-start" sx={{ px: 2, py: 1.5, bgcolor: unread ? 'action.hover' : 'background.paper', borderBottom: '1px solid', borderColor: 'divider' }}>
               <Box sx={{ mr: 1.5, mt: .5 }}><InfoOutlinedIcon color="info" /></Box>
               <ListItemText primary={<Typography variant="body2" fontWeight={700}>{item.title}</Typography>}

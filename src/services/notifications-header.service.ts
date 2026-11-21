@@ -9,6 +9,13 @@ export interface HeaderNotification {
   branch?: string;
   sentOn?: string;
   createdOn?: string;
+  customer_id?: string;
+  category?: string;
+  created_at?: string;
+  is_read?: boolean;
+  service_type?: string | null;
+  reference_id?: string | null;
+  priority?: string;
 }
 export const headerNotificationService = {
   async list(): Promise<HeaderNotification[]> {

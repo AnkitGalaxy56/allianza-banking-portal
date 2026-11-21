@@ -13,11 +13,14 @@ import { getErrorMessage } from '@/services/api/apiError';
 import { mobileUtilitiesService } from '@/services/mobile-utilities.service';
 import type { PushNotification } from './types/pushNotification';
 import type { PushNotificationFormValues } from './schemas/pushNotificationSchema';
+import { headerNotificationService, type HeaderNotification } from '@/services/notifications-header.service';
 
 type PendingAction = { values: PushNotificationFormValues; action: 'send' | 'draft' } | null;
 
 export default function PushNotificationsPage() {
   const [rows, setRows] = useState<PushNotification[]>([]);
+  const [inboxRows, setInboxRows] = useState<HeaderNotification[]>([]);
+  const [inboxLoading, setInboxLoading] = useState(true);
   const [loading, setLoading] = useState(true);
   const loadRows = async () => {
     try {
@@ -29,7 +32,12 @@ export default function PushNotificationsPage() {
       setLoading(false);
     }
   };
-  useEffect(() => { void loadRows(); }, []);
+  const loadInboxRows = async () => {
+    try { setInboxRows(await headerNotificationService.list()); }
+    catch (e) { setError(getErrorMessage(e, 'Unable to load customer notification records.')); }
+    finally { setInboxLoading(false); }
+  };
+  useEffect(() => { void loadRows(); void loadInboxRows(); }, []);
   const [pending, setPending] = useState<PendingAction>(null);
   const [editing, setEditing] = useState<PushNotification | null>(null);
   const [viewing, setViewing] = useState<PushNotification | null>(null);
@@ -103,6 +111,18 @@ export default function PushNotificationsPage() {
     ) },
   ];
 
+  const inboxColumns: DataTableColumn<HeaderNotification>[] = [
+    { key: 'title', label: 'Title', minWidth: 220, render: row => <Typography fontWeight={650}>{row.title}</Typography> },
+    { key: 'customer_id', label: 'Customer ID', minWidth: 140, render: row => row.customer_id ?? '—' },
+    { key: 'category', label: 'Category', minWidth: 140, render: row => row.category ?? '—' },
+    { key: 'message', label: 'Message', minWidth: 280, render: row => row.message },
+    { key: 'created_at', label: 'Created on', minWidth: 180, render: row => row.created_at ? new Date(row.created_at).toLocaleString() : '—' },
+    { key: 'is_read', label: 'Read status', minWidth: 110, render: row => <StatusChip status={row.is_read ? 'read' : 'unread'} /> },
+    { key: 'priority', label: 'Priority', minWidth: 100, render: row => row.priority ?? '—' },
+    { key: 'service_type', label: 'Service', minWidth: 160, render: row => row.service_type ?? '—' },
+    { key: 'reference_id', label: 'Reference', minWidth: 110, render: row => row.reference_id ?? '—' },
+  ];
+
   const editInitialValues: Partial<PushNotificationFormValues> | undefined = editing ? {
     title: editing.title,
     branch: editing.branch,
@@ -119,7 +139,14 @@ export default function PushNotificationsPage() {
     <NotificationForm onSubmit={(values, action) => { setPending({ values, action }); setError(''); }} />
     <Box sx={{ mt: 2.5, border: 1, borderColor: 'divider', borderRadius: 3, overflow: 'hidden', bgcolor: 'background.paper' }}>
       <Box sx={{ p: 2.5, pb: 2 }}>
-        <Typography variant="h6" fontWeight={750}>Sent notifications</Typography>
+        <Typography variant="h6" fontWeight={750}>Customer notification records</Typography>
+        <Typography variant="body2" color="text.secondary">Records from MB012001. Super Admin sees all records; bank users see records for their bank.</Typography>
+      </Box>
+      <DataTable rows={inboxRows} columns={inboxColumns} getRowId={row => row.id} emptyMessage={inboxLoading ? 'Loading notification records…' : 'No notification records found.'} />
+    </Box>
+    <Box sx={{ mt: 2.5, border: 1, borderColor: 'divider', borderRadius: 3, overflow: 'hidden', bgcolor: 'background.paper' }}>
+      <Box sx={{ p: 2.5, pb: 2 }}>
+        <Typography variant="h6" fontWeight={750}>Sent notifications (campaigns)</Typography>
       </Box>
       <DataTable rows={rows} columns={columns} getRowId={row => row.id} emptyMessage={loading ? 'Loading notifications…' : 'No notifications found.'} />
     </Box>
